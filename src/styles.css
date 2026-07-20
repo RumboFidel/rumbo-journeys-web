@@ -1,0 +1,145 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Fidel Ecuador — Cinematic Editorial design system */
+
+@theme {
+  /* Paleta RUMBO — extraída del manual visual (navy profundo + dorado + blanco cálido) */
+  --color-background: #0a1a33;
+  --color-foreground: #f5efe1;
+  --color-surface: #0a1a33;
+  --color-surface-dim: #081428;
+  --color-surface-bright: #1a2c50;
+  --color-surface-container-lowest: #061024;
+  --color-surface-container-low: #0f1f3d;
+  --color-surface-container: #142848;
+  --color-surface-container-high: #1b3055;
+  --color-surface-container-highest: #223a63;
+  --color-on-surface: #f5efe1;
+  --color-on-surface-variant: #c7cee0;
+  --color-outline: #6478a0;
+  --color-outline-variant: #22355c;
+  --color-primary: #f5b800;
+  --color-on-primary: #0a1a33;
+  --color-primary-container: #f5b800;
+  --color-on-primary-container: #0a1a33;
+  --color-secondary: #d6dbe8;
+  --color-on-secondary: #0f1f3d;
+  --color-accent-blue: #f5b800;
+  --color-accent-blue-hover: #ffcb2e;
+
+  --color-topbar: #0a1a33;
+  --color-on-topbar: #f5efe1;
+  --color-topbar-muted: #a9b4cc;
+
+
+  --font-display: "Manrope", sans-serif;
+  --font-sans: "Manrope", sans-serif;
+  --font-serif: "Newsreader", serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+
+
+  --tracking-caps: 0.15em;
+  --tracking-caps-wide: 0.4em;
+  --tracking-caps-widest: 0.5em;
+
+  --spacing-margin-mobile: 24px;
+  --spacing-margin-desktop: 64px;
+  --spacing-gutter: 32px;
+  --spacing-section-gap: 128px;
+}
+
+/* Shadcn compatibility tokens (kept so shadcn primitives still resolve) */
+@theme inline {
+  --color-card: var(--color-surface-container-low);
+  --color-card-foreground: var(--color-on-surface);
+  --color-popover: var(--color-surface-container);
+  --color-popover-foreground: var(--color-on-surface);
+  --color-primary-foreground: var(--color-on-primary);
+  --color-secondary-foreground: var(--color-on-secondary);
+  --color-muted: var(--color-surface-container-low);
+  --color-muted-foreground: var(--color-on-surface-variant);
+  --color-accent: var(--color-primary);
+  --color-accent-foreground: var(--color-on-primary);
+  --color-destructive: #ffb4ab;
+  --color-destructive-foreground: #690005;
+  --color-border: var(--color-outline-variant);
+  --color-input: var(--color-outline-variant);
+  --color-ring: var(--color-primary);
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-outline-variant);
+  }
+  html,
+  body {
+    background-color: var(--color-background);
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 500;
+  }
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-primary) 25%, transparent);
+    color: var(--color-on-surface);
+  }
+}
+
+@utility text-label-caps {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Leaflet map — pin de municipio completado */
+.municipio-check-icon {
+  background: transparent !important;
+  border: 0 !important;
+}
+.municipio-check-icon .check-pin {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 15px;
+  box-shadow:
+    0 0 0 2px rgba(11, 18, 32, 0.9),
+    0 0 18px rgba(245, 197, 24, 0.6);
+  transition: transform 0.2s ease;
+}
+.municipio-check-icon:hover .check-pin {
+  transform: scale(1.15);
+}
+.leaflet-container {
+  background: #070d18;
+  font-family: inherit;
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: #f4f7fb;
+  color: #0b1220;
+  border-radius: 2px;
+}
+
+
