@@ -1,13 +1,26 @@
-import type { Race } from "./types";
+import type { ContentStatus, Race } from "./types";
+import { CARRERAS_WEB } from "./rumbo-web";
 
-// Referencias mínimas a Carreras para relacionar contenidos. La vista
-// pública de Carreras conserva su propia data; esto sólo mapea ids/slugs.
-export const RACES: Race[] = [
-  { id: "race-guayaquil", slug: "guayaquil", title: "Guayaquil", locationId: "loc-guayaquil-laspenas", routeId: "gpx-guayaquil", date: "2026-06-12", status: "published" },
-  { id: "race-cotopaxi", slug: "cotopaxi", title: "Cotopaxi", locationId: "loc-cotopaxi-refugio", routeId: "gpx-cotopaxi", date: "2026-05-14", status: "published" },
-  { id: "race-cuenca", slug: "cuenca", title: "Cuenca", locationId: "loc-cuenca-tomebamba", routeId: "gpx-cuenca", date: "2026-04-22", status: "published" },
-  { id: "race-atacames", slug: "atacames", title: "Atacames", locationId: "loc-atacames-malecon", routeId: "gpx-atacames", date: "2026-06-30", status: "published" },
-];
+// Adaptador de compatibilidad: expone las Carreras reales (generadas desde el
+// Excel via rumbo-web.ts) con la forma minima que usan los enlaces de
+// relaciones de la Bitacora. Las paginas principales de Carreras deben usar
+// repo.carreras (CarreraWeb), no este adaptador.
+function mapEstado(estado: string | null): ContentStatus {
+  if (estado === "draft" || estado === "under_review" || estado === "approved" || estado === "published" || estado === "hidden") {
+    return estado;
+  }
+  return "draft";
+}
+
+export const RACES: Race[] = CARRERAS_WEB.map((c) => ({
+  id: c.id,
+  slug: c.slug,
+  title: c.titulo,
+  routeId: c.rutaGeojson ? c.id : undefined,
+  locationId: undefined,
+  date: c.fecha ?? undefined,
+  status: mapEstado(c.estado),
+}));
 
 export function getRaceById(id: string): Race | undefined {
   return RACES.find((r) => r.id === id);

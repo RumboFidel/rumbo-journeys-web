@@ -1,45 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import heroAsset from "@/assets/hero-andes.jpg.asset.json";
-import storyCotopaxi from "@/assets/story-cotopaxi.jpg.asset.json";
-import storySabiduria from "@/assets/story-sabiduria.jpg.asset.json";
-import raceQuito from "@/assets/race-quito.jpg.asset.json";
-import raceCuenca from "@/assets/race-cuenca.jpg.asset.json";
 import rumboLogo from "@/assets/rumbo-logo.png.asset.json";
 import compass from "@/assets/compass.png";
 import { MunicipiosMap } from "@/components/municipios-map";
 import { SiteHeader } from "@/components/site-header";
-
-
-
-const stories = [
-  {
-    title: "El despertar del Cotopaxi",
-    desc: "Atravesar el valle bajo la mirada del gigante dormido mientras el sol baña el páramo de oro.",
-    image: storyCotopaxi.url,
-  },
-  {
-    title: "Sabiduría Ancestral",
-    desc: "Un encuentro silencioso con Mama Tránsito en las alturas de Chimborazo.",
-    image: storySabiduria.url,
-  },
-] as const;
-
-const races = [
-  {
-    n: "ETAPA 037",
-    title: "Quito — Amanecer en el páramo",
-    meta: "10 KM · 4.520 M · 58′ 12″",
-    desc: "Salida antes del alba desde la Mitad del Mundo, cruzando la neblina que abraza el altiplano.",
-    image: raceQuito.url,
-  },
-  {
-    n: "ETAPA 036",
-    title: "Cuenca — Puentes de piedra",
-    meta: "10 KM · 2.560 M · 54′ 03″",
-    desc: "Un recorrido por los adoquines coloniales con el Cajas custodiando el horizonte al atardecer.",
-    image: raceCuenca.url,
-  },
-] as const;
+import { repo } from "@/data/repository";
+import { formatDuration } from "@/components/bitacora-shell";
 
 
 
@@ -85,6 +51,25 @@ const worlds = [
 ] as const;
 
 function Home() {
+  const resumen = repo.resumen.get();
+  const ultimasCarreras = repo.carreras
+    .all()
+    .slice()
+    .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? ""))
+    .slice(0, 2);
+  const ultimasHistorias = repo.historias
+    .all()
+    .slice()
+    .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? ""))
+    .slice(0, 2);
+
+  const pctMunicipios = resumen.metaCantones
+    ? Math.round((resumen.cantonesVisitados / resumen.metaCantones) * 100)
+    : 0;
+  const pctKm = resumen.metaKilometros
+    ? Math.round((resumen.kilometros / resumen.metaKilometros) * 100)
+    : 0;
+
   return (
     <div className="min-h-screen bg-background text-on-surface">
       <SiteHeader />
@@ -191,15 +176,15 @@ function Home() {
             <div className="px-0 pb-12 md:px-10 md:pb-0 lg:px-16">
               <div className="text-label-caps mb-8 text-[10px] tracking-[0.4em] text-primary">MUNICIPIOS</div>
               <div className="flex items-baseline gap-3">
-                <span className="font-display text-7xl font-extrabold leading-none text-on-surface md:text-8xl">37</span>
-                <span className="font-display text-2xl text-on-surface/50 md:text-3xl">/ 221</span>
+                <span className="font-display text-7xl font-extrabold leading-none text-on-surface md:text-8xl">{resumen.cantonesVisitados}</span>
+                <span className="font-display text-2xl text-on-surface/50 md:text-3xl">/ {resumen.metaCantones}</span>
               </div>
               <div className="mt-8">
                 <div className="mb-3 flex justify-end">
-                  <span className="font-display text-2xl font-semibold text-primary">17%</span>
+                  <span className="font-display text-2xl font-semibold text-primary">{pctMunicipios}%</span>
                 </div>
                 <div className="h-px w-full bg-outline-variant">
-                  <div className="h-px bg-primary" style={{ width: "17%" }} />
+                  <div className="h-px bg-primary" style={{ width: `${pctMunicipios}%` }} />
                 </div>
               </div>
 
@@ -208,15 +193,15 @@ function Home() {
             <div className="px-0 pt-12 md:px-10 md:pt-0 lg:px-16">
               <div className="text-label-caps mb-8 text-[10px] tracking-[0.4em] text-primary">KILÓMETROS</div>
               <div className="flex items-baseline gap-3">
-                <span className="font-display text-7xl font-extrabold leading-none text-on-surface md:text-8xl">412</span>
-                <span className="font-display text-2xl text-on-surface/50 md:text-3xl">/ 2.210 km</span>
+                <span className="font-display text-7xl font-extrabold leading-none text-on-surface md:text-8xl">{resumen.kilometros}</span>
+                <span className="font-display text-2xl text-on-surface/50 md:text-3xl">/ {resumen.metaKilometros.toLocaleString("es-EC")} km</span>
               </div>
               <div className="mt-8">
                 <div className="mb-3 flex justify-end">
-                  <span className="font-display text-2xl font-semibold text-primary">19%</span>
+                  <span className="font-display text-2xl font-semibold text-primary">{pctKm}%</span>
                 </div>
                 <div className="h-px w-full bg-outline-variant">
-                  <div className="h-px bg-primary" style={{ width: "19%" }} />
+                  <div className="h-px bg-primary" style={{ width: `${pctKm}%` }} />
                 </div>
               </div>
 
@@ -229,22 +214,22 @@ function Home() {
               <div>
                 <div className="text-label-caps mb-3 text-[10px] tracking-[0.4em] text-on-surface/50">VO₂ MAX</div>
                 <div className="flex items-baseline gap-2">
-                  <span className="font-display text-4xl font-extrabold text-on-surface md:text-5xl">56.4</span>
-                  <span className="text-sm text-on-surface/50">ml/kg·min</span>
+                  <span className="font-display text-4xl font-extrabold text-on-surface md:text-5xl">{resumen.vo2max ?? "—"}</span>
+                  {resumen.vo2max != null && <span className="text-sm text-on-surface/50">ml/kg·min</span>}
                 </div>
               </div>
               <div>
                 <div className="text-label-caps mb-3 text-[10px] tracking-[0.4em] text-on-surface/50">RECUPERACIÓN</div>
                 <div className="flex items-baseline gap-2">
-                  <span className="font-display text-4xl font-extrabold text-on-surface md:text-5xl">78</span>
-                  <span className="text-sm text-on-surface/50">%</span>
+                  <span className="font-display text-4xl font-extrabold text-on-surface md:text-5xl">{resumen.recuperacion ?? "—"}</span>
+                  {resumen.recuperacion != null && <span className="text-sm text-on-surface/50">%</span>}
                 </div>
               </div>
               <div>
                 <div className="text-label-caps mb-3 text-[10px] tracking-[0.4em] text-on-surface/50">CALORÍAS / ETAPA</div>
                 <div className="flex items-baseline gap-2">
-                  <span className="font-display text-4xl font-extrabold text-on-surface md:text-5xl">1240</span>
-                  <span className="text-sm text-on-surface/50">kcal</span>
+                  <span className="font-display text-4xl font-extrabold text-on-surface md:text-5xl">{resumen.caloriasPromedio ?? "—"}</span>
+                  {resumen.caloriasPromedio != null && <span className="text-sm text-on-surface/50">kcal</span>}
                 </div>
               </div>
             </div>
@@ -337,44 +322,65 @@ function Home() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-8">
-            {races.map((r) => (
-              <article key={r.title} className="group cursor-pointer">
-                <div className="relative mb-6 aspect-[16/9] overflow-hidden">
-                  <img
-                    src={r.image}
-                    alt={r.title}
-                    loading="lazy"
-                    width={1600}
-                    height={900}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                  <span className="text-label-caps absolute top-4 left-4 bg-background/80 px-3 py-1 text-[10px] font-bold tracking-[0.3em] text-primary backdrop-blur-sm">
-                    {r.n}
-                  </span>
-                </div>
-                <div className="space-y-4">
-                  <h3 className="font-display text-2xl font-bold text-on-surface transition-colors group-hover:text-primary md:text-3xl">
-                    {r.title}
-                  </h3>
-                  <p className="font-mono text-xs tracking-widest text-on-surface/50 uppercase">
-                    {r.meta}
-                  </p>
-                  <p className="font-serif text-base leading-relaxed text-on-surface/60">{r.desc}</p>
-                  <Link
-                    to="/carreras"
-                    className="text-label-caps inline-flex items-center gap-2 text-primary transition-all hover:gap-4"
-                  >
-                    VER ETAPA
-                    <span aria-hidden className="material-symbols-outlined text-sm">
-                      arrow_forward
-                    </span>
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
+          {ultimasCarreras.length === 0 ? (
+            <p className="py-16 text-center text-sm text-on-surface/50">
+              Todavía no hay Carreras registradas. Aparecerán aquí en cuanto Cowork procese la primera jornada.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-8">
+              {ultimasCarreras.map((r) => {
+                const imagen = repo.medios.byId(r.imagenPrincipal)?.rutaWeb;
+                const meta = [
+                  r.distanciaKm != null ? `${r.distanciaKm} KM` : null,
+                  r.desnivelM != null ? `${r.desnivelM} M` : null,
+                  r.duracionSeg != null ? formatDuration(r.duracionSeg) : null,
+                ].filter(Boolean).join(" · ");
+                return (
+                  <article key={r.id} className="group cursor-pointer">
+                    <div className="relative mb-6 aspect-[16/9] overflow-hidden bg-surface-container-lowest">
+                      {imagen ? (
+                        <img
+                          src={imagen}
+                          alt={r.titulo}
+                          loading="lazy"
+                          width={1600}
+                          height={900}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center border border-dashed border-outline-variant text-xs text-on-surface/40">
+                          Sin imagen todavía
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                    </div>
+                    <div className="space-y-4">
+                      <h3 className="font-display text-2xl font-bold text-on-surface transition-colors group-hover:text-primary md:text-3xl">
+                        {r.titulo}
+                      </h3>
+                      {meta && (
+                        <p className="font-mono text-xs tracking-widest text-on-surface/50 uppercase">
+                          {meta}
+                        </p>
+                      )}
+                      <p className="font-serif text-base leading-relaxed text-on-surface/60">
+                        {[r.canton, r.provincia].filter(Boolean).join(", ")}
+                      </p>
+                      <Link
+                        to="/carreras"
+                        className="text-label-caps inline-flex items-center gap-2 text-primary transition-all hover:gap-4"
+                      >
+                        VER ETAPA
+                        <span aria-hidden className="material-symbols-outlined text-sm">
+                          arrow_forward
+                        </span>
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -394,38 +400,55 @@ function Home() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-8">
-            {stories.map((s) => (
-              <article key={s.title} className="group cursor-pointer">
-                <div className="relative mb-6 aspect-[16/9] overflow-hidden">
-                  <img
-                    src={s.image}
-                    alt={s.title}
-                    loading="lazy"
-                    width={1600}
-                    height={900}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                </div>
-                <div className="space-y-4">
-                  <h3 className="font-display text-2xl font-bold text-on-surface transition-colors group-hover:text-primary md:text-3xl">
-                    {s.title}
-                  </h3>
-                  <p className="font-serif text-base leading-relaxed text-on-surface/60">{s.desc}</p>
-                  <a
-                    href="#"
-                    className="text-label-caps inline-flex items-center gap-2 text-primary transition-all hover:gap-4"
-                  >
-                    LEER MÁS
-                    <span aria-hidden className="material-symbols-outlined text-sm">
-                      arrow_forward
-                    </span>
-                  </a>
-                </div>
-              </article>
-            ))}
-          </div>
+          {ultimasHistorias.length === 0 ? (
+            <p className="py-16 text-center text-sm text-on-surface/50">
+              Todavía no hay Historias aprobadas. Aparecerán aquí en cuanto Fidel apruebe una.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-8">
+              {ultimasHistorias.map((s) => {
+                const imagen = repo.medios.byId(s.imagen)?.rutaWeb;
+                return (
+                  <article key={s.id} className="group cursor-pointer">
+                    <div className="relative mb-6 aspect-[16/9] overflow-hidden bg-surface-container-lowest">
+                      {imagen ? (
+                        <img
+                          src={imagen}
+                          alt={s.titulo}
+                          loading="lazy"
+                          width={1600}
+                          height={900}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center border border-dashed border-outline-variant text-xs text-on-surface/40">
+                          Sin imagen todavía
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                    </div>
+                    <div className="space-y-4">
+                      <h3 className="font-display text-2xl font-bold text-on-surface transition-colors group-hover:text-primary md:text-3xl">
+                        {s.titulo}
+                      </h3>
+                      {s.extracto && (
+                        <p className="font-serif text-base leading-relaxed text-on-surface/60">{s.extracto}</p>
+                      )}
+                      <Link
+                        to="/historias"
+                        className="text-label-caps inline-flex items-center gap-2 text-primary transition-all hover:gap-4"
+                      >
+                        LEER MÁS
+                        <span aria-hidden className="material-symbols-outlined text-sm">
+                          arrow_forward
+                        </span>
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 

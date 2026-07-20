@@ -1,0 +1,15 @@
+{
+  "generadoEn": "2026-07-20T19:53:56.514Z",
+  "fuenteExcel": "RUMBO_ARCHIVO_MAESTRO_V6_INTEGRACION_WEB.xlsx",
+  "hashExcel": "f21da833eb87bc1d43119c2e9db42ddb93cdb6bf51c6222e290a4b8b372b2775",
+  "scriptVersion": "1.0.0",
+  "conteos": {
+    "jornadas": 0,
+    "carreras": 0,
+    "historias": 0,
+    "medios": 0,
+    "cantonesVisitados": 0
+  },
+  "advertencias": [],
+  "errores": []
+}

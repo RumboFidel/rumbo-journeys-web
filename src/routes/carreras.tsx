@@ -1,10 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
-import raceQuito from "@/assets/race-quito.jpg.asset.json";
-import raceCuenca from "@/assets/race-cuenca.jpg.asset.json";
-import storyCotopaxi from "@/assets/story-cotopaxi.jpg.asset.json";
-import storySabiduria from "@/assets/story-sabiduria.jpg.asset.json";
+import { repo } from "@/data/repository";
+import { formatDuration } from "@/components/bitacora-shell";
+import type { CantonWeb, CarreraWeb } from "@/data/types";
 
 export const Route = createFileRoute("/carreras")({
   head: () => ({
@@ -20,111 +19,26 @@ export const Route = createFileRoute("/carreras")({
   component: CarrerasPage,
 });
 
-const TOTAL_CANTONES = 221;
-
-type Carrera = {
-  slug: string;
-  n: number;
-  municipio: string;
-  provincia: string;
-  title: string;
-  date: string;
-  desc: string;
-  photos: string[];
-  videoUrl?: string;
-  tags: { label: string; to: "/historias" | "/bitacora" }[];
-};
-
-// Estructura geográfica (ejemplo con 4 provincias). Reemplazar por la lista
-// completa de 24 provincias y sus 221 cantones cuando esté disponible.
-const PROVINCIAS: Record<string, string[]> = {
-  Azuay: ["Cuenca", "Girón", "Gualaceo", "Nabón", "Paute", "Santa Isabel"],
-  Guayas: [
-    "Daule",
-    "Durán",
-    "El Empalme",
-    "Guayaquil",
-    "Milagro",
-    "Playas",
-    "Samborondón",
-  ],
-  Loja: ["Catamayo", "Loja", "Macará", "Saraguro", "Zapotillo"],
-  Pichincha: [
-    "Cayambe",
-    "Mejía",
-    "Pedro Moncayo",
-    "Puerto Quito",
-    "Quito",
-    "Rumiñahui",
-    "San Miguel de los Bancos",
-  ],
-};
-
-// Mock — reemplazar por lectura de la hoja "Carreras" de Google Sheets.
-const CARRERAS: Carrera[] = [
-  {
-    slug: "guayaquil",
-    n: 1,
-    municipio: "Guayaquil",
-    provincia: "Guayas",
-    title: "Guayaquil: el lujo de recorrer Las Peñas y el Malecón",
-    date: "2026-06-12",
-    desc:
-      "Diez kilómetros a orillas del Guayas, subiendo los 444 escalones de Las Peñas al amanecer, entre el color de las casas y el bullicio del puerto que despierta.",
-    photos: [raceQuito.url, raceCuenca.url, storyCotopaxi.url],
-    tags: [
-      { label: "Historia: Las Peñas", to: "/historias" },
-      { label: "Bitácora del día", to: "/bitacora" },
-    ],
-  },
-  {
-    slug: "cuenca",
-    n: 2,
-    municipio: "Cuenca",
-    provincia: "Azuay",
-    title: "Cuenca — Puentes de piedra y adoquines coloniales",
-    date: "2026-06-18",
-    desc:
-      "Un recorrido por el centro patrimonial cruzando el Tomebamba, con el Cajas custodiando el horizonte al atardecer.",
-    photos: [raceCuenca.url, storySabiduria.url],
-    tags: [
-      { label: "Historia: El Cajas", to: "/historias" },
-      { label: "Bitácora del día", to: "/bitacora" },
-    ],
-  },
-  {
-    slug: "quito",
-    n: 3,
-    municipio: "Quito",
-    provincia: "Pichincha",
-    title: "Quito — Amanecer en el páramo",
-    date: "2026-06-25",
-    desc:
-      "Salida antes del alba desde la Mitad del Mundo, cruzando la neblina que abraza el altiplano andino.",
-    photos: [raceQuito.url, storyCotopaxi.url, storySabiduria.url],
-    tags: [
-      { label: "Historia: Mitad del Mundo", to: "/historias" },
-      { label: "Bitácora del día", to: "/bitacora" },
-    ],
-  },
-];
-
-function key(prov: string, muni: string) {
-  return `${prov}::${muni}`.toLowerCase();
+function key(prov: string, canton: string) {
+  return `${prov}::${canton}`.toLowerCase();
 }
 
 function CarrerasPage() {
-  const carrerasByMuni = useMemo(() => {
-    const map = new Map<string, Carrera>();
-    for (const c of CARRERAS) map.set(key(c.provincia, c.municipio), c);
-    return map;
-  }, []);
+  const cantones = repo.cantones.all();
+  const carrerasById = useMemo(
+    () => new Map(repo.carreras.all().map((c) => [c.id, c])),
+    []
+  );
+  const resumen = repo.resumen.get();
 
-  const provincias = useMemo(() => Object.keys(PROVINCIAS).sort(), []);
+  const provincias = useMemo(
+    () => Array.from(new Set(cantones.map((c) => c.provincia))).sort(),
+    [cantones]
+  );
   const [openProv, setOpenProv] = useState<string | null>(provincias[0] ?? null);
   const [openMuni, setOpenMuni] = useState<string | null>(null);
 
-  const totalHechas = CARRERAS.length;
+  const totalHechas = resumen.cantonesVisitados;
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
@@ -141,7 +55,7 @@ function CarrerasPage() {
             </h1>
             <p className="font-serif mt-6 max-w-2xl text-base leading-relaxed text-on-surface/60">
               Ecuador cantón a cantón. Elige una provincia y despliega sus
-              municipios para ver los recorridos completados.
+              cantones para ver los recorridos completados.
             </p>
 
             <div className="mt-8 inline-flex items-baseline gap-3 border border-primary/40 px-6 py-3">
@@ -149,15 +63,18 @@ function CarrerasPage() {
                 {totalHechas}
               </span>
               <span className="font-mono text-xs uppercase tracking-[0.3em] text-on-surface/60">
-                / {TOTAL_CANTONES} cantones
+                / {resumen.metaCantones} cantones
               </span>
             </div>
           </div>
 
           <ul className="divide-y divide-outline-variant border border-outline-variant bg-surface-container-lowest">
             {provincias.map((prov) => {
-              const munis = [...PROVINCIAS[prov]].sort((a, b) => a.localeCompare(b));
-              const hechas = munis.filter((m) => carrerasByMuni.has(key(prov, m))).length;
+              const cantonesProv = cantones
+                .filter((c) => c.provincia === prov)
+                .slice()
+                .sort((a, b) => a.canton.localeCompare(b.canton));
+              const hechas = cantonesProv.filter((c) => c.visitado).length;
               const isOpen = openProv === prov;
               return (
                 <li key={prov}>
@@ -182,24 +99,26 @@ function CarrerasPage() {
                       </span>
                     </div>
                     <span className="text-label-caps text-[10px] tracking-[0.3em] text-on-surface/50">
-                      {hechas}/{munis.length}
+                      {hechas}/{cantonesProv.length}
                     </span>
                   </button>
 
                   {isOpen && (
                     <ul className="border-t border-outline-variant bg-background/40">
-                      {munis.map((muni) => {
-                        const carrera = carrerasByMuni.get(key(prov, muni));
-                        const k = key(prov, muni);
+                      {cantonesProv.map((canton) => {
+                        const k = key(prov, canton.canton);
                         const isMuniOpen = openMuni === k;
+                        const carrera = canton.carrerasIds.length
+                          ? carrerasById.get(canton.carrerasIds[0])
+                          : undefined;
                         if (!carrera) {
                           return (
                             <li
-                              key={muni}
+                              key={canton.cantonId}
                               className="flex items-center justify-between gap-4 border-b border-outline-variant/60 px-6 py-3 pl-14 last:border-b-0 md:px-10 md:pl-20"
                             >
                               <span className="text-sm text-on-surface/35">
-                                {muni}
+                                {canton.canton}
                               </span>
                               <span className="text-label-caps text-[9px] tracking-[0.3em] text-on-surface/30">
                                 SIN CARRERA AÚN
@@ -209,7 +128,7 @@ function CarrerasPage() {
                         }
                         return (
                           <li
-                            key={muni}
+                            key={canton.cantonId}
                             className="border-b border-outline-variant/60 last:border-b-0"
                           >
                             <button
@@ -226,14 +145,14 @@ function CarrerasPage() {
                                   ›
                                 </span>
                                 <span className="text-sm font-semibold text-on-surface">
-                                  {muni}
+                                  {canton.canton}
                                 </span>
                               </div>
                               <span className="text-label-caps text-[10px] font-bold tracking-[0.3em] text-primary">
-                                {carrera.n}/{TOTAL_CANTONES}
+                                {canton.numCarreras} carrera{canton.numCarreras === 1 ? "" : "s"}
                               </span>
                             </button>
-                            {isMuniOpen && <CarreraCard carrera={carrera} />}
+                            {isMuniOpen && <CarreraCard carrera={carrera} canton={canton} />}
                           </li>
                         );
                       })}
@@ -249,52 +168,82 @@ function CarrerasPage() {
   );
 }
 
-function CarreraCard({ carrera }: { carrera: Carrera }) {
+function CarreraCard({ carrera, canton }: { carrera: CarreraWeb; canton: CantonWeb }) {
+  const imagenPrincipal = repo.medios.byId(carrera.imagenPrincipal)?.rutaWeb;
+  const galeria = carrera.galeria
+    .map((id) => repo.medios.byId(id))
+    .filter((m): m is NonNullable<typeof m> => !!m && m.tipo === "fotografia");
+  const video = carrera.galeria
+    .map((id) => repo.medios.byId(id))
+    .find((m) => m?.tipo === "video");
+
+  const meta = [
+    carrera.distanciaKm != null ? `${carrera.distanciaKm} km` : null,
+    carrera.desnivelM != null ? `+${carrera.desnivelM} m` : null,
+    carrera.duracionSeg != null ? formatDuration(carrera.duracionSeg) : null,
+  ].filter(Boolean).join(" · ");
+
   return (
     <article className="border-t border-outline-variant bg-surface-container-lowest px-6 py-8 md:px-10 md:py-12">
       <span className="text-label-caps mb-3 block text-[10px] font-bold tracking-[0.4em] text-primary">
-        {carrera.municipio.toUpperCase()} {carrera.n}/{TOTAL_CANTONES}
+        {canton.canton.toUpperCase()}
       </span>
       <h2 className="font-display text-2xl font-extrabold leading-tight text-on-surface md:text-4xl">
-        {carrera.title}
+        {carrera.titulo}
       </h2>
-      <p className="mt-2 font-mono text-[11px] uppercase text-on-surface/40">
-        {new Date(carrera.date).toLocaleDateString("es-EC", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        })}
-      </p>
-      <p className="font-serif mt-5 max-w-3xl text-base leading-relaxed text-on-surface/75">
-        {carrera.desc}
-      </p>
-
+      {carrera.fechaPublica && (
+        <p className="mt-2 font-mono text-[11px] uppercase text-on-surface/40">
+          {new Date(carrera.fechaPublica).toLocaleDateString("es-EC", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          })}
+        </p>
+      )}
+      {meta && (
+        <p className="mt-2 font-mono text-[11px] uppercase text-on-surface/40">{meta}</p>
+      )}
+      {carrera.descripcionCorta && (
+        <p className="font-serif mt-5 max-w-3xl text-base leading-relaxed text-on-surface/75">
+          {carrera.descripcionCorta}
+        </p>
+      )}
+      {imagenPrincipal && (
+        <div className="mt-6 aspect-[16/9] w-full overflow-hidden border border-outline-variant">
+          <img src={imagenPrincipal} alt={carrera.titulo} className="h-full w-full object-cover" />
+        </div>
+      )}
 
       {/* Área reservada para el visor */}
       <section className="mt-8">
         <h3 className="text-label-caps mb-3 text-[10px] font-bold tracking-[0.4em] text-primary">
           RECORRIDO
         </h3>
-        <div
-          role="region"
-          aria-label="Área reservada para el visor del recorrido"
-          className="relative flex aspect-[16/10] w-full items-center justify-center overflow-hidden border-2 border-dashed border-primary/60 bg-background"
-        >
-          <div className="pointer-events-none absolute inset-0 [background:repeating-linear-gradient(45deg,transparent_0_12px,rgba(212,163,77,0.06)_12px_24px)]" />
-          <div className="pointer-events-none absolute inset-0 [background:linear-gradient(rgba(212,163,77,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(212,163,77,0.08)_1px,transparent_1px)] [background-size:40px_40px]" />
-          <div className="relative z-10 max-w-md px-6 text-center">
-            <span className="text-label-caps mb-3 block text-[10px] tracking-[0.4em] text-primary">
-              ESPACIO RESERVADO · IFRAME
-            </span>
-            <p className="font-display text-lg font-bold text-on-surface md:text-2xl">
-              Aquí se integrará el visor del recorrido
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-on-surface/60">
-              Área preparada para el iframe con mapa y perfil del recorrido de{" "}
-              {carrera.municipio}.
-            </p>
+        {carrera.rutaGeojson ? (
+          <div
+            role="region"
+            aria-label="Área reservada para el visor del recorrido"
+            className="relative flex aspect-[16/10] w-full items-center justify-center overflow-hidden border-2 border-dashed border-primary/60 bg-background"
+          >
+            <div className="pointer-events-none absolute inset-0 [background:repeating-linear-gradient(45deg,transparent_0_12px,rgba(212,163,77,0.06)_12px_24px)]" />
+            <div className="pointer-events-none absolute inset-0 [background:linear-gradient(rgba(212,163,77,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(212,163,77,0.08)_1px,transparent_1px)] [background-size:40px_40px]" />
+            <div className="relative z-10 max-w-md px-6 text-center">
+              <span className="text-label-caps mb-3 block text-[10px] tracking-[0.4em] text-primary">
+                ESPACIO RESERVADO · IFRAME
+              </span>
+              <p className="font-display text-lg font-bold text-on-surface md:text-2xl">
+                Aquí se integrará el visor del recorrido
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-on-surface/60">
+                GeoJSON disponible para {canton.canton}.
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex aspect-[16/10] w-full items-center justify-center border border-dashed border-outline-variant bg-background text-sm text-on-surface/50">
+            Recorrido todavía sin mapa disponible
+          </div>
+        )}
       </section>
 
       {/* Galería */}
@@ -302,16 +251,20 @@ function CarreraCard({ carrera }: { carrera: Carrera }) {
         <h3 className="text-label-caps mb-3 text-[10px] font-bold tracking-[0.4em] text-primary">
           GALERÍA
         </h3>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-          {carrera.photos.map((p, i) => (
-            <div
-              key={i}
-              className="aspect-[4/3] overflow-hidden border border-outline-variant"
-            >
-              <img src={p} alt="" className="h-full w-full object-cover" />
-            </div>
-          ))}
-        </div>
+        {galeria.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            {galeria.map((m, i) => (
+              <div
+                key={i}
+                className="aspect-[4/3] overflow-hidden border border-outline-variant"
+              >
+                <img src={m.rutaWeb ?? undefined} alt={m.titulo ?? ""} className="h-full w-full object-cover" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-on-surface/50">Sin fotografías todavía.</p>
+        )}
       </section>
 
       {/* Video */}
@@ -319,9 +272,9 @@ function CarreraCard({ carrera }: { carrera: Carrera }) {
         <h3 className="text-label-caps mb-3 text-[10px] font-bold tracking-[0.4em] text-primary">
           VIDEO TESTIMONIAL
         </h3>
-        {carrera.videoUrl ? (
+        {video?.rutaWeb ? (
           <div className="aspect-video w-full overflow-hidden border border-outline-variant bg-black">
-            <video src={carrera.videoUrl} controls className="h-full w-full" />
+            <video src={video.rutaWeb} controls className="h-full w-full" />
           </div>
         ) : (
           <div className="flex aspect-video w-full items-center justify-center border border-dashed border-outline-variant bg-background text-sm text-on-surface/50">
@@ -336,15 +289,18 @@ function CarreraCard({ carrera }: { carrera: Carrera }) {
           PROFUNDIZAR
         </h3>
         <div className="flex flex-wrap gap-3">
-          {carrera.tags.map((t) => (
-            <Link
-              key={t.label}
-              to={t.to}
-              className="text-label-caps rounded-full border border-primary/50 px-4 py-2 text-xs tracking-[0.2em] text-primary transition hover:bg-primary/10"
-            >
-              {t.label}
-            </Link>
-          ))}
+          <Link
+            to="/historias"
+            className="text-label-caps rounded-full border border-primary/50 px-4 py-2 text-xs tracking-[0.2em] text-primary transition hover:bg-primary/10"
+          >
+            Historias relacionadas
+          </Link>
+          <Link
+            to="/bitacora"
+            className="text-label-caps rounded-full border border-primary/50 px-4 py-2 text-xs tracking-[0.2em] text-primary transition hover:bg-primary/10"
+          >
+            Bitácora del día
+          </Link>
         </div>
       </section>
     </article>

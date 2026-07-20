@@ -1,0 +1,2224 @@
+{
+  "cantones": [
+    {
+      "cantonId": "cant-azuay-camilo-ponce-enriquez",
+      "provincia": "Azuay",
+      "canton": "Camilo Ponce Enríquez",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-azuay-chordeleg",
+      "provincia": "Azuay",
+      "canton": "Chordeleg",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-azuay-cuenca",
+      "provincia": "Azuay",
+      "canton": "Cuenca",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-azuay-el-pan",
+      "provincia": "Azuay",
+      "canton": "El Pan",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-azuay-giron",
+      "provincia": "Azuay",
+      "canton": "Girón",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-azuay-guachapala",
+      "provincia": "Azuay",
+      "canton": "Guachapala",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-azuay-gualaceo",
+      "provincia": "Azuay",
+      "canton": "Gualaceo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-azuay-nabon",
+      "provincia": "Azuay",
+      "canton": "Nabón",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-azuay-ona",
+      "provincia": "Azuay",
+      "canton": "Oña",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-azuay-paute",
+      "provincia": "Azuay",
+      "canton": "Paute",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-azuay-pucara",
+      "provincia": "Azuay",
+      "canton": "Pucará",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-azuay-san-fernando",
+      "provincia": "Azuay",
+      "canton": "San Fernando",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-azuay-santa-isabel",
+      "provincia": "Azuay",
+      "canton": "Santa Isabel",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-azuay-sevilla-de-oro",
+      "provincia": "Azuay",
+      "canton": "Sevilla de Oro",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-azuay-sigsig",
+      "provincia": "Azuay",
+      "canton": "Sígsig",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-bolivar-caluma",
+      "provincia": "Bolívar",
+      "canton": "Caluma",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-bolivar-chillanes",
+      "provincia": "Bolívar",
+      "canton": "Chillanes",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-bolivar-chimbo",
+      "provincia": "Bolívar",
+      "canton": "Chimbo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-bolivar-echeandia",
+      "provincia": "Bolívar",
+      "canton": "Echeandía",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-bolivar-guaranda",
+      "provincia": "Bolívar",
+      "canton": "Guaranda",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-bolivar-las-naves",
+      "provincia": "Bolívar",
+      "canton": "Las Naves",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-bolivar-san-miguel",
+      "provincia": "Bolívar",
+      "canton": "San Miguel",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-canar-azogues",
+      "provincia": "Cañar",
+      "canton": "Azogues",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-canar-biblian",
+      "provincia": "Cañar",
+      "canton": "Biblián",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-canar-canar",
+      "provincia": "Cañar",
+      "canton": "Cañar",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-canar-deleg",
+      "provincia": "Cañar",
+      "canton": "Déleg",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-canar-el-tambo",
+      "provincia": "Cañar",
+      "canton": "El Tambo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-canar-la-troncal",
+      "provincia": "Cañar",
+      "canton": "La Troncal",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-canar-suscal",
+      "provincia": "Cañar",
+      "canton": "Suscal",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-carchi-bolivar",
+      "provincia": "Carchi",
+      "canton": "Bolívar",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-carchi-espejo",
+      "provincia": "Carchi",
+      "canton": "Espejo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-carchi-mira",
+      "provincia": "Carchi",
+      "canton": "Mira",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-carchi-montufar",
+      "provincia": "Carchi",
+      "canton": "Montúfar",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-carchi-san-pedro-de-huaca",
+      "provincia": "Carchi",
+      "canton": "San Pedro de Huaca",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-carchi-tulcan",
+      "provincia": "Carchi",
+      "canton": "Tulcán",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-chimborazo-alausi",
+      "provincia": "Chimborazo",
+      "canton": "Alausí",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-chimborazo-chambo",
+      "provincia": "Chimborazo",
+      "canton": "Chambo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-chimborazo-chunchi",
+      "provincia": "Chimborazo",
+      "canton": "Chunchi",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-chimborazo-colta",
+      "provincia": "Chimborazo",
+      "canton": "Colta",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-chimborazo-cumanda",
+      "provincia": "Chimborazo",
+      "canton": "Cumandá",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-chimborazo-guamote",
+      "provincia": "Chimborazo",
+      "canton": "Guamote",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-chimborazo-guano",
+      "provincia": "Chimborazo",
+      "canton": "Guano",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-chimborazo-pallatanga",
+      "provincia": "Chimborazo",
+      "canton": "Pallatanga",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-chimborazo-penipe",
+      "provincia": "Chimborazo",
+      "canton": "Penipe",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-chimborazo-riobamba",
+      "provincia": "Chimborazo",
+      "canton": "Riobamba",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-cotopaxi-la-mana",
+      "provincia": "Cotopaxi",
+      "canton": "La Maná",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-cotopaxi-latacunga",
+      "provincia": "Cotopaxi",
+      "canton": "Latacunga",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-cotopaxi-pangua",
+      "provincia": "Cotopaxi",
+      "canton": "Pangua",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-cotopaxi-pujili",
+      "provincia": "Cotopaxi",
+      "canton": "Pujilí",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-cotopaxi-salcedo",
+      "provincia": "Cotopaxi",
+      "canton": "Salcedo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-cotopaxi-saquisili",
+      "provincia": "Cotopaxi",
+      "canton": "Saquisilí",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-cotopaxi-sigchos",
+      "provincia": "Cotopaxi",
+      "canton": "Sigchos",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-el-oro-arenillas",
+      "provincia": "El Oro",
+      "canton": "Arenillas",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-el-oro-atahualpa",
+      "provincia": "El Oro",
+      "canton": "Atahualpa",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-el-oro-balsas",
+      "provincia": "El Oro",
+      "canton": "Balsas",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-el-oro-chilla",
+      "provincia": "El Oro",
+      "canton": "Chilla",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-el-oro-el-guabo",
+      "provincia": "El Oro",
+      "canton": "El Guabo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-el-oro-huaquillas",
+      "provincia": "El Oro",
+      "canton": "Huaquillas",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-el-oro-las-lajas",
+      "provincia": "El Oro",
+      "canton": "Las Lajas",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-el-oro-machala",
+      "provincia": "El Oro",
+      "canton": "Machala",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-el-oro-marcabeli",
+      "provincia": "El Oro",
+      "canton": "Marcabelí",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-el-oro-pasaje",
+      "provincia": "El Oro",
+      "canton": "Pasaje",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-el-oro-pinas",
+      "provincia": "El Oro",
+      "canton": "Piñas",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-el-oro-portovelo",
+      "provincia": "El Oro",
+      "canton": "Portovelo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-el-oro-santa-rosa",
+      "provincia": "El Oro",
+      "canton": "Santa Rosa",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-el-oro-zaruma",
+      "provincia": "El Oro",
+      "canton": "Zaruma",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-esmeraldas-atacames",
+      "provincia": "Esmeraldas",
+      "canton": "Atacames",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-esmeraldas-eloy-alfaro",
+      "provincia": "Esmeraldas",
+      "canton": "Eloy Alfaro",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-esmeraldas-esmeraldas",
+      "provincia": "Esmeraldas",
+      "canton": "Esmeraldas",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-esmeraldas-muisne",
+      "provincia": "Esmeraldas",
+      "canton": "Muisne",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-esmeraldas-quininde",
+      "provincia": "Esmeraldas",
+      "canton": "Quinindé",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-esmeraldas-rio-verde",
+      "provincia": "Esmeraldas",
+      "canton": "Río Verde",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-esmeraldas-san-lorenzo",
+      "provincia": "Esmeraldas",
+      "canton": "San Lorenzo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-galapagos-isabela",
+      "provincia": "Galápagos",
+      "canton": "Isabela",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-galapagos-san-cristobal",
+      "provincia": "Galápagos",
+      "canton": "San Cristóbal",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-galapagos-santa-cruz",
+      "provincia": "Galápagos",
+      "canton": "Santa Cruz",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-alfredo-baquerizo-moreno",
+      "provincia": "Guayas",
+      "canton": "Alfredo Baquerizo Moreno",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-balao",
+      "provincia": "Guayas",
+      "canton": "Balao",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-balzar",
+      "provincia": "Guayas",
+      "canton": "Balzar",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-colimes",
+      "provincia": "Guayas",
+      "canton": "Colimes",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-coronel-marcelino-mariduena",
+      "provincia": "Guayas",
+      "canton": "Coronel Marcelino Maridueña",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-daule",
+      "provincia": "Guayas",
+      "canton": "Daule",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-duran",
+      "provincia": "Guayas",
+      "canton": "Durán",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-el-empalme",
+      "provincia": "Guayas",
+      "canton": "El Empalme",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-el-triunfo",
+      "provincia": "Guayas",
+      "canton": "El Triunfo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-general-antonio-elizalde",
+      "provincia": "Guayas",
+      "canton": "General Antonio Elizalde",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-guayaquil",
+      "provincia": "Guayas",
+      "canton": "Guayaquil",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-isidro-ayora",
+      "provincia": "Guayas",
+      "canton": "Isidro Ayora",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-lomas-de-sargentillo",
+      "provincia": "Guayas",
+      "canton": "Lomas de Sargentillo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-milagro",
+      "provincia": "Guayas",
+      "canton": "Milagro",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-naranjal",
+      "provincia": "Guayas",
+      "canton": "Naranjal",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-naranjito",
+      "provincia": "Guayas",
+      "canton": "Naranjito",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-nobol",
+      "provincia": "Guayas",
+      "canton": "Nobol",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-palestina",
+      "provincia": "Guayas",
+      "canton": "Palestina",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-pedro-carbo",
+      "provincia": "Guayas",
+      "canton": "Pedro Carbo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-playas",
+      "provincia": "Guayas",
+      "canton": "Playas",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-salitre",
+      "provincia": "Guayas",
+      "canton": "Salitre",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-samborondon",
+      "provincia": "Guayas",
+      "canton": "Samborondón",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-santa-lucia",
+      "provincia": "Guayas",
+      "canton": "Santa Lucía",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-simon-bolivar",
+      "provincia": "Guayas",
+      "canton": "Simón Bolívar",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-guayas-yaguachi",
+      "provincia": "Guayas",
+      "canton": "Yaguachi",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-imbabura-antonio-ante",
+      "provincia": "Imbabura",
+      "canton": "Antonio Ante",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-imbabura-cotacachi",
+      "provincia": "Imbabura",
+      "canton": "Cotacachi",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-imbabura-ibarra",
+      "provincia": "Imbabura",
+      "canton": "Ibarra",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-imbabura-otavalo",
+      "provincia": "Imbabura",
+      "canton": "Otavalo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-imbabura-pimampiro",
+      "provincia": "Imbabura",
+      "canton": "Pimampiro",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-imbabura-san-miguel-de-urcuqui",
+      "provincia": "Imbabura",
+      "canton": "San Miguel de Urcuquí",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-calvas",
+      "provincia": "Loja",
+      "canton": "Calvas",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-catamayo",
+      "provincia": "Loja",
+      "canton": "Catamayo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-celica",
+      "provincia": "Loja",
+      "canton": "Celica",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-chaguarpamba",
+      "provincia": "Loja",
+      "canton": "Chaguarpamba",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-espindola",
+      "provincia": "Loja",
+      "canton": "Espíndola",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-gonzanama",
+      "provincia": "Loja",
+      "canton": "Gonzanamá",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-loja",
+      "provincia": "Loja",
+      "canton": "Loja",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-macara",
+      "provincia": "Loja",
+      "canton": "Macará",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-olmedo",
+      "provincia": "Loja",
+      "canton": "Olmedo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-paltas",
+      "provincia": "Loja",
+      "canton": "Paltas",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-pindal",
+      "provincia": "Loja",
+      "canton": "Pindal",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-puyango",
+      "provincia": "Loja",
+      "canton": "Puyango",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-quilanga",
+      "provincia": "Loja",
+      "canton": "Quilanga",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-saraguro",
+      "provincia": "Loja",
+      "canton": "Saraguro",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-sozoranga",
+      "provincia": "Loja",
+      "canton": "Sozoranga",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-loja-zapotillo",
+      "provincia": "Loja",
+      "canton": "Zapotillo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-los-rios-baba",
+      "provincia": "Los Ríos",
+      "canton": "Baba",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-los-rios-babahoyo",
+      "provincia": "Los Ríos",
+      "canton": "Babahoyo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-los-rios-buena-fe",
+      "provincia": "Los Ríos",
+      "canton": "Buena Fe",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-los-rios-mocache",
+      "provincia": "Los Ríos",
+      "canton": "Mocache",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-los-rios-montalvo",
+      "provincia": "Los Ríos",
+      "canton": "Montalvo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-los-rios-palenque",
+      "provincia": "Los Ríos",
+      "canton": "Palenque",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-los-rios-pueblo-viejo",
+      "provincia": "Los Ríos",
+      "canton": "Pueblo Viejo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-los-rios-quevedo",
+      "provincia": "Los Ríos",
+      "canton": "Quevedo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-los-rios-quinsaloma",
+      "provincia": "Los Ríos",
+      "canton": "Quinsaloma",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-los-rios-urdaneta",
+      "provincia": "Los Ríos",
+      "canton": "Urdaneta",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-los-rios-valencia",
+      "provincia": "Los Ríos",
+      "canton": "Valencia",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-los-rios-ventanas",
+      "provincia": "Los Ríos",
+      "canton": "Ventanas",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-los-rios-vinces",
+      "provincia": "Los Ríos",
+      "canton": "Vinces",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-bolivar",
+      "provincia": "Manabí",
+      "canton": "Bolívar",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-chone",
+      "provincia": "Manabí",
+      "canton": "Chone",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-el-carmen",
+      "provincia": "Manabí",
+      "canton": "El Carmen",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-flavio-alfaro",
+      "provincia": "Manabí",
+      "canton": "Flavio Alfaro",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-jama",
+      "provincia": "Manabí",
+      "canton": "Jama",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-jaramijo",
+      "provincia": "Manabí",
+      "canton": "Jaramijó",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-jipijapa",
+      "provincia": "Manabí",
+      "canton": "Jipijapa",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-junin",
+      "provincia": "Manabí",
+      "canton": "Junín",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-manta",
+      "provincia": "Manabí",
+      "canton": "Manta",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-montecristi",
+      "provincia": "Manabí",
+      "canton": "Montecristi",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-olmedo",
+      "provincia": "Manabí",
+      "canton": "Olmedo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-pajan",
+      "provincia": "Manabí",
+      "canton": "Paján",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-pedernales",
+      "provincia": "Manabí",
+      "canton": "Pedernales",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-pichincha",
+      "provincia": "Manabí",
+      "canton": "Pichincha",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-portoviejo",
+      "provincia": "Manabí",
+      "canton": "Portoviejo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-puerto-lopez",
+      "provincia": "Manabí",
+      "canton": "Puerto López",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-rocafuerte",
+      "provincia": "Manabí",
+      "canton": "Rocafuerte",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-san-vicente",
+      "provincia": "Manabí",
+      "canton": "San Vicente",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-santa-ana",
+      "provincia": "Manabí",
+      "canton": "Santa Ana",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-sucre",
+      "provincia": "Manabí",
+      "canton": "Sucre",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-tosagua",
+      "provincia": "Manabí",
+      "canton": "Tosagua",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-manabi-veinticuatro-de-mayo",
+      "provincia": "Manabí",
+      "canton": "Veinticuatro de Mayo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-morona-santiago-gualaquiza",
+      "provincia": "Morona Santiago",
+      "canton": "Gualaquiza",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-morona-santiago-huamboya",
+      "provincia": "Morona Santiago",
+      "canton": "Huamboya",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-morona-santiago-limon-indanza",
+      "provincia": "Morona Santiago",
+      "canton": "Limón Indanza",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-morona-santiago-logrono",
+      "provincia": "Morona Santiago",
+      "canton": "Logroño",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-morona-santiago-morona",
+      "provincia": "Morona Santiago",
+      "canton": "Morona",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-morona-santiago-pablo-sexto",
+      "provincia": "Morona Santiago",
+      "canton": "Pablo Sexto",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-morona-santiago-palora",
+      "provincia": "Morona Santiago",
+      "canton": "Palora",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-morona-santiago-san-juan-bosco",
+      "provincia": "Morona Santiago",
+      "canton": "San Juan Bosco",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-morona-santiago-santiago-de-mendez",
+      "provincia": "Morona Santiago",
+      "canton": "Santiago de Méndez",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-morona-santiago-sevilla-don-bosco",
+      "provincia": "Morona Santiago",
+      "canton": "Sevilla Don Bosco",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-morona-santiago-sucua",
+      "provincia": "Morona Santiago",
+      "canton": "Sucúa",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-morona-santiago-taisha",
+      "provincia": "Morona Santiago",
+      "canton": "Taisha",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-morona-santiago-tiwintza",
+      "provincia": "Morona Santiago",
+      "canton": "Tiwintza",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-napo-archidona",
+      "provincia": "Napo",
+      "canton": "Archidona",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-napo-carlos-julio-arosemena-tola",
+      "provincia": "Napo",
+      "canton": "Carlos Julio Arosemena Tola",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-napo-el-chaco",
+      "provincia": "Napo",
+      "canton": "El Chaco",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-napo-quijos",
+      "provincia": "Napo",
+      "canton": "Quijos",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-napo-tena",
+      "provincia": "Napo",
+      "canton": "Tena",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-orellana-aguarico",
+      "provincia": "Orellana",
+      "canton": "Aguarico",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-orellana-francisco-de-orellana",
+      "provincia": "Orellana",
+      "canton": "Francisco de Orellana",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-orellana-joya-de-los-sachas",
+      "provincia": "Orellana",
+      "canton": "Joya de los Sachas",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-orellana-loreto",
+      "provincia": "Orellana",
+      "canton": "Loreto",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-pastaza-arajuno",
+      "provincia": "Pastaza",
+      "canton": "Arajuno",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-pastaza-mera",
+      "provincia": "Pastaza",
+      "canton": "Mera",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-pastaza-pastaza",
+      "provincia": "Pastaza",
+      "canton": "Pastaza",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-pastaza-santa-clara",
+      "provincia": "Pastaza",
+      "canton": "Santa Clara",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-pichincha-cayambe",
+      "provincia": "Pichincha",
+      "canton": "Cayambe",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-pichincha-mejia",
+      "provincia": "Pichincha",
+      "canton": "Mejía",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-pichincha-pedro-moncayo",
+      "provincia": "Pichincha",
+      "canton": "Pedro Moncayo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-pichincha-pedro-vicente-maldonado",
+      "provincia": "Pichincha",
+      "canton": "Pedro Vicente Maldonado",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-pichincha-puerto-quito",
+      "provincia": "Pichincha",
+      "canton": "Puerto Quito",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-pichincha-quito",
+      "provincia": "Pichincha",
+      "canton": "Quito",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-pichincha-ruminahui",
+      "provincia": "Pichincha",
+      "canton": "Rumiñahui",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-pichincha-san-miguel-de-los-bancos",
+      "provincia": "Pichincha",
+      "canton": "San Miguel de los Bancos",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-santa-elena-la-libertad",
+      "provincia": "Santa Elena",
+      "canton": "La Libertad",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-santa-elena-salinas",
+      "provincia": "Santa Elena",
+      "canton": "Salinas",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-santa-elena-santa-elena",
+      "provincia": "Santa Elena",
+      "canton": "Santa Elena",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-santo-domingo-de-los-tsachilas-la-concordia",
+      "provincia": "Santo Domingo de los Tsáchilas",
+      "canton": "La Concordia",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-santo-domingo-de-los-tsachilas-santo-domingo",
+      "provincia": "Santo Domingo de los Tsáchilas",
+      "canton": "Santo Domingo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-sucumbios-cascales",
+      "provincia": "Sucumbíos",
+      "canton": "Cascales",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-sucumbios-cuyabeno",
+      "provincia": "Sucumbíos",
+      "canton": "Cuyabeno",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-sucumbios-gonzalo-pizarro",
+      "provincia": "Sucumbíos",
+      "canton": "Gonzalo Pizarro",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-sucumbios-lago-agrio",
+      "provincia": "Sucumbíos",
+      "canton": "Lago Agrio",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-sucumbios-putumayo",
+      "provincia": "Sucumbíos",
+      "canton": "Putumayo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-sucumbios-shushufindi",
+      "provincia": "Sucumbíos",
+      "canton": "Shushufindi",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-sucumbios-sucumbios",
+      "provincia": "Sucumbíos",
+      "canton": "Sucumbíos",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-tungurahua-ambato",
+      "provincia": "Tungurahua",
+      "canton": "Ambato",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-tungurahua-banos-de-agua-santa",
+      "provincia": "Tungurahua",
+      "canton": "Baños de Agua Santa",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-tungurahua-cevallos",
+      "provincia": "Tungurahua",
+      "canton": "Cevallos",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-tungurahua-mocha",
+      "provincia": "Tungurahua",
+      "canton": "Mocha",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-tungurahua-patate",
+      "provincia": "Tungurahua",
+      "canton": "Patate",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-tungurahua-quero",
+      "provincia": "Tungurahua",
+      "canton": "Quero",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-tungurahua-san-pedro-de-pelileo",
+      "provincia": "Tungurahua",
+      "canton": "San Pedro de Pelileo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-tungurahua-santiago-de-pillaro",
+      "provincia": "Tungurahua",
+      "canton": "Santiago de Píllaro",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-tungurahua-tisaleo",
+      "provincia": "Tungurahua",
+      "canton": "Tisaleo",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-zamora-chinchipe-centinela-del-condor",
+      "provincia": "Zamora Chinchipe",
+      "canton": "Centinela del Cóndor",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-zamora-chinchipe-chinchipe",
+      "provincia": "Zamora Chinchipe",
+      "canton": "Chinchipe",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-zamora-chinchipe-el-pangui",
+      "provincia": "Zamora Chinchipe",
+      "canton": "El Pangui",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-zamora-chinchipe-nangaritza",
+      "provincia": "Zamora Chinchipe",
+      "canton": "Nangaritza",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-zamora-chinchipe-palanda",
+      "provincia": "Zamora Chinchipe",
+      "canton": "Palanda",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-zamora-chinchipe-paquisha",
+      "provincia": "Zamora Chinchipe",
+      "canton": "Paquisha",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-zamora-chinchipe-yacuambi",
+      "provincia": "Zamora Chinchipe",
+      "canton": "Yacuambi",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-zamora-chinchipe-yantzaza",
+      "provincia": "Zamora Chinchipe",
+      "canton": "Yantzaza",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    },
+    {
+      "cantonId": "cant-zamora-chinchipe-zamora",
+      "provincia": "Zamora Chinchipe",
+      "canton": "Zamora",
+      "visitado": false,
+      "numCarreras": 0,
+      "kmAcumulados": 0,
+      "fechaUltimaCarrera": null,
+      "carrerasIds": []
+    }
+  ]
+}

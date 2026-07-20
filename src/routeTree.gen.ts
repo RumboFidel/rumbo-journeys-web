@@ -9,31 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as QuienSoyRouteImport } from './routes/quien-soy'
-import { Route as HistoriasRouteImport } from './routes/historias'
-import { Route as CarrerasRouteImport } from './routes/carreras'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CarrerasRouteImport } from './routes/carreras'
+import { Route as HistoriasRouteImport } from './routes/historias'
+import { Route as QuienSoyRouteImport } from './routes/quien-soy'
 import { Route as BitacoraIndexRouteImport } from './routes/bitacora.index'
 import { Route as BitacoraRutasGpxRouteImport } from './routes/bitacora.rutas-gpx'
-import { Route as BitacoraVideosIndexRouteImport } from './routes/bitacora.videos.index'
-import { Route as BitacoraMedallasIndexRouteImport } from './routes/bitacora.medallas.index'
-import { Route as BitacoraFotografiasIndexRouteImport } from './routes/bitacora.fotografias.index'
-import { Route as BitacoraCuadernosDocumentosIndexRouteImport } from './routes/bitacora.cuadernos-documentos.index'
 import { Route as BitacoraAudiosIndexRouteImport } from './routes/bitacora.audios.index'
-import { Route as BitacoraVideosSlugRouteImport } from './routes/bitacora.videos.$slug'
-import { Route as BitacoraMedallasSlugRouteImport } from './routes/bitacora.medallas.$slug'
-import { Route as BitacoraFotografiasSlugRouteImport } from './routes/bitacora.fotografias.$slug'
-import { Route as BitacoraCuadernosDocumentosSlugRouteImport } from './routes/bitacora.cuadernos-documentos.$slug'
 import { Route as BitacoraAudiosSlugRouteImport } from './routes/bitacora.audios.$slug'
+import { Route as BitacoraCuadernosDocumentosIndexRouteImport } from './routes/bitacora.cuadernos-documentos.index'
+import { Route as BitacoraCuadernosDocumentosSlugRouteImport } from './routes/bitacora.cuadernos-documentos.$slug'
+import { Route as BitacoraFotografiasIndexRouteImport } from './routes/bitacora.fotografias.index'
+import { Route as BitacoraFotografiasSlugRouteImport } from './routes/bitacora.fotografias.$slug'
+import { Route as BitacoraMedallasIndexRouteImport } from './routes/bitacora.medallas.index'
+import { Route as BitacoraMedallasSlugRouteImport } from './routes/bitacora.medallas.$slug'
+import { Route as BitacoraVideosIndexRouteImport } from './routes/bitacora.videos.index'
+import { Route as BitacoraVideosSlugRouteImport } from './routes/bitacora.videos.$slug'
 
-const QuienSoyRoute = QuienSoyRouteImport.update({
-  id: '/quien-soy',
-  path: '/quien-soy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HistoriasRoute = HistoriasRouteImport.update({
-  id: '/historias',
-  path: '/historias',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CarrerasRoute = CarrerasRouteImport.update({
@@ -41,9 +36,14 @@ const CarrerasRoute = CarrerasRouteImport.update({
   path: '/carreras',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const HistoriasRoute = HistoriasRouteImport.update({
+  id: '/historias',
+  path: '/historias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuienSoyRoute = QuienSoyRouteImport.update({
+  id: '/quien-soy',
+  path: '/quien-soy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BitacoraIndexRoute = BitacoraIndexRouteImport.update({
@@ -56,9 +56,37 @@ const BitacoraRutasGpxRoute = BitacoraRutasGpxRouteImport.update({
   path: '/bitacora/rutas-gpx',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BitacoraVideosIndexRoute = BitacoraVideosIndexRouteImport.update({
-  id: '/bitacora/videos/',
-  path: '/bitacora/videos/',
+const BitacoraAudiosIndexRoute = BitacoraAudiosIndexRouteImport.update({
+  id: '/bitacora/audios/',
+  path: '/bitacora/audios/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BitacoraAudiosSlugRoute = BitacoraAudiosSlugRouteImport.update({
+  id: '/bitacora/audios/$slug',
+  path: '/bitacora/audios/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BitacoraCuadernosDocumentosIndexRoute =
+  BitacoraCuadernosDocumentosIndexRouteImport.update({
+    id: '/bitacora/cuadernos-documentos/',
+    path: '/bitacora/cuadernos-documentos/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const BitacoraCuadernosDocumentosSlugRoute =
+  BitacoraCuadernosDocumentosSlugRouteImport.update({
+    id: '/bitacora/cuadernos-documentos/$slug',
+    path: '/bitacora/cuadernos-documentos/$slug',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const BitacoraFotografiasIndexRoute =
+  BitacoraFotografiasIndexRouteImport.update({
+    id: '/bitacora/fotografias/',
+    path: '/bitacora/fotografias/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const BitacoraFotografiasSlugRoute = BitacoraFotografiasSlugRouteImport.update({
+  id: '/bitacora/fotografias/$slug',
+  path: '/bitacora/fotografias/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BitacoraMedallasIndexRoute = BitacoraMedallasIndexRouteImport.update({
@@ -66,47 +94,19 @@ const BitacoraMedallasIndexRoute = BitacoraMedallasIndexRouteImport.update({
   path: '/bitacora/medallas/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BitacoraFotografiasIndexRoute =
-  BitacoraFotografiasIndexRouteImport.update({
-    id: '/bitacora/fotografias/',
-    path: '/bitacora/fotografias/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const BitacoraCuadernosDocumentosIndexRoute =
-  BitacoraCuadernosDocumentosIndexRouteImport.update({
-    id: '/bitacora/cuadernos-documentos/',
-    path: '/bitacora/cuadernos-documentos/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const BitacoraAudiosIndexRoute = BitacoraAudiosIndexRouteImport.update({
-  id: '/bitacora/audios/',
-  path: '/bitacora/audios/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BitacoraVideosSlugRoute = BitacoraVideosSlugRouteImport.update({
-  id: '/bitacora/videos/$slug',
-  path: '/bitacora/videos/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const BitacoraMedallasSlugRoute = BitacoraMedallasSlugRouteImport.update({
   id: '/bitacora/medallas/$slug',
   path: '/bitacora/medallas/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BitacoraFotografiasSlugRoute = BitacoraFotografiasSlugRouteImport.update({
-  id: '/bitacora/fotografias/$slug',
-  path: '/bitacora/fotografias/$slug',
+const BitacoraVideosIndexRoute = BitacoraVideosIndexRouteImport.update({
+  id: '/bitacora/videos/',
+  path: '/bitacora/videos/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BitacoraCuadernosDocumentosSlugRoute =
-  BitacoraCuadernosDocumentosSlugRouteImport.update({
-    id: '/bitacora/cuadernos-documentos/$slug',
-    path: '/bitacora/cuadernos-documentos/$slug',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const BitacoraAudiosSlugRoute = BitacoraAudiosSlugRouteImport.update({
-  id: '/bitacora/audios/$slug',
-  path: '/bitacora/audios/$slug',
+const BitacoraVideosSlugRoute = BitacoraVideosSlugRouteImport.update({
+  id: '/bitacora/videos/$slug',
+  path: '/bitacora/videos/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -243,18 +243,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/quien-soy': {
-      id: '/quien-soy'
-      path: '/quien-soy'
-      fullPath: '/quien-soy'
-      preLoaderRoute: typeof QuienSoyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/historias': {
-      id: '/historias'
-      path: '/historias'
-      fullPath: '/historias'
-      preLoaderRoute: typeof HistoriasRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/carreras': {
@@ -264,11 +257,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CarrerasRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/historias': {
+      id: '/historias'
+      path: '/historias'
+      fullPath: '/historias'
+      preLoaderRoute: typeof HistoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quien-soy': {
+      id: '/quien-soy'
+      path: '/quien-soy'
+      fullPath: '/quien-soy'
+      preLoaderRoute: typeof QuienSoyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bitacora/': {
@@ -285,25 +285,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BitacoraRutasGpxRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/bitacora/videos/': {
-      id: '/bitacora/videos/'
-      path: '/bitacora/videos'
-      fullPath: '/bitacora/videos/'
-      preLoaderRoute: typeof BitacoraVideosIndexRouteImport
+    '/bitacora/audios/': {
+      id: '/bitacora/audios/'
+      path: '/bitacora/audios'
+      fullPath: '/bitacora/audios/'
+      preLoaderRoute: typeof BitacoraAudiosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/bitacora/medallas/': {
-      id: '/bitacora/medallas/'
-      path: '/bitacora/medallas'
-      fullPath: '/bitacora/medallas/'
-      preLoaderRoute: typeof BitacoraMedallasIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/bitacora/fotografias/': {
-      id: '/bitacora/fotografias/'
-      path: '/bitacora/fotografias'
-      fullPath: '/bitacora/fotografias/'
-      preLoaderRoute: typeof BitacoraFotografiasIndexRouteImport
+    '/bitacora/audios/$slug': {
+      id: '/bitacora/audios/$slug'
+      path: '/bitacora/audios/$slug'
+      fullPath: '/bitacora/audios/$slug'
+      preLoaderRoute: typeof BitacoraAudiosSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bitacora/cuadernos-documentos/': {
@@ -313,25 +306,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BitacoraCuadernosDocumentosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/bitacora/audios/': {
-      id: '/bitacora/audios/'
-      path: '/bitacora/audios'
-      fullPath: '/bitacora/audios/'
-      preLoaderRoute: typeof BitacoraAudiosIndexRouteImport
+    '/bitacora/cuadernos-documentos/$slug': {
+      id: '/bitacora/cuadernos-documentos/$slug'
+      path: '/bitacora/cuadernos-documentos/$slug'
+      fullPath: '/bitacora/cuadernos-documentos/$slug'
+      preLoaderRoute: typeof BitacoraCuadernosDocumentosSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/bitacora/videos/$slug': {
-      id: '/bitacora/videos/$slug'
-      path: '/bitacora/videos/$slug'
-      fullPath: '/bitacora/videos/$slug'
-      preLoaderRoute: typeof BitacoraVideosSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/bitacora/medallas/$slug': {
-      id: '/bitacora/medallas/$slug'
-      path: '/bitacora/medallas/$slug'
-      fullPath: '/bitacora/medallas/$slug'
-      preLoaderRoute: typeof BitacoraMedallasSlugRouteImport
+    '/bitacora/fotografias/': {
+      id: '/bitacora/fotografias/'
+      path: '/bitacora/fotografias'
+      fullPath: '/bitacora/fotografias/'
+      preLoaderRoute: typeof BitacoraFotografiasIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bitacora/fotografias/$slug': {
@@ -341,18 +327,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BitacoraFotografiasSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/bitacora/cuadernos-documentos/$slug': {
-      id: '/bitacora/cuadernos-documentos/$slug'
-      path: '/bitacora/cuadernos-documentos/$slug'
-      fullPath: '/bitacora/cuadernos-documentos/$slug'
-      preLoaderRoute: typeof BitacoraCuadernosDocumentosSlugRouteImport
+    '/bitacora/medallas/': {
+      id: '/bitacora/medallas/'
+      path: '/bitacora/medallas'
+      fullPath: '/bitacora/medallas/'
+      preLoaderRoute: typeof BitacoraMedallasIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/bitacora/audios/$slug': {
-      id: '/bitacora/audios/$slug'
-      path: '/bitacora/audios/$slug'
-      fullPath: '/bitacora/audios/$slug'
-      preLoaderRoute: typeof BitacoraAudiosSlugRouteImport
+    '/bitacora/medallas/$slug': {
+      id: '/bitacora/medallas/$slug'
+      path: '/bitacora/medallas/$slug'
+      fullPath: '/bitacora/medallas/$slug'
+      preLoaderRoute: typeof BitacoraMedallasSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bitacora/videos/': {
+      id: '/bitacora/videos/'
+      path: '/bitacora/videos'
+      fullPath: '/bitacora/videos/'
+      preLoaderRoute: typeof BitacoraVideosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bitacora/videos/$slug': {
+      id: '/bitacora/videos/$slug'
+      path: '/bitacora/videos/$slug'
+      fullPath: '/bitacora/videos/$slug'
+      preLoaderRoute: typeof BitacoraVideosSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -379,3 +379,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

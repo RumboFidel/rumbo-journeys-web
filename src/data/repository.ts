@@ -5,13 +5,18 @@
 import type {
   AssetType,
   Audio,
+  CantonWeb,
+  CarreraWeb,
   ContentRelation,
   DestinationType,
   GpxRoute,
+  HistoriaWeb,
   Medal,
+  MedioWeb,
   NotebookDocument,
   Photograph,
   Race,
+  ResumenWeb,
   Story,
   Video,
 } from "./types";
@@ -25,6 +30,7 @@ import { RACES, getRaceById } from "./races";
 import { STORIES, getStoryById } from "./stories";
 import { CONTENT_RELATIONS } from "./content-relations";
 import { getLocationById, locationLabel, LOCATIONS } from "./locations";
+import { CANTONES_WEB, CARRERAS_WEB, HISTORIAS_WEB, MEDIOS_WEB, RESUMEN_WEB } from "./rumbo-web";
 
 const published = <T extends { status: string }>(rows: T[]) =>
   rows.filter((r) => r.status === "published");
@@ -76,6 +82,29 @@ export const repo = {
       CONTENT_RELATIONS.filter(
         (r) => r.destinationType === destinationType && r.destinationId === destinationId
       ),
+  },
+  // Capa unica de datos generada desde el Excel maestro (ver rumbo-web.ts).
+  // Home, Carreras, Historias y el mapa deben consumir unicamente esto.
+  carreras: {
+    all: (): CarreraWeb[] => CARRERAS_WEB,
+    bySlug: (slug: string) => CARRERAS_WEB.find((c) => c.slug === slug),
+  },
+  historias: {
+    // historias.json ya viene filtrado por sync-rumbo.mjs a solo
+    // aprobada_fidel/publicada; no se re-filtra aqui para no duplicar la regla.
+    all: (): HistoriaWeb[] => HISTORIAS_WEB,
+    bySlug: (slug: string) => HISTORIAS_WEB.find((h) => h.slug === slug),
+  },
+  cantones: {
+    all: (): CantonWeb[] => CANTONES_WEB,
+    byId: (id: string) => CANTONES_WEB.find((c) => c.cantonId === id),
+  },
+  resumen: {
+    get: (): ResumenWeb => RESUMEN_WEB,
+  },
+  medios: {
+    all: (): MedioWeb[] => MEDIOS_WEB,
+    byId: (id?: string | null) => (id ? MEDIOS_WEB.find((m) => m.mediaId === id) : undefined),
   },
 };
 
