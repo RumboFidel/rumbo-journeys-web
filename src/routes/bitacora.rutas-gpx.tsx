@@ -1,123 +1,183 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { BitacoraSection, Field, FiltersBar, formatDate, formatDuration, inputCls } from "@/components/bitacora-shell";
+import { useEffect, useMemo, useState } from "react";
+import { BitacoraSection, EmptyResults, Field, FiltersBar, formatDate, formatDuration, inputCls } from "@/components/bitacora-shell";
+import { RutasMultiMap, type RutaMapaItem } from "@/components/rutas-multi-map";
 import { repo } from "@/data/repository";
-import { Eye, EyeOff, Map } from "lucide-react";
 
 export const Route = createFileRoute("/bitacora/rutas-gpx")({
   head: () => ({
     meta: [
-      { title: "Rutas GPX — Bitácora · rumbo" },
-      { name: "description", content: "Trazas GPX de las etapas de la expedición RUMBO por Ecuador." },
+      { title: "Rutas — Bitácora · rumbo" },
+      { name: "description", content: "Actividades de ruta (FIT, GPX o TCX) originales registradas en la Bitácora de RUMBO." },
     ],
   }),
-  component: RutasGpxPage,
+  component: RutasIndex,
 });
 
-function RutasGpxPage() {
-  const all = repo.gpxRoutes.all();
-  const [q, setQ] = useState("");
-  const [province, setProvince] = useState("");
-  const [canton, setCanton] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [active, setActive] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(all.map((r) => [r.id, r.routeStatus === "active"]))
-  );
+const PALETTE = [
+  "#f5c518", "#4fd1c5", "#f56565", "#63b3ed",
+  "#ed64a6", "#68d391", "#f6ad55", "#9f7aea",
+];
 
-  const provinces = useMemo(() => Array.from(new Set(all.map((r) => repo.locations.byId(r.locationId)?.province).filter(Boolean))).sort() as string[], [all]);
-  const cantons = useMemo(() => Array.from(new Set(all.map((r) => repo.locations.byId(r.locationId)).filter((l) => l && (!province || l.province === province)).map((l) => l!.canton))).sort(), [all, province]);
+function RutasIndex() {
+  const items = repo.bitacora.byCategoria("rutas");
+  const [q, setQ] = useState("");
+  const [order, setOrder] = useState<"desc" | "asc">("desc");
+  const [activeIds, setActiveIds] = useState<Set<string> | null>(null);
+  const [mapErrorIds, setMapErrorIds] = useState<Set<string>>(new Set());
+
+  // Por defecto, mostrar en el mapa todas las rutas que tengan un GeoJSON
+  // disponible. Se inicializa una sola vez (cuando llegan los items reales),
+  // sin sobreescribir la seleccion manual del usuario en renders siguientes.
+  useEffect(() => {
+    if (activeIds !== null) return;
+    const conGeojson = items.filter((r) => r.rutaGeojson).map((r) => r.id);
+    if (conGeojson.length > 0) setActiveIds(new Set(conGeojson));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length]);
 
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
-    return all.filter((r) => {
-      const loc = repo.locations.byId(r.locationId);
-      if (query && !`${r.title} ${loc?.visibleName ?? ""}`.toLowerCase().includes(query)) return false;
-      if (province && loc?.province !== province) return false;
-      if (canton && loc?.canton !== canton) return false;
-      if (from && r.date < from) return false;
-      if (to && r.date > to) return false;
-      return true;
+    const arr = items.filter((r) => !query || `${r.titulo ?? ""} ${r.lugar ?? ""}`.toLowerCase().includes(query));
+    arr.sort((a, b) => {
+      const da = a.fechaCaptura ?? a.fechaIngreso ?? "";
+      const db = b.fechaCaptura ?? b.fechaIngreso ?? "";
+      return order === "desc" ? db.localeCompare(da) : da.localeCompare(db);
     });
-  }, [all, q, province, canton, from, to]);
+    return arr;
+  }, [items, q, order]);
 
-  const clear = () => { setQ(""); setProvince(""); setCanton(""); setFrom(""); setTo(""); };
-  const showAll = () => setActive(Object.fromEntries(all.map((r) => [r.id, true])));
-  const hideAll = () => setActive(Object.fromEntries(all.map((r) => [r.id, false])));
-  const toggle = (id: string) => setActive((s) => ({ ...s, [id]: !s[id] }));
+  const clear = () => { setQ(""); setOrder("desc"); };
 
-  const activeCount = filtered.filter((r) => active[r.id]).length;
+  const mapRoutes: RutaMapaItem[] = items
+    .filter((r) => r.rutaGeojson)
+    .map((r) => ({ id: r.id, geojsonUrl: r.rutaGeojson as string, active: activeIds?.has(r.id) ?? false }));
+
+  const colorFor = (id: string) => {
+    const idx = mapRoutes.findIndex((r) => r.id === id);
+    return idx >= 0 ? PALETTE[idx % PALETTE.length] : null;
+  };
+
+  const toggle = (id: string) => {
+    setActiveIds((prev) => {
+      const next = new Set(prev ?? []);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   return (
-    <BitacoraSection eyebrow="BITÁCORA · 05" title="Rutas GPX" intro="Un mapa con las trazas de cada etapa. El visor cartográfico se integrará en la siguiente fase; mientras tanto, el panel funciona para explorar y activar rutas.">
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
-        <div className="lg:col-span-3">
-          <div className="relative flex aspect-[4/3] flex-col items-center justify-center border border-dashed border-outline-variant bg-surface-container-lowest p-6 text-center lg:aspect-auto lg:h-full">
-            <Map className="mb-4 h-10 w-10 text-primary/60" aria-hidden />
-            <p className="text-label-caps text-[10px] tracking-[0.4em] text-primary">VISOR DE RUTAS</p>
-            <p className="mt-3 max-w-sm text-sm text-on-surface/60">Espacio reservado para el mapa interactivo con las trazas GPX. Se conectará posteriormente sin cambiar este layout.</p>
-            <p className="mt-2 text-xs text-on-surface/50">{activeCount} de {filtered.length} rutas activas</p>
-          </div>
-        </div>
+    <BitacoraSection eyebrow="BITÁCORA · 05" title="Rutas" intro="Actividades de ruta originales (FIT, GPX o TCX) cargadas por Fidel, registradas en la Bitácora. Activa una o varias para verlas juntas en el mapa.">
+      {items.length === 0 ? (
+        <p className="py-16 text-center text-sm text-on-surface/50">Todavía no hay rutas registradas en la Bitácora.</p>
+      ) : (
+        <>
+          {mapRoutes.length > 0 ? (
+            <div className="mb-8 h-[420px] w-full overflow-hidden border border-outline-variant bg-surface-container-lowest">
+              <RutasMultiMap routes={mapRoutes} onErrorIdsChange={setMapErrorIds} />
+            </div>
+          ) : (
+            <div className="mb-8 border border-dashed border-outline-variant p-10 text-center text-sm text-on-surface/50">
+              Ninguna de las rutas registradas tiene todavía un recorrido (GeoJSON) disponible para el mapa.
+            </div>
+          )}
 
-        <div className="lg:col-span-2">
           <FiltersBar onClear={clear}>
-            <Field label="Buscar"><input className={inputCls} placeholder="Nombre de la ruta" value={q} onChange={(e) => setQ(e.target.value)} /></Field>
-            <Field label="Provincia">
-              <select className={inputCls} value={province} onChange={(e) => { setProvince(e.target.value); setCanton(""); }}>
-                <option value="">Todas</option>{provinces.map((p) => <option key={p} value={p}>{p}</option>)}
+            <Field label="Buscar"><input className={inputCls} placeholder="Nombre o lugar" value={q} onChange={(e) => setQ(e.target.value)} /></Field>
+            <Field label="Orden">
+              <select className={inputCls} value={order} onChange={(e) => setOrder(e.target.value as "desc" | "asc")}>
+                <option value="desc">Más recientes</option><option value="asc">Más antiguas</option>
               </select>
             </Field>
-            <Field label="Cantón">
-              <select className={inputCls} value={canton} onChange={(e) => setCanton(e.target.value)}>
-                <option value="">Todos</option>{cantons.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </Field>
-            <Field label="Desde"><input type="date" className={inputCls} value={from} onChange={(e) => setFrom(e.target.value)} /></Field>
-            <Field label="Hasta"><input type="date" className={inputCls} value={to} onChange={(e) => setTo(e.target.value)} /></Field>
           </FiltersBar>
 
-          <div className="mb-3 flex gap-2">
-            <button onClick={showAll} className="text-label-caps flex-1 border border-outline-variant px-3 py-2 text-[10px] tracking-[0.3em] text-on-surface hover:border-primary/60 hover:text-primary">MOSTRAR TODAS</button>
-            <button onClick={hideAll} className="text-label-caps flex-1 border border-outline-variant px-3 py-2 text-[10px] tracking-[0.3em] text-on-surface hover:border-primary/60 hover:text-primary">OCULTAR TODAS</button>
-          </div>
+          {filtered.length === 0 ? <EmptyResults /> : (
+            <ul className="divide-y divide-outline-variant border border-outline-variant bg-surface-container-lowest">
+              {filtered.map((r) => {
+                const formato = (r.nombre?.split(".").pop() ?? "").toUpperCase();
+                const color = r.rutaGeojson ? colorFor(r.id) : null;
+                const isActive = activeIds?.has(r.id) ?? false;
+                const failedOnMap = mapErrorIds.has(r.id);
+                return (
+                  <li key={r.id} className="p-4">
+                    <div className="flex items-start gap-3">
+                      {r.rutaGeojson ? (
+                        <label className="mt-1 flex flex-shrink-0 cursor-pointer items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={isActive}
+                            onChange={() => toggle(r.id)}
+                            className="h-4 w-4 accent-primary"
+                            aria-label={`Mostrar en el mapa: ${r.titulo}`}
+                          />
+                          {color && (
+                            <span
+                              className="h-3 w-3 flex-shrink-0 rounded-full"
+                              style={{ backgroundColor: isActive ? color : "transparent", border: `2px solid ${color}` }}
+                              aria-hidden
+                            />
+                          )}
+                        </label>
+                      ) : (
+                        <span className="mt-1 h-4 w-4 flex-shrink-0" aria-hidden />
+                      )}
 
-          <ul className="divide-y divide-outline-variant border border-outline-variant bg-surface-container-lowest">
-            {filtered.map((r) => {
-              const loc = repo.locations.byId(r.locationId);
-              const on = !!active[r.id];
-              return (
-                <li key={r.id} className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-display truncate text-sm font-extrabold text-on-surface">{r.title}</p>
-                      <p className="text-label-caps mt-1 text-[10px] font-bold tracking-[0.3em] text-primary">{formatDate(r.date)}</p>
-                      <p className="mt-1 text-xs text-on-surface/60">{loc ? `${loc.canton}, ${loc.province}` : ""}</p>
-                      <p className="mt-1 text-xs text-on-surface/70">
-                        {r.distanceKm.toFixed(1)} km
-                        {r.durationSeconds ? ` · ${formatDuration(r.durationSeconds)}` : ""}
-                        {r.elevationGain ? ` · +${r.elevationGain} m` : ""}
-                      </p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {formato && <span className="text-label-caps text-[9px] tracking-[0.3em] text-primary">{formato}</span>}
+                          <span className="text-label-caps text-[10px] font-bold tracking-[0.3em] text-primary">{formatDate(r.fechaCaptura ?? r.fechaIngreso)}</span>
+                        </div>
+                        <p className="font-display truncate text-sm font-extrabold text-on-surface">{r.titulo}</p>
+                        <p className="mt-1 text-xs text-on-surface/60">{[r.lugar, r.canton, r.provincia].filter(Boolean).join(", ")}</p>
+                        {r.duracionSegundos ? <p className="mt-1 text-xs text-on-surface/70">{formatDuration(r.duracionSegundos)}</p> : null}
+                        {!r.rutaGeojson && (
+                          <p className="mt-1 text-xs text-on-surface/40">Sin recorrido geográfico disponible todavía.</p>
+                        )}
+                        {failedOnMap && (
+                          <p className="mt-1 text-xs text-red-400">No se pudo cargar este recorrido en el mapa.</p>
+                        )}
+                      </div>
+
+                      <div className="flex flex-shrink-0 flex-col items-end gap-2">
+                        {r.rutaWeb && (
+                          <a
+                            href={r.rutaWeb}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-label-caps border border-outline-variant px-3 py-2 text-[10px] tracking-[0.3em] text-on-surface hover:border-primary/60 hover:text-primary"
+                          >
+                            DESCARGAR ORIGINAL
+                          </a>
+                        )}
+                        {r.rutaGeojson && (
+                          <a
+                            href={r.rutaGeojson}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-label-caps border border-outline-variant px-3 py-2 text-[10px] tracking-[0.3em] text-on-surface hover:border-primary/60 hover:text-primary"
+                          >
+                            DESCARGAR GEOJSON
+                          </a>
+                        )}
+                      </div>
                     </div>
-                    <button
-                      onClick={() => toggle(r.id)}
-                      aria-pressed={on}
-                      aria-label={on ? "Desactivar ruta" : "Activar ruta"}
-                      className={`flex flex-shrink-0 items-center gap-1 border px-3 py-2 text-[10px] tracking-[0.3em] transition ${on ? "border-primary text-primary" : "border-outline-variant text-on-surface/60 hover:text-primary"}`}
-                    >
-                      {on ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-                      {on ? "ACTIVA" : "OCULTA"}
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
-            {filtered.length === 0 && (
-              <li className="p-6 text-center text-sm text-on-surface/60">Sin rutas con estos filtros.</li>
-            )}
-          </ul>
-        </div>
-      </div>
+                    {r.derivados.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2 pl-7">
+                        {r.derivados.map((d, i) => (
+                          <span key={i} className="text-label-caps border border-outline-variant/60 px-2 py-1 text-[9px] tracking-[0.2em] text-on-surface/50">
+                            {d.nombre}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </>
+      )}
     </BitacoraSection>
   );
 }

@@ -20,7 +20,7 @@ export const Route = createFileRoute("/bitacora/")({
       {
         name: "description",
         content:
-          "Mundo 03 · BITÁCORA. Archivo vivo de la expedición: fotografías, cuadernos, audios, videos, rutas GPX y medallas.",
+          "Mundo 03 · BITÁCORA. Archivo vivo de la expedición: fotografías, cuadernos, audios, videos, rutas y medallas.",
       },
     ],
   }),
@@ -45,11 +45,11 @@ function BitacoraPage() {
     icon: LucideIcon;
     to: CardTo;
   }[] = [
-    { name: "Fotografías", label: "Fotografías", count: counts.photographs, icon: ImageIcon, to: "/bitacora/fotografias" },
-    { name: "Cuadernos y documentos", label: "Cuadernos y documentos", count: counts.notebooksDocuments, icon: FileText, to: "/bitacora/cuadernos-documentos" },
+    { name: "Fotografías", label: "Fotografías", count: counts.fotografias, icon: ImageIcon, to: "/bitacora/fotografias" },
+    { name: "Cuadernos y documentos", label: "Cuadernos y documentos", count: counts.documentos, icon: FileText, to: "/bitacora/cuadernos-documentos" },
     { name: "Audios", label: "Audios", count: counts.audios, icon: Mic, to: "/bitacora/audios" },
     { name: "Videos", label: "Videos", count: counts.videos, icon: Video, to: "/bitacora/videos" },
-    { name: "Rutas GPX", label: "Rutas GPX", count: counts.gpxRoutes, icon: Map, to: "/bitacora/rutas-gpx" },
+    { name: "Rutas", label: "Rutas", count: counts.rutas, icon: Map, to: "/bitacora/rutas-gpx" },
     { name: "Medallas", label: "Medallas", count: counts.medals, icon: Trophy, to: "/bitacora/medallas" },
   ];
 

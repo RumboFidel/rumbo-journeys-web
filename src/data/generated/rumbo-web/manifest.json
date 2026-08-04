@@ -1,14 +1,22 @@
 {
-  "generadoEn": "2026-07-20T19:53:56.514Z",
+  "generadoEn": "2026-07-21T21:33:53.824Z",
   "fuenteExcel": "RUMBO_ARCHIVO_MAESTRO_V6_INTEGRACION_WEB.xlsx",
-  "hashExcel": "f21da833eb87bc1d43119c2e9db42ddb93cdb6bf51c6222e290a4b8b372b2775",
+  "hashExcel": "7756ad22817253d20e416ba0ef19f5b8b21b77a6370b277eb23c5d9075077df2",
   "scriptVersion": "1.0.0",
   "conteos": {
-    "jornadas": 0,
-    "carreras": 0,
-    "historias": 0,
-    "medios": 0,
-    "cantonesVisitados": 0
+    "jornadas": 1,
+    "carreras": 1,
+    "historias": 1,
+    "medios": 5,
+    "cantonesVisitados": 1,
+    "bitacoraOriginales": 7,
+    "bitacoraPorCategoria": {
+      "fotografias": 3,
+      "documentos": 1,
+      "videos": 1,
+      "audios": 1,
+      "rutas": 1
+    }
   },
   "advertencias": [],
   "errores": []

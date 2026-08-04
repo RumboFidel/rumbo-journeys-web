@@ -125,6 +125,17 @@ function safeMediaName(mediaId, originalName) {
   return `${safe}${ext}`;
 }
 
+// Resuelve una ruta de archivo declarada en el Excel (ubicacion_bitacora,
+// geojson_onedrive_path, etc.). Estas rutas vienen como "RUMBO/..." y son
+// relativas al contenedor de RUMBO_ROOT (su carpeta padre), no a RUMBO_ROOT.
+// Antes el GeoJSON se resolvia con path.join(RUMBO_ROOT, rel), lo que duplicaba
+// la carpeta RUMBO (".../RUMBO/RUMBO/03 TRABAJO COWORK/...") y no se encontraba.
+function resolveRumboAsset(relOrAbs) {
+  if (!relOrAbs) return null;
+  if (path.isAbsolute(relOrAbs)) return relOrAbs;
+  return path.join(RUMBO_ROOT, "..", relOrAbs);
+}
+
 function centroidOfLineString(coordinates) {
   if (!Array.isArray(coordinates) || coordinates.length === 0) return null;
   let sumLon = 0;
@@ -188,6 +199,7 @@ async function generatePackage() {
   const provinciasRows = readSheet(workbook, "15_PROVINCIAS");
   const territorioRows = readSheet(workbook, "16_TERRITORIO");
   const bitacoraArchivosRows = readSheet(workbook, "17_BITACORA_ARCHIVOS");
+  const archivosDerivadosRows = readSheet(workbook, "19_ARCHIVOS_DERIVADOS");
   const metricasRows = readSheet(workbook, "20_METRICAS_ATLETA");
 
   // --- Validaciones de identificadores/relaciones ---
@@ -222,6 +234,19 @@ async function generatePackage() {
   for (const m of mediosRows) {
     if (mediaIds.has(m.media_id)) err(`media_id duplicado: ${m.media_id}`);
     mediaIds.add(m.media_id);
+  }
+
+  // Indice de medios por id, para resolver el tipo real (05_MEDIOS) de los
+  // activos relacionados con la Carrera cuando el asset_type es generico ("media").
+  const mediosById = new Map(mediosRows.map((m) => [m.media_id, m]));
+  function esFotografiaAsset(rel) {
+    const t = String(rel.asset_type || "").toLowerCase();
+    if (t === "photograph" || t === "fotografia") return true;
+    if (t === "media") {
+      const m = mediosById.get(rel.asset_id);
+      return !!m && String(m.tipo_medio || "").toLowerCase() === "fotografia";
+    }
+    return false;
   }
 
   // --- resumen.json ---
@@ -261,6 +286,20 @@ async function generatePackage() {
     }
   }
 
+  // Pasos: 06_RUTAS todavia no tiene una columna dedicada (ni Cowork la
+  // registra hoy). Se deja preparado para leer "pasos_totales" cuando exista
+  // (ej. desde total_strides del FIT, si se confirma que corresponde a pasos
+  // para el dispositivo/actividad). Nunca se estima a partir de la distancia.
+  let pasosSuma = 0;
+  let pasosCount = 0;
+  for (const r of rutasRows) {
+    const pasos = toNumberOrNull(r.pasos_totales);
+    if (pasos !== null) {
+      pasosSuma += pasos;
+      pasosCount++;
+    }
+  }
+
   const provinciasIndicador = provinciasRows.find((p) => p.INDICADOR === "Provincias");
   const cantonesVigentesIndicador = provinciasRows.find((p) => p.INDICADOR === "Cantones vigentes");
   const alcanceOriginalIndicador = provinciasRows.find((p) => p.INDICADOR === "Alcance original");
@@ -273,6 +312,7 @@ async function generatePackage() {
     metaKilometros: 2210,
     vo2max: ultimoValor("vo2max"),
     recuperacion: ultimoValor("recuperacion"),
+    pasos: pasosCount > 0 ? Math.round(pasosSuma / pasosCount) : null,
     caloriasPromedio: caloriasCount > 0 ? Math.round(caloriasSuma / caloriasCount) : null,
     ultimaActualizacion: new Date().toISOString(),
   };
@@ -287,11 +327,9 @@ async function generatePackage() {
 
     let rutaGeojsonRelPath = null;
     if (ruta && ruta.geojson_onedrive_path) {
-      const srcGeojson = path.join(RUMBO_ROOT, "..", ruta.geojson_onedrive_path);
-      // geojson_onedrive_path es relativo a RUMBO/ segun el diccionario, no a RUMBO/..
-      const srcGeojsonReal = path.isAbsolute(ruta.geojson_onedrive_path)
-        ? ruta.geojson_onedrive_path
-        : path.join(RUMBO_ROOT, ruta.geojson_onedrive_path);
+      // geojson_onedrive_path viene como "RUMBO/..." (relativo al contenedor de
+      // RUMBO_ROOT), igual que ubicacion_bitacora. Se resuelve con el mismo criterio.
+      const srcGeojsonReal = resolveRumboAsset(ruta.geojson_onedrive_path);
       if (fs.existsSync(srcGeojsonReal)) {
         const destName = `${ruta.route_id}.geojson`;
         await fsp.copyFile(srcGeojsonReal, path.join(PAQUETE_DIR, "rutas", destName));
@@ -311,7 +349,7 @@ async function generatePackage() {
     }
 
     const galeria = relacionesRows
-      .filter((rel) => rel.destination_type === "race" && rel.destination_id === c.race_id && rel.asset_type === "photograph")
+      .filter((rel) => rel.destination_type === "race" && rel.destination_id === c.race_id && esFotografiaAsset(rel))
       .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
       .map((rel) => rel.asset_id);
 
@@ -331,6 +369,9 @@ async function generatePackage() {
       duracionSeg: ruta ? toNumberOrNull(ruta.duracion_segundos) : null,
       desnivelM: ruta ? toNumberOrNull(ruta.desnivel_positivo_m) : null,
       caloriasKcal: ruta ? toNumberOrNull(ruta.calorias_kcal) : null,
+      pasos: ruta ? toNumberOrNull(ruta.pasos_totales) : null,
+      pasosFuente: ruta ? (ruta.pasos_fuente ?? null) : null,
+      pasosConfianza: ruta ? (ruta.pasos_confianza ?? null) : null,
       deporte: ruta ? ruta.sport_label : null,
       deporteConfianza: ruta ? ruta.sport_confidence : null,
       subdeporte: ruta ? ruta.subsport_label : null,
@@ -373,9 +414,7 @@ async function generatePackage() {
     let punto = null;
     for (const { ruta } of entradas) {
       if (!ruta.geojson_onedrive_path) continue;
-      const srcGeojsonReal = path.isAbsolute(ruta.geojson_onedrive_path)
-        ? ruta.geojson_onedrive_path
-        : path.join(RUMBO_ROOT, ruta.geojson_onedrive_path);
+      const srcGeojsonReal = resolveRumboAsset(ruta.geojson_onedrive_path);
       if (fs.existsSync(srcGeojsonReal)) {
         try {
           const geo = JSON.parse(fs.readFileSync(srcGeojsonReal, "utf-8"));
@@ -453,7 +492,7 @@ async function generatePackage() {
     const rutaOrigenRel = bitacoraOrigen?.ubicacion_bitacora;
     let webPath = null;
     if (rutaOrigenRel) {
-      const srcReal = path.isAbsolute(rutaOrigenRel) ? rutaOrigenRel : path.join(RUMBO_ROOT, "..", rutaOrigenRel);
+      const srcReal = resolveRumboAsset(rutaOrigenRel);
       if (fs.existsSync(srcReal)) {
         const destName = safeMediaName(m.media_id, nombreOriginal);
         await fsp.copyFile(srcReal, path.join(PAQUETE_DIR, "archivos", carpeta, destName));
@@ -478,7 +517,107 @@ async function generatePackage() {
     });
   }
 
-  const bitacora = { items: medios.map((m) => ({ ...m })) };
+  // --- bitacora.json: fuente de verdad = 17_BITACORA_ARCHIVOS ---
+  // Incluye TODO original de Fidel sin ningun filtro editorial (aprobacion de
+  // Carrera/Historia, publicacion, estado publico). Los derivados de
+  // 19_ARCHIVOS_DERIVADOS se enlazan por origen, pero nunca cuentan como
+  // originales nuevos.
+  const TIPO_A_CATEGORIA = {
+    fotografia: "fotografias",
+    nota: "documentos",
+    documento: "documentos",
+    audio: "audios",
+    video: "videos",
+    actividad: "rutas",
+  };
+  const categoriaDe = (tipoArchivo) => TIPO_A_CATEGORIA[String(tipoArchivo || "").toLowerCase()] || "otros";
+
+  const derivadosPorOrigen = new Map();
+  for (const d of archivosDerivadosRows) {
+    if (!d.source_bitacora_id) continue;
+    if (!derivadosPorOrigen.has(d.source_bitacora_id)) derivadosPorOrigen.set(d.source_bitacora_id, []);
+    derivadosPorOrigen.get(d.source_bitacora_id).push({
+      tipo: d.derived_type,
+      nombre: d.derived_file_name,
+      generadoPor: d.generated_by,
+    });
+  }
+
+  await fsp.mkdir(path.join(PAQUETE_DIR, "archivos", "originales"), { recursive: true });
+
+  const bitacoraIds = new Set();
+  const bitacoraItems = [];
+  for (const b of bitacoraArchivosRows) {
+    if (bitacoraIds.has(b.bitacora_id)) err(`bitacora_id duplicado: ${b.bitacora_id}`);
+    bitacoraIds.add(b.bitacora_id);
+
+    const territorio = b.canton_id ? territorioByCantonId.get(b.canton_id) : null;
+    const categoria = categoriaDe(b.tipo_archivo);
+
+    // Si este original es una actividad de ruta (FIT/GPX/TCX), resolver su
+    // GeoJSON via 06_RUTAS (misma logica y mismo archivo de destino que usa
+    // el bloque de carreras.json, para no duplicar la copia).
+    let rutaGeojsonRelPath = null;
+    if (categoria === "rutas") {
+      const rutaAsociada = rutasRows.find((r) => r.source_route_bitacora_id === b.bitacora_id);
+      if (rutaAsociada && rutaAsociada.geojson_onedrive_path) {
+        const srcGeojsonReal = resolveRumboAsset(rutaAsociada.geojson_onedrive_path);
+        if (fs.existsSync(srcGeojsonReal)) {
+          const destName = `${rutaAsociada.route_id}.geojson`;
+          await fsp.copyFile(srcGeojsonReal, path.join(PAQUETE_DIR, "rutas", destName));
+          rutaGeojsonRelPath = `rutas/${destName}`;
+        }
+      }
+    }
+
+    let webPath = null;
+    if (b.ubicacion_bitacora) {
+      const srcReal = resolveRumboAsset(b.ubicacion_bitacora);
+      if (fs.existsSync(srcReal)) {
+        const destName = safeMediaName(b.bitacora_id, b.nombre_original);
+        await fsp.copyFile(srcReal, path.join(PAQUETE_DIR, "archivos", "originales", destName));
+        webPath = `archivos/originales/${destName}`;
+      } else {
+        warn(`Original de Bitacora no encontrado en disco, no se copia: ${b.bitacora_id} (${srcReal})`);
+      }
+    } else {
+      warn(`Bitacora ${b.bitacora_id} sin ubicacion_bitacora resuelta, no se copia`);
+    }
+
+    bitacoraItems.push({
+      id: b.bitacora_id,
+      jornadaId: b.jornada_id,
+      categoria,
+      tipoArchivo: b.tipo_archivo,
+      nombre: b.nombre_original,
+      titulo: b.titulo_publico || b.nombre_original,
+      descripcion: b.descripcion_publica || null,
+      fechaIngreso: b.fecha_hora_llegada || null,
+      fechaCaptura: b.fecha_hora_captura || null,
+      fechaPublica: b.fecha_publica || null,
+      provincia: territorio ? territorio.provincia : null,
+      canton: territorio ? territorio.canton_municipio : null,
+      lugar: b.lugar_publico || null,
+      rutaWeb: webPath,
+      rutaGeojson: rutaGeojsonRelPath,
+      duracionSegundos: toNumberOrNull(b.duracion_segundos),
+      anchoPixeles: toNumberOrNull(b.ancho_pixeles),
+      altoPixeles: toNumberOrNull(b.alto_pixeles),
+      hash: b.hash_copia_sha256 || null,
+      origen: b.fuente || null,
+      tipoOrigen: b.tipo_origen || null,
+      estadoIngesta: b.estado_ingesta || null,
+      publicStatus: b.public_status || null,
+      derivados: derivadosPorOrigen.get(b.bitacora_id) || [],
+    });
+  }
+
+  const bitacoraPorCategoria = {};
+  for (const it of bitacoraItems) {
+    bitacoraPorCategoria[it.categoria] = (bitacoraPorCategoria[it.categoria] || 0) + 1;
+  }
+
+  const bitacora = { items: bitacoraItems };
 
   // --- manifest.json ---
   const manifest = {
@@ -492,6 +631,8 @@ async function generatePackage() {
       historias: historias.length,
       medios: medios.length,
       cantonesVisitados: resumen.cantonesVisitados,
+      bitacoraOriginales: bitacoraItems.length,
+      bitacoraPorCategoria,
     },
     advertencias: warnings,
     errores: errors,

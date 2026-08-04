@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import rumboLogo from "@/assets/rumbo-logo.png.asset.json";
+import rumboLogoUrl from "@/assets/rumbo-logo.png";
 
 const worlds = [
   { title: "CARRERAS", to: "/carreras" },
@@ -16,7 +16,7 @@ export function SiteHeader() {
     <nav className="fixed top-0 z-50 w-full border-b border-outline-variant bg-topbar px-6 py-5 md:px-16">
       <div className="relative mx-auto flex max-w-7xl items-center justify-between">
         <Link to="/" className="flex items-center" aria-label="rumbo">
-          <img src={rumboLogo.url} alt="rumbo" className="h-8 w-auto md:h-12" />
+          <img src={rumboLogoUrl} alt="rumbo" className="h-8 w-auto md:h-12" />
         </Link>
 
         <div className="pointer-events-none absolute inset-x-0 top-1/2 hidden -translate-y-1/2 justify-center lg:flex">

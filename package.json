@@ -12,7 +12,9 @@
     "format": "prettier --write .",
     "generar:paquete-web": "node scripts/sync-rumbo.mjs --generate",
     "sync:web": "node scripts/sync-rumbo.mjs --sync",
-    "sync:rumbo": "node scripts/sync-rumbo.mjs"
+    "sync:rumbo": "node scripts/sync-rumbo.mjs",
+    "preparar:redes": "node scripts/preparar-publicacion-redes.mjs",
+    "preparar:redes:validar": "node scripts/preparar-publicacion-redes.mjs --validar"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

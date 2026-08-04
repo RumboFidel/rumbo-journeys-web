@@ -4,58 +4,55 @@
 
 import type {
   AssetType,
-  Audio,
+  BitacoraCategoria,
+  BitacoraItemWeb,
   CantonWeb,
   CarreraWeb,
   ContentRelation,
   DestinationType,
-  GpxRoute,
   HistoriaWeb,
   Medal,
   MedioWeb,
-  NotebookDocument,
-  Photograph,
   Race,
   ResumenWeb,
   Story,
-  Video,
 } from "./types";
-import { PHOTOGRAPHS } from "./photographs";
-import { AUDIOS } from "./audios";
-import { VIDEOS } from "./videos";
-import { NOTEBOOKS_DOCUMENTS } from "./notebooks-documents";
-import { GPX_ROUTES } from "./gpx-routes";
 import { MEDALS } from "./medals";
 import { RACES, getRaceById } from "./races";
 import { STORIES, getStoryById } from "./stories";
 import { CONTENT_RELATIONS } from "./content-relations";
 import { getLocationById, locationLabel, LOCATIONS } from "./locations";
-import { CANTONES_WEB, CARRERAS_WEB, HISTORIAS_WEB, MEDIOS_WEB, RESUMEN_WEB } from "./rumbo-web";
+import { BITACORA_WEB, CANTONES_WEB, CARRERAS_WEB, HISTORIAS_WEB, MEDIOS_WEB, RESUMEN_WEB } from "./rumbo-web";
 
 const published = <T extends { status: string }>(rows: T[]) =>
   rows.filter((r) => r.status === "published");
 
+// Las rutas de archivo del paquete web (rutaWeb, rutaGeojson) vienen del
+// generador como relativas al paquete (ej. "archivos/imagenes/x.jpg"). El
+// paquete se sirve en /data/rumbo/, así que hay que anteponer ese prefijo
+// antes de usarlas como src/href/fetch en el navegador; de lo contrario el
+// navegador las resuelve relativas a la URL de la página actual y fallan.
+const RUMBO_WEB_BASE = "/data/rumbo/";
+function webAssetUrl<T extends string | null | undefined>(relPath: T): T {
+  if (!relPath) return relPath;
+  if (/^(https?:)?\//.test(relPath)) return relPath;
+  return (RUMBO_WEB_BASE + relPath) as T;
+}
+
 export const repo = {
-  photographs: {
-    all: (): Photograph[] => published(PHOTOGRAPHS),
-    bySlug: (slug: string) => PHOTOGRAPHS.find((p) => p.slug === slug && p.status === "published"),
-  },
-  audios: {
-    all: (): Audio[] => published(AUDIOS),
-    bySlug: (slug: string) => AUDIOS.find((a) => a.slug === slug && a.status === "published"),
-  },
-  videos: {
-    all: (): Video[] => published(VIDEOS),
-    bySlug: (slug: string) => VIDEOS.find((v) => v.slug === slug && v.status === "published"),
-  },
-  notebooksDocuments: {
-    all: (): NotebookDocument[] => published(NOTEBOOKS_DOCUMENTS),
-    bySlug: (slug: string) =>
-      NOTEBOOKS_DOCUMENTS.find((n) => n.slug === slug && n.status === "published"),
-  },
-  gpxRoutes: {
-    all: (): GpxRoute[] => published(GPX_ROUTES),
-    bySlug: (slug: string) => GPX_ROUTES.find((g) => g.slug === slug && g.status === "published"),
+  // Bitacora privada: fuente de verdad = 17_BITACORA_ARCHIVOS (via bitacora.json).
+  // Incluye TODO original de Fidel, sin filtro editorial. "id" hace de slug
+  // (17_BITACORA_ARCHIVOS no tiene un campo de slug propio).
+  bitacora: {
+    all: (): BitacoraItemWeb[] =>
+      BITACORA_WEB.map((b) => ({
+        ...b,
+        rutaWeb: webAssetUrl(b.rutaWeb),
+        rutaGeojson: webAssetUrl(b.rutaGeojson),
+      })),
+    byCategoria: (categoria: BitacoraCategoria): BitacoraItemWeb[] =>
+      repo.bitacora.all().filter((b) => b.categoria === categoria),
+    byId: (id: string) => repo.bitacora.all().find((b) => b.id === id),
   },
   medals: {
     all: (): Medal[] => published(MEDALS),
@@ -86,8 +83,11 @@ export const repo = {
   // Capa unica de datos generada desde el Excel maestro (ver rumbo-web.ts).
   // Home, Carreras, Historias y el mapa deben consumir unicamente esto.
   carreras: {
-    all: (): CarreraWeb[] => CARRERAS_WEB,
-    bySlug: (slug: string) => CARRERAS_WEB.find((c) => c.slug === slug),
+    all: (): CarreraWeb[] => CARRERAS_WEB.map((c) => ({ ...c, rutaGeojson: webAssetUrl(c.rutaGeojson) })),
+    bySlug: (slug: string) => {
+      const c = CARRERAS_WEB.find((c) => c.slug === slug);
+      return c ? { ...c, rutaGeojson: webAssetUrl(c.rutaGeojson) } : undefined;
+    },
   },
   historias: {
     // historias.json ya viene filtrado por sync-rumbo.mjs a solo
@@ -103,19 +103,25 @@ export const repo = {
     get: (): ResumenWeb => RESUMEN_WEB,
   },
   medios: {
-    all: (): MedioWeb[] => MEDIOS_WEB,
-    byId: (id?: string | null) => (id ? MEDIOS_WEB.find((m) => m.mediaId === id) : undefined),
+    all: (): MedioWeb[] => MEDIOS_WEB.map((m) => ({ ...m, rutaWeb: webAssetUrl(m.rutaWeb) })),
+    byId: (id?: string | null) => {
+      const m = id ? MEDIOS_WEB.find((m) => m.mediaId === id) : undefined;
+      return m ? { ...m, rutaWeb: webAssetUrl(m.rutaWeb) } : undefined;
+    },
   },
 };
 
-// Contadores automáticos de tarjetas de Bitácora.
+// Contadores automáticos de tarjetas de Bitácora, calculados desde
+// bitacora.json (17_BITACORA_ARCHIVOS). Nunca hardcodeados.
 export function bitacoraCounts() {
+  const all = repo.bitacora.all();
+  const count = (cat: BitacoraCategoria) => all.filter((b) => b.categoria === cat).length;
   return {
-    photographs: repo.photographs.all().length,
-    notebooksDocuments: repo.notebooksDocuments.all().length,
-    audios: repo.audios.all().length,
-    videos: repo.videos.all().length,
-    gpxRoutes: repo.gpxRoutes.all().length,
+    fotografias: count("fotografias"),
+    documentos: count("documentos"),
+    audios: count("audios"),
+    videos: count("videos"),
+    rutas: count("rutas"),
     medals: repo.medals.all().length,
   };
 }

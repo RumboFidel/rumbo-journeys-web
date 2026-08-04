@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { repo } from "@/data/repository";
 import { formatDuration } from "@/components/bitacora-shell";
+import { RutaMap } from "@/components/ruta-map";
 import type { CantonWeb, CarreraWeb } from "@/data/types";
 
 export const Route = createFileRoute("/carreras")({
@@ -220,24 +221,8 @@ function CarreraCard({ carrera, canton }: { carrera: CarreraWeb; canton: CantonW
           RECORRIDO
         </h3>
         {carrera.rutaGeojson ? (
-          <div
-            role="region"
-            aria-label="Área reservada para el visor del recorrido"
-            className="relative flex aspect-[16/10] w-full items-center justify-center overflow-hidden border-2 border-dashed border-primary/60 bg-background"
-          >
-            <div className="pointer-events-none absolute inset-0 [background:repeating-linear-gradient(45deg,transparent_0_12px,rgba(212,163,77,0.06)_12px_24px)]" />
-            <div className="pointer-events-none absolute inset-0 [background:linear-gradient(rgba(212,163,77,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(212,163,77,0.08)_1px,transparent_1px)] [background-size:40px_40px]" />
-            <div className="relative z-10 max-w-md px-6 text-center">
-              <span className="text-label-caps mb-3 block text-[10px] tracking-[0.4em] text-primary">
-                ESPACIO RESERVADO · IFRAME
-              </span>
-              <p className="font-display text-lg font-bold text-on-surface md:text-2xl">
-                Aquí se integrará el visor del recorrido
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-on-surface/60">
-                GeoJSON disponible para {canton.canton}.
-              </p>
-            </div>
+          <div className="relative aspect-[16/10] w-full overflow-hidden border border-outline-variant bg-surface-container-lowest">
+            <RutaMap geojsonUrl={carrera.rutaGeojson} />
           </div>
         ) : (
           <div className="flex aspect-[16/10] w-full items-center justify-center border border-dashed border-outline-variant bg-background text-sm text-on-surface/50">
@@ -267,21 +252,17 @@ function CarreraCard({ carrera, canton }: { carrera: CarreraWeb; canton: CantonW
         )}
       </section>
 
-      {/* Video */}
-      <section className="mt-8">
-        <h3 className="text-label-caps mb-3 text-[10px] font-bold tracking-[0.4em] text-primary">
-          VIDEO TESTIMONIAL
-        </h3>
-        {video?.rutaWeb ? (
+      {/* Video: la sección completa se oculta si no hay video asociado */}
+      {video?.rutaWeb && (
+        <section className="mt-8">
+          <h3 className="text-label-caps mb-3 text-[10px] font-bold tracking-[0.4em] text-primary">
+            VIDEO DE LA CARRERA
+          </h3>
           <div className="aspect-video w-full overflow-hidden border border-outline-variant bg-black">
             <video src={video.rutaWeb} controls className="h-full w-full" />
           </div>
-        ) : (
-          <div className="flex aspect-video w-full items-center justify-center border border-dashed border-outline-variant bg-background text-sm text-on-surface/50">
-            Video testimonial próximamente
-          </div>
-        )}
-      </section>
+        </section>
+      )}
 
       {/* Etiquetas */}
       <section className="mt-8">

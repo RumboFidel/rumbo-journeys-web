@@ -1,3 +1,59 @@
 {
-  "medios": []
+  "medios": [
+    {
+      "mediaId": "med-20260720-turi-01",
+      "tipo": "fotografia",
+      "titulo": "Panorámica de Cuenca desde Turi",
+      "descripcion": "Vista panorámica de Cuenca desde el Mirador de Turi.",
+      "rutaWeb": "archivos/imagenes/med-20260720-turi-01.jpg",
+      "credito": "Fotografía de terceros con licencia abierta (no capturada por Fidel).",
+      "fuente": "declarado_por_fidel",
+      "licencia": null,
+      "estado": "published"
+    },
+    {
+      "mediaId": "med-20260720-turi-02",
+      "tipo": "fotografia",
+      "titulo": "Entorno del Mirador de Turi",
+      "descripcion": "Entorno del Mirador de Turi.",
+      "rutaWeb": "archivos/imagenes/med-20260720-turi-02.jpg",
+      "credito": "Fotografía de terceros con licencia abierta (no capturada por Fidel).",
+      "fuente": "declarado_por_fidel",
+      "licencia": null,
+      "estado": "published"
+    },
+    {
+      "mediaId": "med-20260720-turi-03",
+      "tipo": "fotografia",
+      "titulo": "Recorrido hacia Turi",
+      "descripcion": "Recorrido hacia el Mirador de Turi.",
+      "rutaWeb": "archivos/imagenes/med-20260720-turi-03.jpg",
+      "credito": "Fotografía de terceros con licencia abierta (no capturada por Fidel).",
+      "fuente": "declarado_por_fidel",
+      "licencia": null,
+      "estado": "published"
+    },
+    {
+      "mediaId": "med-20260720-turi-04",
+      "tipo": "video",
+      "titulo": "Video de prueba del Mirador de Turi",
+      "descripcion": "Video de prueba compuesto con fotografías del Mirador de Turi.",
+      "rutaWeb": "archivos/videos/med-20260720-turi-04.mp4",
+      "credito": "Composición de prueba a partir de fotografías (no es grabación de Fidel).",
+      "fuente": "declarado_por_fidel",
+      "licencia": null,
+      "estado": "published"
+    },
+    {
+      "mediaId": "med-20260720-turi-05",
+      "tipo": "audio",
+      "titulo": "Audio de prueba (voz sintética)",
+      "descripcion": "Audio de prueba con voz sintética leyendo un guion en español.",
+      "rutaWeb": "archivos/audios/med-20260720-turi-05.wav",
+      "credito": "Voz sintética de prueba en inglés leyendo un guion en español (no es la voz de Fidel).",
+      "fuente": "declarado_por_fidel",
+      "licencia": null,
+      "estado": "published"
+    }
+  ]
 }

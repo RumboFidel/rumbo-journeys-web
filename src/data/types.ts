@@ -177,6 +177,9 @@ export type CarreraWeb = {
   galeria: string[];
   rutaGeojson: string | null;
   estado: string | null;
+  pasos: number | null;
+  pasosFuente: string | null;
+  pasosConfianza: ConfidenceLevel;
 };
 
 export type HistoriaEstadoEditorial =
@@ -220,8 +223,49 @@ export type ResumenWeb = {
   metaKilometros: number;
   vo2max: number | null;
   recuperacion: number | null;
+  pasos: number | null;
   caloriasPromedio: number | null;
   ultimaActualizacion: string;
+};
+
+// Categoria de un archivo original de Bitacora, calculada desde tipo_archivo
+// en 17_BITACORA_ARCHIVOS.
+export type BitacoraCategoria = "fotografias" | "documentos" | "audios" | "videos" | "rutas" | "otros";
+
+export type BitacoraDerivado = {
+  tipo: string | null;
+  nombre: string | null;
+  generadoPor: string | null;
+};
+
+// Un archivo ORIGINAL de Bitacora (17_BITACORA_ARCHIVOS), sin ningun filtro
+// editorial. Esta es la fuente de verdad de la Bitacora privada: todo lo que
+// Fidel carga aparece aqui de inmediato, apruebe o no una Carrera/Historia.
+export type BitacoraItemWeb = {
+  id: string;
+  jornadaId: string | null;
+  categoria: BitacoraCategoria;
+  tipoArchivo: string | null;
+  nombre: string | null;
+  titulo: string | null;
+  descripcion: string | null;
+  fechaIngreso: string | null;
+  fechaCaptura: string | null;
+  fechaPublica: string | null;
+  provincia: string | null;
+  canton: string | null;
+  lugar: string | null;
+  rutaWeb: string | null;
+  rutaGeojson: string | null;
+  duracionSegundos: number | null;
+  anchoPixeles: number | null;
+  altoPixeles: number | null;
+  hash: string | null;
+  origen: string | null;
+  tipoOrigen: string | null;
+  estadoIngesta: string | null;
+  publicStatus: string | null;
+  derivados: BitacoraDerivado[];
 };
 
 export type MedioWeb = {

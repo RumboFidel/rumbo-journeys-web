@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import heroAsset from "@/assets/hero-andes.jpg.asset.json";
-import rumboLogo from "@/assets/rumbo-logo.png.asset.json";
+import heroUrl from "@/assets/hero-andes.jpg";
+import rumboLogoUrl from "@/assets/rumbo-logo.png";
 import compass from "@/assets/compass.png";
 import { MunicipiosMap } from "@/components/municipios-map";
 import { SiteHeader } from "@/components/site-header";
@@ -79,7 +79,7 @@ function Home() {
         <div className="absolute inset-0 z-0">
           <img
             alt="Cordillera de los Andes ecuatorianos al amanecer"
-            src={heroAsset.url}
+            src={heroUrl}
             className="h-full w-full object-cover saturate-[0.8] brightness-[0.4]"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background" />
@@ -88,7 +88,7 @@ function Home() {
         <div className="relative z-10 mx-auto max-w-4xl px-6 py-6 text-center md:px-16">
           <div className="mt-12 mb-1">
             <img
-              src={rumboLogo.url}
+              src={rumboLogoUrl}
               alt="rumbo"
               className="mx-auto h-48 w-auto max-w-full drop-shadow-[0_4px_30px_rgba(0,0,0,0.6)] md:h-64"
             />
@@ -158,6 +158,18 @@ function Home() {
           <div>0°15′ 78°35′ S</div>
           <div>ALT 2850 M</div>
         </div>
+
+        {/* Crédito fotográfico (CC BY-SA 3.0) */}
+        <div className="absolute bottom-8 right-6 font-mono text-[10px] text-on-surface/30 md:right-16">
+          <a
+            href="https://commons.wikimedia.org/wiki/File:Cotopaxi_al_amanecer_-_Ecuador_-_panoramio.jpg"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-on-surface/60"
+          >
+            Foto: diego_cue / Wikimedia Commons (CC BY-SA 3.0)
+          </a>
+        </div>
       </header>
 
       {/* ¿Cómo vamos? */}
@@ -219,10 +231,18 @@ function Home() {
                 </div>
               </div>
               <div>
-                <div className="text-label-caps mb-3 text-[10px] tracking-[0.4em] text-on-surface/50">RECUPERACIÓN</div>
+                <div className="text-label-caps mb-3 text-[10px] tracking-[0.4em] text-on-surface/50">PASOS</div>
                 <div className="flex items-baseline gap-2">
-                  <span className="font-display text-4xl font-extrabold text-on-surface md:text-5xl">{resumen.recuperacion ?? "—"}</span>
-                  {resumen.recuperacion != null && <span className="text-sm text-on-surface/50">%</span>}
+                  {resumen.pasos != null ? (
+                    <>
+                      <span className="font-display text-4xl font-extrabold text-on-surface md:text-5xl">
+                        {resumen.pasos.toLocaleString("es-EC")}
+                      </span>
+                      <span className="text-sm text-on-surface/50">pasos</span>
+                    </>
+                  ) : (
+                    <span className="font-display text-xl font-semibold text-on-surface/40 md:text-2xl">No disponible</span>
+                  )}
                 </div>
               </div>
               <div>
@@ -462,7 +482,7 @@ function Home() {
                 AVENTURA · 2026
               </span>
               <img
-                src={rumboLogo.url}
+                src={rumboLogoUrl}
                 alt="rumbo"
                 className="mb-6 h-8 w-auto md:h-12"
               />

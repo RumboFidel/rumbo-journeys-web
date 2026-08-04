@@ -102,7 +102,7 @@ const MESES_ES = [
   "JUL", "AGO", "SEP", "OCT", "NOV", "DIC",
 ];
 
-export function formatDate(iso?: string): string {
+export function formatDate(iso?: string | null): string {
   if (!iso) return "";
   // Parse YYYY-MM-DD sin zona horaria para evitar hydration mismatch SSR/cliente.
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);

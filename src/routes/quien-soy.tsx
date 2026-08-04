@@ -1,11 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import heroAndes from "@/assets/hero-andes.jpg.asset.json";
-import storyCotopaxi from "@/assets/story-cotopaxi.jpg.asset.json";
-import storySabiduria from "@/assets/story-sabiduria.jpg.asset.json";
-import raceQuito from "@/assets/race-quito.jpg.asset.json";
-import raceCuenca from "@/assets/race-cuenca.jpg.asset.json";
+import { ArrowLeft, ArrowRight, ImageOff } from "lucide-react";
+import heroUrl from "@/assets/hero-andes.jpg";
+
+function PlaceholderImage({ label, className = "" }: { label: string; className?: string }) {
+  return (
+    <div
+      className={`flex h-full w-full flex-col items-center justify-center gap-2 border border-dashed border-outline-variant bg-surface-container-lowest text-center ${className}`}
+    >
+      <ImageOff className="h-6 w-6 text-on-surface/30" aria-hidden />
+      <span className="text-label-caps px-4 text-[9px] tracking-[0.2em] text-on-surface/40">{label}</span>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/quien-soy")({
   head: () => ({
@@ -77,7 +84,7 @@ const MOMENTOS: Momento[] = [
   },
 ];
 
-type Objeto = { name: string; year?: string; place?: string; note: string; image: string };
+type Objeto = { name: string; year?: string; place?: string; note: string };
 
 const OBJETOS: Objeto[] = [
   {
@@ -85,40 +92,34 @@ const OBJETOS: Objeto[] = [
     year: "2019",
     place: "Londres",
     note: "La última de las seis estrellas. Llegó junto con la pregunta que abriría todo lo demás.",
-    image: raceQuito.url,
   },
   {
     name: "Dorsal Boston",
     year: "2016",
     place: "Boston, EE. UU.",
     note: "Lluvia y frío. El primer Major. Todavía la guardo doblada en un cajón.",
-    image: raceCuenca.url,
   },
   {
     name: "Zapatillas de Berlín",
     year: "2017",
     place: "Berlín, Alemania",
     note: "Récord personal. Las suelas todavía cuentan los kilómetros como testigos.",
-    image: storyCotopaxi.url,
   },
   {
     name: "Cuaderno de rutas",
     year: "2020 — 2024",
     note: "Anotaciones de recuperación, mapas dibujados a mano, listas de lugares que quería visitar cuando volviera a caminar bien.",
-    image: storySabiduria.url,
   },
   {
     name: "Camiseta trail andino",
     year: "2024",
     place: "Andes ecuatorianos",
     note: "La que usé el día que entendí que iba a recorrer el país entero.",
-    image: heroAndes.url,
   },
   {
     name: "Mapa de trabajo",
     year: "2025",
     note: "Ecuador continental impreso en A0. Círculos, tachones, nombres de municipios. El primer objeto de RUMBO.",
-    image: raceQuito.url,
   },
 ];
 
@@ -190,13 +191,7 @@ function QuienSoyPage() {
 
             <div className="md:col-span-6">
               <div className="relative aspect-[4/5] w-full overflow-hidden">
-                <img
-                  src={storySabiduria.url}
-                  alt="Retrato humano de Fidel antes de la expedición"
-                  className="h-full w-full object-cover"
-                  loading="eager"
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+                <PlaceholderImage label="RETRATO PENDIENTE" />
               </div>
               <p className="text-label-caps mt-4 text-topbar-muted">
                 RETRATO · ANTES DEL KM 0
@@ -297,12 +292,7 @@ function QuienSoyPage() {
               {OBJETOS.map((o) => (
                 <article key={o.name} className="group">
                   <div className="relative aspect-[4/5] w-full overflow-hidden bg-surface-container-low">
-                    <img
-                      src={o.image}
-                      alt={o.name}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
+                    <PlaceholderImage label="FOTO PENDIENTE" />
                   </div>
                   <div className="mt-4 flex items-center justify-between">
                     <h3 className="font-display text-lg text-on-surface">{o.name}</h3>
@@ -359,7 +349,7 @@ function QuienSoyPage() {
           <div className="relative">
             <div className="absolute inset-0">
               <img
-                src={heroAndes.url}
+                src={heroUrl}
                 alt="Territorio andino de Ecuador"
                 className="h-full w-full object-cover opacity-25"
               />
@@ -436,8 +426,8 @@ function QuienSoyPage() {
         <section className="relative border-t border-outline-variant">
           <div className="absolute inset-0">
             <img
-              src={storyCotopaxi.url}
-              alt="Fidel frente al territorio"
+              src={heroUrl}
+              alt="Territorio andino de Ecuador"
               className="h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/30" />

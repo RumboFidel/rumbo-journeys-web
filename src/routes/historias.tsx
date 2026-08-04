@@ -4,7 +4,6 @@ import { SiteHeader } from "@/components/site-header";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { Toaster, toast } from "sonner";
 import { repo } from "@/data/repository";
 import type { HistoriaWeb } from "@/data/types";
 
@@ -37,30 +36,6 @@ function formatDate(d: string | null) {
   return `${day} de ${MESES_LARGO_ES[idx]} de ${y}`;
 }
 
-function buildShareUrl(slug: string) {
-  if (typeof window === "undefined") return `/historias#${slug}`;
-  return `${window.location.origin}/historias#${slug}`;
-}
-
-function shareFacebook(h: HistoriaWeb) {
-  const url = encodeURIComponent(buildShareUrl(h.slug));
-  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank", "noopener,noreferrer");
-}
-
-function shareWhatsApp(h: HistoriaWeb) {
-  const text = encodeURIComponent(`${h.titulo} — ${buildShareUrl(h.slug)}`);
-  window.open(`https://wa.me/?text=${text}`, "_blank", "noopener,noreferrer");
-}
-
-async function shareInstagram(h: HistoriaWeb) {
-  try {
-    await navigator.clipboard.writeText(buildShareUrl(h.slug));
-    toast("Enlace copiado. Pégalo en una historia o publicación de Instagram.");
-  } catch {
-    toast("No se pudo copiar el enlace.");
-  }
-}
-
 function HistoriasPage() {
   const [query, setQuery] = useState("");
   const all = repo.historias.all();
@@ -81,7 +56,6 @@ function HistoriasPage() {
   return (
     <div className="min-h-screen bg-background text-on-surface">
       <SiteHeader />
-      <Toaster position="bottom-center" />
 
       <main className="pt-24">
         <section className="mx-auto max-w-6xl px-6 py-12 md:px-16 md:py-20">
@@ -212,15 +186,18 @@ function HistoriaCard({ h }: { h: HistoriaWeb }) {
       </article>
 
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-outline-variant bg-surface-container p-0">
-        <div className="relative aspect-video w-full overflow-hidden bg-surface-container-lowest">
-          {imagen ? (
+        {/* Slot unico de medio principal: video si existe, si no la imagen. Nunca ambos a la vez. */}
+        <div className="relative aspect-video w-full overflow-hidden bg-black">
+          {video?.rutaWeb ? (
+            <video src={video.rutaWeb} controls className="h-full w-full" />
+          ) : imagen ? (
             <img src={imagen} alt={h.titulo} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-xs text-on-surface/40">
               Sin imagen todavía
             </div>
           )}
-          {h.tipo && (
+          {h.tipo && !video?.rutaWeb && (
             <span className="text-label-caps absolute left-3 top-3 rounded-sm bg-background/85 px-2 py-1 text-[9px] tracking-[0.3em] text-primary">
               {h.tipo.toUpperCase()}
             </span>
@@ -235,12 +212,6 @@ function HistoriaCard({ h }: { h: HistoriaWeb }) {
               {h.titulo}
             </DialogTitle>
           </DialogHeader>
-
-          {video?.rutaWeb && (
-            <div className="mt-6 aspect-video w-full border border-outline-variant bg-black">
-              <video src={video.rutaWeb} controls className="h-full w-full" />
-            </div>
-          )}
 
           {h.fraseDestacada && (
             <blockquote className="font-serif mt-6 border-l-2 border-primary/60 pl-4 text-lg italic leading-relaxed text-on-surface/90">
@@ -258,30 +229,6 @@ function HistoriaCard({ h }: { h: HistoriaWeb }) {
             ) : (
               <p className="text-sm text-on-surface/50">Todavía no hay texto completo para esta Historia.</p>
             )}
-          </div>
-
-          <div className="mt-8 flex flex-wrap gap-2 border-t border-outline-variant pt-6">
-            <button
-              type="button"
-              onClick={() => shareFacebook(h)}
-              className="text-label-caps border border-outline-variant px-4 py-2 text-[10px] tracking-[0.2em] text-on-surface transition hover:border-primary/60 hover:text-primary"
-            >
-              Compartir en Facebook
-            </button>
-            <button
-              type="button"
-              onClick={() => shareWhatsApp(h)}
-              className="text-label-caps border border-outline-variant px-4 py-2 text-[10px] tracking-[0.2em] text-on-surface transition hover:border-primary/60 hover:text-primary"
-            >
-              Compartir en WhatsApp
-            </button>
-            <button
-              type="button"
-              onClick={() => shareInstagram(h)}
-              className="text-label-caps border border-outline-variant px-4 py-2 text-[10px] tracking-[0.2em] text-on-surface transition hover:border-primary/60 hover:text-primary"
-            >
-              Copiar para Instagram
-            </button>
           </div>
         </div>
       </DialogContent>

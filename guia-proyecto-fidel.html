@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proyecto Fidel Ecuador — Guía de ruta, clase y decisiones</title>
+<style>
+  :root{
+    --verde:#1f7a4d; --verde2:#2fa06a; --tierra:#b5651d; --cielo:#2c6e9b;
+    --tinta:#1d2733; --gris:#5b6570; --papel:#fbfaf6; --card:#ffffff;
+    --linea:#e6e2d6; --amarillo:#fff3cd; --amarilloB:#ffe08a;
+    --sombra:0 1px 3px rgba(0,0,0,.08),0 6px 18px rgba(0,0,0,.05);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--tinta);background:var(--papel);line-height:1.6;font-size:16px;
+  }
+  header.hero{
+    background:linear-gradient(135deg,var(--verde),var(--cielo));color:#fff;
+    padding:38px 24px 30px;box-shadow:var(--sombra);
+  }
+  header.hero .wrap{max-width:980px;margin:0 auto}
+  header.hero h1{margin:0 0 6px;font-size:30px;line-height:1.2}
+  header.hero p{margin:4px 0;opacity:.95}
+  .badge{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+    padding:3px 10px;border-radius:999px;font-size:12px;margin:8px 6px 0 0}
+  .layout{max-width:980px;margin:0 auto;padding:0 20px}
+  nav.toc{
+    position:sticky;top:0;z-index:20;background:rgba(251,250,246,.95);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--linea);padding:10px 20px;
+  }
+  nav.toc .wrap{max-width:980px;margin:0 auto;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  nav.toc a{font-size:13px;color:var(--verde);text-decoration:none;padding:5px 10px;border-radius:8px;
+    border:1px solid transparent}
+  nav.toc a:hover{background:#eef6f0;border-color:var(--linea)}
+  main{max-width:980px;margin:0 auto;padding:26px 20px 80px}
+  section{background:var(--card);border:1px solid var(--linea);border-radius:14px;padding:24px 26px;
+    margin:22px 0;box-shadow:var(--sombra)}
+  h2{color:var(--verde);border-bottom:2px solid #e9f3ec;padding-bottom:8px;margin-top:6px;font-size:24px}
+  h3{color:var(--cielo);margin-top:26px;font-size:19px}
+  h4{color:var(--tierra);margin-top:20px;margin-bottom:6px;font-size:16px}
+  p{margin:10px 0}
+  ul,ol{margin:10px 0 10px 4px;padding-left:22px}
+  li{margin:5px 0}
+  code{background:#f0efe8;padding:1px 6px;border-radius:5px;font-family:Consolas,Monaco,monospace;font-size:13.5px}
+  pre{background:#1d2733;color:#e8eef2;padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:13px;line-height:1.5}
+  pre code{background:none;color:inherit;padding:0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14.5px}
+  th,td{border:1px solid var(--linea);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:#eef6f0;color:var(--verde)}
+  tr:nth-child(even) td{background:#faf9f4}
+  .callout{border-left:4px solid var(--verde2);background:#f0f8f3;padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+  .callout.warn{border-color:var(--tierra);background:#fdf3e9}
+  .callout.tip{border-color:var(--cielo);background:#eef5fa}
+  .callout .t{font-weight:700;display:block;margin-bottom:4px}
+  .pill{display:inline-block;font-size:12px;padding:2px 9px;border-radius:999px;background:#eef6f0;color:var(--verde);border:1px solid #cfe6d8;margin-right:6px}
+  .pill.pago{background:#fdf3e9;color:var(--tierra);border-color:#f0d5b8}
+  .pill.libre{background:#eef5fa;color:var(--cielo);border-color:#cfe0ee}
+  /* flujo */
+  .flow{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin:16px 0}
+  .flow .box{flex:1 1 150px;min-width:140px;background:#f7fbf8;border:1px solid #cfe6d8;border-radius:12px;padding:12px;text-align:center;font-size:14px}
+  .flow .box b{display:block;color:var(--verde);margin-bottom:4px}
+  .flow .arrow{align-self:center;color:var(--gris);font-size:22px;font-weight:700}
+  /* editable */
+  .editable{border:1px dashed #cdd6cf;border-radius:10px;padding:12px 14px;background:#fffef9;min-height:44px;outline:none}
+  .editable:focus{border-color:var(--verde2);background:#fff;box-shadow:0 0 0 3px rgba(47,160,106,.12)}
+  .edlabel{font-size:12px;color:var(--gris);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 4px;font-weight:700}
+  textarea.decision{width:100%;min-height:80px;border:1px solid var(--amarilloB);border-radius:10px;padding:11px 13px;
+    background:var(--amarillo);font-family:inherit;font-size:15px;color:var(--tinta);resize:vertical}
+  textarea.decision:focus{outline:none;box-shadow:0 0 0 3px rgba(255,224,138,.5)}
+  textarea.promptarea{width:100%;background:#f6f7f4;border:1px solid #c9d2cb;border-radius:10px;padding:12px 14px;
+    color:#1d2733;font-family:Consolas,Monaco,monospace;font-size:12.5px;min-height:220px;line-height:1.55;resize:vertical}
+  textarea.promptarea:focus{outline:none;box-shadow:0 0 0 3px rgba(47,160,106,.18);border-color:var(--verde2)}
+  .promptlabel{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--verde);margin:20px 0 5px;font-size:15px}
+  .promptlabel .n{background:var(--verde);color:#fff;border-radius:6px;padding:1px 8px;font-size:12px;flex:0 0 auto}
+  .promptlabel .extra{background:var(--tierra)}
+  .copyhint{font-size:12px;color:var(--gris);margin:2px 0 0}
+  .decision-card{border:1px solid var(--amarilloB);background:#fffdf5;border-radius:12px;padding:14px 16px;margin:12px 0}
+  .decision-card .q{font-weight:700;color:var(--tierra)}
+  .decision-card .opts{font-size:14px;color:var(--gris);margin:6px 0}
+  /* toolbar */
+  .toolbar{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:50}
+  .toolbar button{border:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer;
+    box-shadow:var(--sombra);color:#fff;background:var(--verde)}
+  .toolbar button.sec{background:var(--cielo)}
+  .toolbar button.alt{background:var(--tierra)}
+  .toolbar button.ghost{background:#fff;color:var(--tinta);border:1px solid var(--linea)}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(60px);background:var(--tinta);color:#fff;
+    padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;transition:.35s;z-index:60;pointer-events:none}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .num{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--verde);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:700;margin-right:8px}
+  .check li{list-style:none;position:relative;padding-left:6px}
+  .check li::before{content:"☐ ";color:var(--verde);font-weight:700}
+  details{border:1px solid var(--linea);border-radius:10px;padding:6px 14px;margin:10px 0;background:#fcfbf6}
+  details summary{cursor:pointer;font-weight:600;color:var(--cielo);padding:6px 0}
+  .small{font-size:13px;color:var(--gris)}
+  a.link{color:var(--cielo)}
+  hr{border:none;border-top:1px solid var(--linea);margin:24px 0}
+  /* ===== ESQUEMA GRÁFICO DE CONEXIONES ===== */
+  .esquema{margin:20px 0}
+  .etapa{display:flex;gap:14px;align-items:stretch;margin:0}
+  .etapa .numcol{display:flex;flex-direction:column;align-items:center;flex:0 0 46px}
+  .etapa .numcol .circ{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-weight:800;color:#fff;font-size:18px;box-shadow:var(--sombra);z-index:2}
+  .etapa .numcol .conector{flex:1;width:4px;background:linear-gradient(#cfe6d8,#cfe6d8);margin:2px 0;border-radius:4px;min-height:14px}
+  .etapa:last-child .numcol .conector{background:transparent}
+  .etapa .cuerpo{flex:1;padding-bottom:18px}
+  .etapa h4.et-title{margin:6px 0 10px;color:var(--tinta);font-size:17px;display:flex;align-items:center;gap:8px}
+  .cards{display:flex;flex-wrap:wrap;gap:12px}
+  .nodo{flex:1 1 200px;min-width:180px;background:#fff;border:2px solid var(--linea);border-radius:14px;padding:14px;
+    box-shadow:var(--sombra);position:relative;transition:.2s}
+  .nodo:hover{transform:translateY(-2px)}
+  .nodo .ico{font-size:30px;line-height:1;display:block;margin-bottom:6px}
+  .nodo .nb{font-weight:700;display:block;margin-bottom:3px;font-size:15px}
+  .nodo .nd{font-size:13px;color:var(--gris);line-height:1.45}
+  .nodo .tag{position:absolute;top:-10px;right:10px;font-size:11px;padding:2px 8px;border-radius:999px;color:#fff;font-weight:700}
+  .nodo.garmin{border-color:#0aa}.nodo.garmin .tag{background:#0aa}
+  .nodo.app{border-color:var(--verde2)}.nodo.app .tag{background:var(--verde2)}
+  .nodo.drive{border-color:#f4b400}.nodo.drive .tag{background:#f4b400}
+  .nodo.ia{border-color:#8a5cf6}.nodo.ia .tag{background:#8a5cf6}
+  .nodo.web{border-color:var(--cielo)}.nodo.web .tag{background:var(--cielo)}
+  .nodo.redes{border-color:#e1306c}.nodo.redes .tag{background:#e1306c}
+  .nodo.sync{border-color:#475569}.nodo.sync .tag{background:#475569}
+  .baja{text-align:center;color:var(--verde2);font-size:26px;font-weight:800;margin:-4px 0 6px;line-height:1}
+  .et1 .circ{background:#0aa}.et2 .circ{background:#f4b400;color:#5a4500}
+  .et3 .circ{background:#8a5cf6}.et4 .circ{background:#475569}.et5 .circ{background:var(--cielo)}.et6 .circ{background:#e1306c}
+  .leyenda{display:flex;flex-wrap:wrap;gap:14px;margin:16px 0 4px;font-size:13px}
+  .leyenda span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+  .mundos-mini{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+  .mundo-chip{flex:1 1 130px;min-width:120px;text-align:center;padding:10px;border-radius:12px;border:2px dashed #cfe0ee;background:#f4f9fc;font-size:13px}
+  .mundo-chip b{display:block;font-size:15px;color:var(--cielo)}
+  @media(max-width:640px){.nodo{flex-basis:100%}}
+  @media print{
+    .toolbar,nav.toc,#toast{display:none}
+    section{box-shadow:none;break-inside:avoid;border-color:#ccc}
+    header.hero{background:var(--verde)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{background:#fff}
+    .nodo,.etapa .numcol .circ{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>🏃‍♂️ Proyecto Fidel Ecuador — Guía maestra</h1>
+    <p>Hoja de ruta de herramientas · Guía de clase para Fidel · Decisiones por definir</p>
+    <p class="small" style="color:#eaf5ef">Profesores: Martín y Carolina · Para: el proceso con Fidel · Recorrido ~2.200 km por Ecuador</p>
+    <div>
+      <span class="badge">✏️ Editable</span>
+      <span class="badge">💾 Se guarda solo (autosave)</span>
+      <span class="badge">📤 Exportar / Importar</span>
+      <span class="badge">🖨️ Imprimir a PDF</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#como-usar">Cómo usar</a>
+    <a href="#vision">Visión general</a>
+    <a href="#cap1">1 · Hoja de ruta</a>
+    <a href="#sync">↳ Rutinas / GitHub</a>
+    <a href="#agente">↳ Agente IA diario</a>
+    <a href="#garmin">↳ Garmin</a>
+    <a href="#rutina">↳ Rutina diaria</a>
+    <a href="#redes">↳ Redes</a>
+    <a href="#cap2">2 · Primera versión Lovable</a>
+    <a href="#forms">↳ Google Forms</a>
+    <a href="#prompts">↳ Prompts por mundo</a>
+    <a href="#diario">↳ Prompt diario</a>
+    <a href="#cap3app">3 · Clase app + visor</a>
+    <a href="#cap4">4 · Decisiones</a>
+    <a href="#bloc">Bloc de Fidel</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============ CÓMO USAR ============ -->
+<section id="como-usar">
+  <h2>📌 Cómo usar este documento</h2>
+  <p>Este archivo es tu <b>cuaderno de trabajo</b>. Todo lo que tenga fondo amarillo o borde punteado <b>lo puedes escribir y editar</b> directamente aquí, y se guarda solo en tu navegador.</p>
+  <ul>
+    <li><b>Editar:</b> haz clic sobre cualquier bloque <span class="pill libre">punteado</span> o <span class="pill" style="background:var(--amarillo);border-color:var(--amarilloB);color:var(--tierra)">amarillo</span> y escribe.</li>
+    <li><b>Guardar:</b> se guarda automáticamente. También tienes el botón <b>💾 Guardar</b> abajo a la derecha.</li>
+    <li><b>Llevarlo a otro computador / respaldar:</b> botón <b>📤 Exportar</b> (descarga un archivo <code>.json</code>) y <b>📥 Importar</b> para recuperarlo.</li>
+    <li><b>Convertir a PDF para Fidel:</b> botón <b>🖨️ PDF</b> → "Guardar como PDF".</li>
+  </ul>
+  <div class="callout warn"><span class="t">⚠️ Importante</span>El guardado vive en <b>este navegador y este computador</b>. Si vas a formatear o cambiar de PC, primero <b>Exporta</b> el <code>.json</code>. Guárdalo también en Drive por si acaso.</div>
+</section>
+
+<!-- ============ VISIÓN GENERAL ============ -->
+<section id="vision">
+  <h2>🗺️ Visión general — el proyecto en una sola imagen</h2>
+  <p>La idea es una <b>app madre en Lovable</b> con cuatro mundos. Cada mundo se alimenta de datos que Fidel captura en el camino, casi todo de forma automática, y una IA le ayuda a redactar.</p>
+
+  <h3>Los cuatro mundos</h3>
+  <table>
+    <tr><th>Mundo</th><th>Qué contiene</th><th>De dónde salen los datos</th></tr>
+    <tr><td>🏅 <b>Carreras</b></td><td>El visor + las últimas 3 carreras (con "ver más"). Cada carrera: nombre, municipio, métricas (km, VO₂ máx, fatiga, calorías, notas), video, fotos y un texto redactado con ayuda de IA.</td><td>Reloj <b>Garmin</b> (métricas) + app Android <b>FidelApp</b> (fotos, audio, notas, GPS) + IA (texto)</td></tr>
+    <tr><td>📖 <b>Historias</b></td><td>Relatos tipo blog: texto + video + fotos + notas. Más libre y narrativo que Carreras.</td><td>Notas de Fidel + Bitácora + IA</td></tr>
+    <tr><td>🗃️ <b>Bitácora</b></td><td>El repositorio/memoria completo: todas las fotos, videos y notas usadas en Carreras e Historias. Es la "bibliografía" del libro.</td><td>Todo lo que entra por Drive</td></tr>
+    <tr><td>🙋 <b>Quién soy</b></td><td>Trayectoria personal, profesional y deportiva. El "por qué". Fotos de carreras pasadas, medallas (Six Majors), camisetas, artículos.</td><td>Contenido fijo que arma Fidel una vez (y actualiza poco)</td></tr>
+  </table>
+
+  <h3>El flujo completo — esquema de conexiones 🔌</h3>
+  <p class="small">Sigue los números de arriba hacia abajo. Cada color es un tipo de herramienta. Todo pasa por el centro amarillo: <b>Google Drive</b>.</p>
+
+  <div class="leyenda">
+    <span><i class="dot" style="background:#0aa"></i> Reloj / captura</span>
+    <span><i class="dot" style="background:var(--verde2)"></i> App Android</span>
+    <span><i class="dot" style="background:#f4b400"></i> Google Drive (centro)</span>
+    <span><i class="dot" style="background:#8a5cf6"></i> Inteligencia Artificial</span>
+    <span><i class="dot" style="background:#475569"></i> GitHub (rutina + publicación)</span>
+    <span><i class="dot" style="background:var(--cielo)"></i> Web (4 mundos)</span>
+    <span><i class="dot" style="background:#e1306c"></i> Redes sociales</span>
+  </div>
+
+  <div class="esquema">
+
+    <!-- ETAPA 1 -->
+    <div class="etapa et1">
+      <div class="numcol"><div class="circ">1</div><div class="conector"></div></div>
+      <div class="cuerpo">
+        <h4 class="et-title">📡 CAPTURA — Fidel corre y registra en el municipio</h4>
+        <div class="cards">
+          <div class="nodo garmin"><span class="tag">reloj</span><span class="ico">⌚</span><span class="nb">Reloj Garmin</span><span class="nd">Mide: km · VO₂ máx · calorías · pulso · fatiga. Sube solo a Garmin Connect.</span></div>
+          <div class="nodo app"><span class="tag">app</span><span class="ico">📱</span><span class="nb">FidelApp (Android)</span><span class="nd">Offline: fotos · audios · GPS de respaldo · notas de ánimo.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="baja">▼</div>
+
+    <!-- ETAPA 2 -->
+    <div class="etapa et2">
+      <div class="numcol"><div class="circ">2</div><div class="conector"></div></div>
+      <div class="cuerpo">
+        <h4 class="et-title">☁️ ALMACÉN — todo llega a un solo lugar</h4>
+        <div class="cards">
+          <div class="nodo drive" style="flex-basis:100%"><span class="tag">centro</span><span class="ico">🗂️</span><span class="nb">Google Drive &nbsp;+&nbsp; Drive para escritorio</span><span class="nd">Una carpeta por carrera con: <b>garmin.gpx · metadata.json · fotos/ · audio/ · notas.txt</b>. "Drive para escritorio" copia esa carpeta al PC de Fidel para que la IA pueda leerla.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="baja">▼</div>
+
+    <!-- ETAPA 3 -->
+    <div class="etapa et3">
+      <div class="numcol"><div class="circ">3</div><div class="conector"></div></div>
+      <div class="cuerpo">
+        <h4 class="et-title">🤖 REDACCIÓN — la IA lee la carpeta y propone textos</h4>
+        <div class="cards">
+          <div class="nodo ia" style="flex-basis:100%"><span class="tag">Claude</span><span class="ico">✍️</span><span class="nb">Agente de IA (Claude)</span><span class="nd">Cada día lee lo nuevo de Drive y devuelve <b>3 borradores</b> (emotivo · informativo · para redes). Los guarda como <code>borrador.md</code> de vuelta en Drive. <b>Nunca publica solo</b> — Fidel es el autor final.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="baja">▼</div>
+
+    <!-- ETAPA 4 — GITHUB / RUTINA -->
+    <div class="etapa et4">
+      <div class="numcol"><div class="circ">4</div><div class="conector"></div></div>
+      <div class="cuerpo">
+        <h4 class="et-title">⚙️ SINCRONIZACIÓN — GitHub es el "cartero" entre Drive y el visor</h4>
+        <div class="cards">
+          <div class="nodo sync"><span class="tag">rutina</span><span class="ico">🔁</span><span class="nb">GitHub Actions (la automatización)</span><span class="nd">Una <b>rutina programada</b> (ej. cada día a las 8:00). Lee la carpeta de Drive, <b>convierte</b> el <code>metadata.json</code> + <code>garmin.gpx</code> al formato que entiende el visor, y lo publica.</span></div>
+          <div class="nodo sync"><span class="tag">bodega</span><span class="ico">📦</span><span class="nb">GitHub (repositorio + Pages)</span><span class="nd">Guarda el código del visor y lo <b>publica gratis</b> como página web (GitHub Pages). Cuando la rutina sube datos nuevos, el visor <b>se actualiza solo</b>.</span></div>
+        </div>
+        <div class="callout" style="margin-top:10px"><span class="t">🔑 Aquí está la respuesta a tu duda</span>Esta es la pieza que faltaba: <b>los datos NO saltan solos de Drive al visor</b>. Es la <b>rutina de GitHub Actions</b> la que, a una hora fija, va a Drive, recoge lo nuevo, lo transforma y lo deja publicado en el visor. Sin esta rutina, los datos se quedarían quietos en Drive.</div>
+      </div>
+    </div>
+    <div class="baja">▼</div>
+
+    <!-- ETAPA 5 — WEB -->
+    <div class="etapa et5">
+      <div class="numcol"><div class="circ">5</div><div class="conector"></div></div>
+      <div class="cuerpo">
+        <h4 class="et-title">🌐 WEB — la app madre muestra los 4 mundos</h4>
+        <div class="cards">
+          <div class="nodo web" style="flex-basis:100%"><span class="tag">Lovable → Claude Code</span><span class="ico">🖥️</span><span class="nb">Página de los 4 mundos</span><span class="nd">Fidel revisa y edita el borrador, y se publica en el mundo que corresponde:</span>
+            <div class="mundos-mini">
+              <div class="mundo-chip"><b>🏅 Carreras</b>visor + métricas + fotos/video + texto IA</div>
+              <div class="mundo-chip"><b>📖 Historias</b>relatos tipo blog</div>
+              <div class="mundo-chip"><b>🗃️ Bitácora</b>repositorio de todo</div>
+              <div class="mundo-chip"><b>🙋 Quién soy</b>trayectoria y medallas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="baja">▼</div>
+
+    <!-- ETAPA 6 — REDES -->
+    <div class="etapa et6">
+      <div class="numcol"><div class="circ">6</div><div class="conector"></div></div>
+      <div class="cuerpo">
+        <h4 class="et-title">📣 DIFUSIÓN — el texto aprobado se comparte</h4>
+        <div class="cards">
+          <div class="nodo redes"><span class="tag">redes</span><span class="ico">📸</span><span class="nb">Instagram</span><span class="nd">Fotos y reels de la carrera.</span></div>
+          <div class="nodo redes"><span class="tag">redes</span><span class="ico">👍</span><span class="nb">Facebook</span><span class="nd">Se programa junto con Instagram desde Meta Business Suite.</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="callout tip"><span class="t">💡 Idea clave</span>Google <b>Drive es el corazón</b> (la pieza amarilla del centro). Casi todo — foto, audio, GPX, métricas y borradores — pasa por <b>una sola carpeta</b>. Eso mantiene el sistema simple, gratis y fácil de entender para Fidel: si algo falla, siempre se revisa esa carpeta.</div>
+</section>
+
+<!-- ============================================================= -->
+<!-- ============ CAPÍTULO 1 — HOJA DE RUTA ====================== -->
+<!-- ============================================================= -->
+<section id="cap1">
+  <h2>Capítulo 1 · Hoja de ruta de herramientas 🧭</h2>
+  <p>Aquí tienes qué herramienta usar para cada cosa, cuáles son gratis, cuáles cuestan y cómo se conectan. Regla de oro que definimos: <b>lo gratuito siempre gana</b>; solo pagamos algo si es mucho más práctico (y esas decisiones quedan marcadas para verlas con Fidel).</p>
+
+  <h3>1.1 · Las piezas y qué hace cada una</h3>
+  <table>
+    <tr><th>Pieza</th><th>Para qué sirve</th><th>Costo</th></tr>
+    <tr><td><b>Reloj Garmin</b></td><td>Graba la carrera: GPS, VO₂ máx, calorías, frecuencia cardiaca, "fatiga" (Body Battery / Training Load).</td><td><span class="pill">Ya lo tiene</span></td></tr>
+    <tr><td><b>Garmin Connect</b> (app del teléfono)</td><td>Recibe automáticamente lo del reloj por Bluetooth. Desde ahí se exporta la actividad (GPX/FIT).</td><td><span class="pill libre">Gratis</span></td></tr>
+    <tr><td><b>FidelApp</b> (Android, la que ya hiciste)</td><td>Captura offline: fotos, audios, notas de ánimo, GPS. Exporta ZIP y lo sube a Drive.</td><td><span class="pill libre">Gratis</span></td></tr>
+    <tr><td><b>Google Drive</b> + <b>Drive para escritorio</b></td><td>Almacén central. "Drive para escritorio" sincroniza la carpeta a una carpeta real del PC de Fidel.</td><td><span class="pill libre">Gratis (15 GB)</span> <span class="pill pago">~USD 2/mes 100 GB si se llena</span></td></tr>
+    <tr><td><b>Agente de IA (Claude)</b></td><td>Lee la carpeta de Drive cada día y redacta 3 borradores de texto por carrera/historia, que Fidel edita.</td><td><span class="pill pago">Centavos por texto (API)</span> · ver §1.3</td></tr>
+    <tr><td><b>Lovable</b></td><td>Construir la web de los 4 mundos con IA, sin programar. Punto de partida.</td><td><span class="pill libre">Plan free limitado</span> <span class="pill pago">~USD 20/mes si necesita más</span></td></tr>
+    <tr><td><b>Claude Code</b></td><td>Cuando la web crezca, migrar aquí para control total y sin límite de créditos.</td><td><span class="pill pago">Suscripción Claude</span></td></tr>
+    <tr><td><b>Meta Business Suite / Metricool</b></td><td>Publicar/programar en Instagram + Facebook de forma práctica.</td><td><span class="pill libre">Free</span></td></tr>
+  </table>
+
+  <h3>1.2 · Cómo se conecta todo (ruta técnica, en cristiano)</h3>
+  <ol>
+    <li><b>Garmin → Garmin Connect:</b> apenas Fidel termina de correr y el reloj tiene señal/BT, la actividad viaja sola al teléfono.</li>
+    <li><b>Garmin Connect → Drive:</b> Fidel exporta la actividad (o la deja auto-sincronizar; ver §1.4) y queda en la carpeta de Drive del día.</li>
+    <li><b>FidelApp → Drive:</b> fotos, audios y notas se suben con el botón ☁ que ya programaste.</li>
+    <li><b>Drive → PC de Fidel:</b> "Drive para escritorio" replica esa carpeta en el disco. Ahora el agente puede "verla" como una carpeta normal.</li>
+    <li><b>Agente IA → borradores:</b> cada mañana lee lo nuevo, redacta y guarda un <code>borrador.md</code> con 3 opciones de texto.</li>
+    <li><b>Rutina de GitHub → visor:</b> ⭐ una automatización programada recoge los datos de Drive, los convierte al formato del visor y los publica. <b>Este es el paso que conecta la captura con el visor</b> (detalle en §1.3).</li>
+    <li><b>Borradores → Web:</b> Fidel elige/edita en la web (Lovable) y publica el mundo correspondiente.</li>
+    <li><b>Web/IA → Redes:</b> el texto aprobado se programa en Instagram y Facebook.</li>
+  </ol>
+
+  <div class="callout"><span class="t">📁 Estructura sugerida de la carpeta en Drive</span>
+  <pre><code>FidelEcuador/
+└── carreras/
+    └── 2026-07-01_Latacunga/
+        ├── garmin.gpx          (o .fit — del reloj)
+        ├── metadata.json       (de FidelApp: GPS + waypoints)
+        ├── fotos/              *.jpg
+        ├── audio/              *.m4a
+        ├── notas.txt           (ánimo, anécdotas del día)
+        └── borrador.md         (lo escribe el agente IA)</code></pre></div>
+
+  <!-- ===== 1.3 RUTINAS / GITHUB ===== -->
+  <h3 id="sync">1.3 · Cómo viajan los datos de Drive al visor (las rutinas / GitHub) 🔁</h3>
+  <p>Esta es la parte que faltaba en tu pregunta. Los datos <b>no pasan solos</b> de Drive al visor: hace falta un "cartero automático" que a una hora fija vaya a Drive, recoja lo nuevo, lo <b>traduzca</b> al formato del visor y lo publique. A ese cartero lo llamamos <b>rutina</b> o <b>automatización</b>.</p>
+
+  <h4>¿Qué es GitHub y por qué aparece aquí?</h4>
+  <ul>
+    <li><b>GitHub = la bodega del código del visor.</b> Ahí vive la página del visor.</li>
+    <li><b>GitHub Pages = la vitrina.</b> Publica esa página en internet <b>gratis</b> (una URL pública).</li>
+    <li><b>GitHub Actions = el cartero.</b> Es una <b>rutina programada</b> (tipo alarma diaria) que corre en la nube de GitHub, sin necesidad de tener un PC encendido.</li>
+  </ul>
+
+  <div class="callout"><span class="t">🚚 Lo que hace la rutina, paso a paso</span>
+    <ol style="margin-bottom:0">
+      <li>Se despierta a una hora fija (ej. 8:00 a.m.) — esto se llama <b>cron</b>.</li>
+      <li>Entra a la carpeta de Google Drive y busca <b>carreras nuevas</b>.</li>
+      <li>Toma <code>metadata.json</code> + <code>garmin.gpx</code> + fotos y los <b>convierte</b> al formato que el visor sabe leer (ej. un <code>datos.json</code> del sitio).</li>
+      <li>Guarda ese resultado en GitHub y <b>publica</b> → el visor queda actualizado con la carrera del día.</li>
+    </ol>
+  </div>
+
+  <h4>Tres formas de montar esta rutina (de más simple a más robusta)</h4>
+  <table>
+    <tr><th>Opción</th><th>Cómo funciona</th><th>Ventaja / cuándo usarla</th><th>Costo</th></tr>
+    <tr><td><b>A. El propio agente de IA</b> <span class="pill libre">para empezar</span></td><td>El mismo agente de Claude que redacta (§1.4) también genera el <code>datos.json</code> del visor y lo sube a GitHub.</td><td>Menos piezas: una sola rutina hace texto + publicación. Ideal mientras aprenden.</td><td><span class="pill libre">Gratis + centavos IA</span></td></tr>
+    <tr><td><b>B. GitHub Actions</b> <span class="pill">recomendada al crecer</span></td><td>Rutina programada en la nube de GitHub. Lee Drive (con la API de Google), convierte y publica. No depende de ningún PC encendido.</td><td>La más confiable y "profesional". Corre sola aunque todos estén dormidos.</td><td><span class="pill libre">Gratis (repos públicos)</span></td></tr>
+    <tr><td><b>C. Google Apps Script</b></td><td>Un pequeño script dentro de Google que se dispara cuando llega un archivo nuevo a Drive.</td><td>Vive "dentro" de Google, cómodo si todo es Drive. Menos flexible que GitHub Actions.</td><td><span class="pill libre">Gratis</span></td></tr>
+  </table>
+
+  <div class="callout tip"><span class="t">💡 Recomendación</span>Arrancar con la <b>Opción A</b> (el agente de IA también publica al visor) porque es una sola rutina y Fidel entiende todo el flujo. Cuando el proyecto crezca o quieran que funcione sin PC encendido, pasar a <b>GitHub Actions (B)</b>. Así encaja también tu plan de "empezar en Lovable y migrar a Claude Code": el visor y su rutina de GitHub pueden convivir con ambos.</div>
+
+  <div class="callout warn"><span class="t">⚠️ Nota honesta sobre el estado actual</span>Hoy tenemos definido el <b>concepto</b> de esta sincronización Drive→visor, pero <b>aún no está construida/confirmada</b>. Es una de las primeras cosas a montar y probar con una carrera real. Queda anotada en Decisiones (#11).</div>
+
+  <div class="edlabel">✏️ Notas sobre la rutina de sincronización</div>
+  <div class="editable" data-key="nota-sync">¿Con cuál opción empiezan (A/B/C)? ¿A qué hora corre? ¿Quién la mantiene?…</div>
+
+  <!-- ===== 1.4 AGENTE IA ===== -->
+  <h3 id="agente">1.4 · Tu idea del "agente que se alimenta solo cada día" — ¿es viable?</h3>
+  <div class="callout tip"><span class="t">✅ Respuesta corta: SÍ, es muy viable — y es de las mejores ideas del proyecto.</span>
+  Lo que imaginaste (un agente que cada día lee una carpeta de Drive sincronizada en el PC de Fidel y genera los textos) se puede montar hoy, casi todo gratis. Pagarías solo el consumo de la IA, que son <b>centavos por historia</b>.</div>
+
+  <p>Hay tres formas de hacerlo, de la más sencilla a la más automática. Te recomiendo empezar por la <b>Opción A</b> y subir de nivel solo si hace falta.</p>
+
+  <h4>Opción A — Semiautomática con Claude (la más fácil para aprender) <span class="pill libre">recomendada para empezar</span></h4>
+  <ul>
+    <li>Fidel (o tú) abre <b>Claude</b> (app de escritorio o web) y arrastra las fotos + el <code>notas.txt</code> + las métricas del día.</li>
+    <li>Un <b>prompt guardado</b> (te lo dejo listo abajo) hace que Claude devuelva <b>3 versiones</b> del texto: una emotiva, una informativa y una corta para redes.</li>
+    <li>Ventaja: cero configuración técnica, Fidel ve y entiende cada paso. Ideal como primera etapa de aprendizaje.</li>
+  </ul>
+
+  <h4>Opción B — Agente diario automático con Claude Code + tarea programada <span class="pill">nivel intermedio</span></h4>
+  <ul>
+    <li>En el PC de Fidel se instala <b>Claude Code</b> apuntando a la carpeta que sincroniza "Drive para escritorio".</li>
+    <li>Se crea un <b>agente programado</b> (Claude Code tiene tareas/cron) que cada mañana a las 7:00 revisa si hay carpetas nuevas, lee todo y escribe <code>borrador.md</code> con las 3 versiones.</li>
+    <li>Como el archivo está en la carpeta de Drive, <b>se sube solo</b> y tú/Fidel lo ven desde cualquier lado.</li>
+    <li>Esto es exactamente el "Claude Cowork / agente que se alimenta solo" que describiste. <b>Es real y viable.</b></li>
+  </ul>
+  <div class="callout"><span class="t">🧠 Sobre "Claude Cowork"</span>Lo que buscas se logra con <b>Claude Code</b> (el asistente de escritorio que ya estás usando conmigo) y sus <b>tareas programadas / agentes</b>. Puede leer una carpeta local, mirar fotos, entender las notas y escribir archivos de vuelta — sin que Fidel tenga que hacer nada cada día.</div>
+
+  <h4>Opción C — 100% en la nube (sin depender del PC encendido) <span class="pill pago">avanzado, más adelante</span></h4>
+  <ul>
+    <li>Una automatización (Make.com o Google Apps Script, ambos con capa gratis) detecta archivos nuevos en Drive y llama a la <b>API de Claude</b>.</li>
+    <li>Ventaja: funciona aunque el PC de Fidel esté apagado. Desventaja: más piezas técnicas; lo dejaría para cuando ya dominen A y B.</li>
+  </ul>
+
+  <div class="edlabel">✏️ Tu decisión / notas sobre el agente IA</div>
+  <div class="editable" data-key="nota-agente">Escribe aquí con cuál opción empiezan (A/B/C), quién lo opera y a qué hora corre…</div>
+
+  <details>
+    <summary>📋 Prompt inicial listo para el agente de IA (copiar y pegar)</summary>
+    <pre><code>Eres el redactor personal de Fidel, un corredor que recorre ~2.200 km
+por los municipios de Ecuador. Tu tono es cercano, humano y honesto,
+en español de Ecuador, sin exagerar ni sonar publicitario.
+
+Te doy el material de UNA carrera:
+- Municipio y nombre de la etapa
+- Métricas del reloj Garmin: km, VO2 máx, calorías, frecuencia,
+  fatiga (Body Battery/carga de entrenamiento)
+- Notas de ánimo y anécdotas que escribió Fidel
+- Descripción de las fotos/audios
+
+Devuélveme TRES versiones del texto, cada una lista para editar:
+1) EMOTIVA (para "Historias"): 150-220 palabras, narrativa, sobre el
+   territorio y las personas, no solo sobre correr.
+2) INFORMATIVA (para "Carreras"): 80-120 palabras que integren de forma
+   natural las métricas y el municipio.
+3) REDES (Instagram/Facebook): máx 60 palabras + 5 hashtags relevantes
+   + una frase de gancho.
+
+Reglas:
+- No inventes datos que no estén en el material. Si falta algo, di
+  "[FALTA: ...]" para que Fidel lo complete.
+- Respeta el estado de ánimo que expresó Fidel.
+- Termina con 2 preguntas para Fidel que ayuden a mejorar el texto.</code></pre>
+  </details>
+
+  <!-- ===== 1.4 GARMIN ===== -->
+  <h3 id="garmin">1.5 · Capturar las métricas del Garmin lo más automático posible</h3>
+  <p>Las métricas que pides (km, VO₂ máx, fatiga, calorías, frecuencia) las mide el reloj y viajan solas a <b>Garmin Connect</b>. El reto es sacarlas de ahí hacia Drive/web. Opciones, de más simple a más automática:</p>
+  <table>
+    <tr><th>Método</th><th>Cómo funciona</th><th>Automatización</th><th>Costo</th></tr>
+    <tr><td><b>Exportar manual</b></td><td>En Garmin Connect: actividad → ⋯ → "Exportar a GPX/original". Se guarda en la carpeta de Drive del día.</td><td>Manual (1 min/día)</td><td><span class="pill libre">Gratis</span></td></tr>
+    <tr><td><b>Vía Strava</b></td><td>Garmin → auto-sincroniza con Strava. Strava tiene datos y API/embed.</td><td>Semiautomática</td><td><span class="pill libre">Gratis</span></td></tr>
+    <tr><td><b>Garmin Connect IQ / export automático</b></td><td>Apps de Connect IQ que exportan la actividad a Dropbox/Drive automáticamente.</td><td>Alta</td><td><span class="pill libre">Gratis</span> <span class="pill pago">algunas de pago</span></td></tr>
+    <tr><td><b>Garmin Health/Activity API</b></td><td>API oficial: los datos llegan solos a tu sistema.</td><td>Total</td><td><span class="pill pago">Requiere aprobación de Garmin (trámite)</span></td></tr>
+  </table>
+  <div class="callout tip"><span class="t">💡 Recomendación práctica</span>Empezar con <b>Exportar manual</b> (es 1 minuto y Fidel entiende qué pasa) y, en paralelo, activar la <b>sincronización con Strava</b> que es gratis y automática. La API oficial de Garmin déjenla para v2 si de verdad hace falta, porque implica trámite de aprobación.</div>
+  <div class="callout warn"><span class="t">⚠️ Ojo con "fatiga"</span>Garmin no tiene un dato llamado exactamente "fatiga". Lo más parecido es <b>Body Battery</b>, <b>Training Load</b> o el <b>estado de entrenamiento</b>. Hay que decidir con Fidel cuál de esos mostrar como "fatiga" en la web (queda en Decisiones).</div>
+
+  <!-- ===== 1.5 RUTINA DIARIA ===== -->
+  <h3 id="rutina">1.6 · Rutina diaria de Fidel en cada municipio (para que salga casi solo)</h3>
+  <p>La meta es que capturar el día completo le tome <b>menos de 10 minutos</b> de "trabajo consciente". El resto lo hacen los aparatos.</p>
+  <table>
+    <tr><th>Momento</th><th>Qué hace Fidel</th><th>Qué pasa automático</th></tr>
+    <tr><td>🌅 <b>Antes de correr</b></td><td>Enciende el reloj y le da "iniciar carrera". Abre FidelApp y "iniciar captura".</td><td>Garmin empieza a grabar GPS/pulso; FidelApp graba GPS de respaldo.</td></tr>
+    <tr><td>🏃 <b>Durante</b></td><td>Toma fotos y graba audios cortos desde FidelApp (botones grandes). Habla lo que siente.</td><td>Cada foto/audio queda con hora y ubicación.</td></tr>
+    <tr><td>🏁 <b>Al terminar</b></td><td>"Detener" en reloj y en FidelApp. Graba un audio-resumen de 1 min: ánimo, gente que conoció, paisaje.</td><td>Garmin sube la actividad a Garmin Connect solo.</td></tr>
+    <tr><td>🍽️ <b>En el descanso (con WiFi)</b></td><td>1) Exporta la actividad de Garmin a la carpeta del día. 2) Toca ☁ en FidelApp para subir todo a Drive. 3) Escribe 3–4 líneas en <code>notas.txt</code>.</td><td>Drive sincroniza todo; el agente lo procesará.</td></tr>
+    <tr><td>🌙 <b>En la noche / mañana siguiente</b></td><td>Abre la web, revisa los <b>3 borradores</b> que hizo la IA, elige uno, lo ajusta a su voz y aprueba.</td><td>El texto aprobado queda listo para Carreras/Historias y para programar en redes.</td></tr>
+  </table>
+  <div class="callout"><span class="t">✅ Checklist imprimible para Fidel (pégalo en su celular o libreta)</span>
+    <ul class="check">
+      <li>Reloj: iniciar / detener carrera</li>
+      <li>FidelApp: iniciar / detener captura</li>
+      <li>Fotos y audios durante el trayecto</li>
+      <li>Audio-resumen de 1 minuto al final</li>
+      <li>Con WiFi: exportar Garmin a la carpeta del día</li>
+      <li>Con WiFi: botón ☁ para subir a Drive</li>
+      <li>Escribir 3–4 líneas de ánimo en notas.txt</li>
+      <li>En la noche: revisar y aprobar el texto de la IA</li>
+    </ul>
+  </div>
+  <div class="edlabel">✏️ Ajustes a la rutina para el caso real de Fidel</div>
+  <div class="editable" data-key="nota-rutina">¿A qué horas suele haber WiFi? ¿Prefiere audio o texto para las notas? Escribe aquí los ajustes…</div>
+
+  <!-- ===== 1.6 IA HISTORIAS ===== -->
+  <h3>1.7 · La IA que le propone historias que él puede modificar</h3>
+  <ul>
+    <li>La IA <b>nunca publica sola</b>: siempre entrega <b>3 opciones</b> y Fidel es el autor final. Esto respeta que "el proceso lo hace él, tú lo acompañas".</li>
+    <li>Cada opción viene con <b>preguntas</b> ("¿quieres que mencione a la señora del mercado?") para que Fidel aporte su voz.</li>
+    <li>Los textos se guardan como <b>borradores editables</b> en la web; nada se pierde y puede volver atrás.</li>
+  </ul>
+
+  <!-- ===== 1.7 REDES ===== -->
+  <h3 id="redes">1.8 · Publicar en Instagram y Facebook de forma práctica</h3>
+  <p>Elegiste Instagram + Facebook. La API oficial de Meta es potente pero <b>compleja</b> (requiere cuenta de empresa, revisión de la app y tokens). Para tu caso, lo práctico es esto:</p>
+  <table>
+    <tr><th>Nivel</th><th>Herramienta</th><th>Qué logras</th><th>Costo</th></tr>
+    <tr><td><b>1 · Fácil</b> <span class="pill libre">empezar aquí</span></td><td><b>Meta Business Suite</b></td><td>Programar el mismo post en IG + FB a la vez, desde el computador. Gratis y oficial de Meta.</td><td><span class="pill libre">Gratis</span></td></tr>
+    <tr><td><b>2 · Cómodo</b></td><td><b>Metricol</b> o <b>Buffer</b> (plan free)</td><td>Calendario, varias redes, el agente puede dejar los textos listos para programar.</td><td><span class="pill libre">Free limitado</span></td></tr>
+    <tr><td><b>3 · Automático real</b></td><td><b>Meta Graph API</b> (Instagram Content Publishing)</td><td>Publicar sin intervención desde tu sistema.</td><td><span class="pill pago">Complejo: cuenta business + revisión</span></td></tr>
+  </table>
+  <div class="callout tip"><span class="t">💡 Recomendación</span>Empezar en <b>Meta Business Suite</b> (nivel 1). Es gratis, oficial y publica en IG+FB al tiempo. La IA le deja el texto y hashtags; Fidel solo revisa y programa. La API oficial (nivel 3) solo si más adelante quieren publicación 100% sin tocar nada.</div>
+  <div class="decision-card">
+    <div class="q">🔸 Decisión: ¿nivel de automatización de redes al inicio?</div>
+    <div class="opts">Business Suite (manual-asistido) · Metricool/Buffer · API oficial</div>
+    <textarea class="decision" data-key="dec-redes" placeholder="Anota lo que decidan con Fidel y la fecha…"></textarea>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- ============ CAPÍTULO 2 — PRIMERA VERSIÓN LOVABLE =========== -->
+<!-- ============================================================= -->
+<section id="cap2">
+  <h2>Capítulo 2 · Desarrollar la primera versión funcional del Lovable 🎨</h2>
+  <p>En esta clase pasamos del <b>prototipo de Google Stitch</b> a una <b>primera pantalla funcional en Lovable</b>. La regla de oro de hoy: <b>solo la pantalla de inicio</b> (los 4 mundos), respetando los textos y el diseño que ya existen. Las demás pantallas se desarrollan después, una por una.</p>
+
+  <h3>2.1 · Qué vamos a lograr en esta sesión</h3>
+  <ul>
+    <li>Exportar el diseño desde <b>Google Stitch</b> (un <code>.zip</code> + el <code>design.md</code>).</li>
+    <li>Armar el <b>prompt correcto</b> para Lovable.</li>
+    <li>Generar en Lovable la <b>primera pantalla</b> (los 4 mundos) sin que la IA cambie textos ni diseño.</li>
+  </ul>
+  <div class="callout tip"><span class="t">💡 Idea para enseñarle a Fidel</span>Google Stitch es "el plano/dibujo" de la casa; Lovable es "el constructor". Le pasamos el plano (zip) y el manual de estilo (design.md), y le pedimos que construya <b>una sola habitación primero</b>: la pantalla de inicio.</div>
+
+  <h3>2.2 · Paso 1 — Exportar el diseño desde Google Stitch</h3>
+  <h4>a) Exportar la pantalla como <code>.zip</code></h4>
+  <ol>
+    <li>Abre tu proyecto en <b>Google Stitch</b> y <b>selecciona la pantalla/imagen</b> que vas a exportar (la de inicio con los 4 mundos).</li>
+    <li>Arriba, haz clic en los <b>tres puntos ⋮</b>.</li>
+    <li>Selecciona <b>Exportar</b> y elige el formato <b>.zip</b>.</li>
+    <li>Guarda ese <code>.zip</code> en tu carpeta del proyecto (o en Drive) para tenerlo a mano.</li>
+  </ol>
+  <div class="callout"><span class="t">📦 ¿Qué trae ese ZIP?</span>Trae la <b>estructura y los recursos</b> de la pantalla (imágenes, íconos, y el código base que generó Stitch). Es lo que Lovable va a "leer" para reconstruir el diseño.</div>
+
+  <h4>b) Copiar la paleta de diseño (<code>design.md</code>)</h4>
+  <ol>
+    <li>En Stitch, <b>selecciona la paleta de diseño</b> del proyecto.</li>
+    <li>Ve al archivo <b><code>design.md</code></b> (el "manual de estilo": colores, tipografía, espaciados).</li>
+    <li><b>Cópialo completo</b> — lo vas a pegar dentro del prompt (paso 2).</li>
+  </ol>
+  <div class="callout tip"><span class="t">🎨 ¿Por qué importa el design.md?</span>Es lo que le da a Lovable el <b>contexto visual</b>: qué colores, qué letra y qué estilo usar. Sin él, Lovable "inventa" un diseño propio y pierdes la identidad que ya definiste en Stitch.</div>
+
+  <h3>2.3 · Paso 2 — Preparar el prompt para Lovable</h3>
+  <p>c) Ahora armamos el prompt. Debe: (1) avisar que se adjunta el <b>ZIP</b>, (2) dejar el <b>espacio para pegar el <code>design.md</code></b>, (3) dar el <b>contexto</b> de la app, (4) exigir que <b>respete los textos y el diseño ya definidos</b>, y (5) dejar claro que <b>por ahora solo se genera la primera pantalla</b> y que más adelante se le dará info de cada pantalla por separado.</p>
+
+  <details open>
+    <summary>📋 Prompt listo para Lovable (copiar, pegar y rellenar el design.md)</summary>
+    <pre><code>CONTEXTO DE LA APP
+Estoy construyendo "Fidel Ecuador", una app con una pantalla de inicio
+que despliega cuatro mundos: CARRERAS, HISTORIAS, BITÁCORA y QUIÉN SOY.
+Es el acompañamiento de un corredor que recorre ~2.200 km por los
+municipios de Ecuador. Adjunto un archivo .ZIP exportado desde Google
+Stitch con el diseño de la PRIMERA pantalla (estructura, imágenes y textos).
+
+SISTEMA DE DISEÑO (design.md exportado de Stitch)
+--- INICIO design.md ---
+[AQUÍ PEGAS EL CONTENIDO COMPLETO DEL design.md]
+--- FIN design.md ---
+
+REGLAS OBLIGATORIAS
+1. Respeta EXACTAMENTE los textos que ya vienen en el diseño. No inventes,
+   no traduzcas y no cambies ninguna palabra.
+2. Respeta colores, tipografía, íconos y disposición del ZIP y del design.md.
+3. Por AHORA genera ÚNICAMENTE la primera pantalla (inicio con los 4 mundos).
+   NO desarrolles las demás pantallas todavía.
+4. Deja la navegación PREPARADA: los 4 mundos deben ser botones/tarjetas que
+   más adelante llevarán a su pantalla. Por ahora pueden quedar sin contenido
+   interno o con un "Próximamente".
+5. Hazlo responsive (que se vea bien en celular).
+
+CÓMO VAMOS A TRABAJAR
+Iremos pantalla por pantalla. Cuando la pantalla de inicio esté lista y
+aprobada, te daré la información de la siguiente pantalla para desarrollarla
+de forma INDEPENDIENTE. No te adelantes.
+
+Cuando termines, muéstrame la primera pantalla y espera mis instrucciones.</code></pre>
+  </details>
+
+  <div class="edlabel">✏️ Tu prompt personalizado (edítalo con el texto real de Fidel)</div>
+  <div class="editable" data-key="prompt-lovable" style="min-height:120px">Pega aquí tu versión del prompt con el design.md ya incluido, para reutilizarlo…</div>
+
+  <h3>2.4 · Paso 3 — Generar en Lovable y revisar</h3>
+  <ol>
+    <li>Entra a <b>Lovable</b> y crea un <b>proyecto nuevo</b>.</li>
+    <li><b>Adjunta el ZIP</b> exportado de Stitch.</li>
+    <li><b>Pega el prompt</b> (con el <code>design.md</code> ya incluido) y genera.</li>
+    <li>Revisa el resultado con esta lista:</li>
+  </ol>
+  <div class="callout"><span class="t">✅ Lista de revisión de la primera pantalla</span>
+    <ul class="check">
+      <li>Se ven los cuatro mundos: Carreras, Historias, Bitácora, Quién soy</li>
+      <li>Los textos son EXACTAMENTE los del diseño (no los cambió)</li>
+      <li>Colores y tipografía coinciden con el design.md</li>
+      <li>Se ve bien en celular (responsive)</li>
+      <li>Los 4 mundos son botones/tarjetas (aunque aún no tengan contenido)</li>
+      <li>No generó pantallas de más</li>
+    </ul>
+  </div>
+
+  <h3>2.5 · Consejos y errores comunes</h3>
+  <ul>
+    <li><b>Si Lovable cambia textos:</b> recuérdaselo con "Respeta exactamente los textos del diseño, no los modifiques". Es el error más frecuente.</li>
+    <li><b>Ir de a una pantalla.</b> No pidas todo de golpe: la calidad baja y es difícil corregir.</li>
+    <li><b>Guarda versiones.</b> Cuando la pantalla de inicio quede bien, guárdala/nómbrala antes de seguir con la siguiente.</li>
+    <li><b>El design.md es tu ancla.</b> Si el diseño se "desvía", vuelve a pegarlo y pídele que se ciña a él.</li>
+    <li><b>Créditos de Lovable:</b> cada generación consume créditos; por eso conviene un prompt claro desde el inicio para no repetir.</li>
+  </ul>
+  <div class="edlabel">✏️ Notas de esta clase (qué funcionó, qué ajustar)</div>
+  <div class="editable" data-key="nota-lovable">Escribe aquí lo aprendido al generar la primera pantalla con Fidel…</div>
+
+  <hr>
+
+  <!-- ===== 2.6 GOOGLE FORMS ===== -->
+  <h3 id="forms">2.6 · Cómo carga Fidel el contenido: Google Forms → Google Sheets → página 📝</h3>
+  <p>Fidel <b>no toca código</b>. Llena un <b>Google Form</b> (como una encuesta con campos fijos = los "módulos predefinidos"). Cada respuesta cae en una <b>Google Sheet</b> (hoja de cálculo). La página <b>lee esa hoja</b> y arma las tarjetas sola. Así actualiza en 2 minutos desde el celular.</p>
+
+  <div class="flow">
+    <div class="box"><b>📝 Google Form</b>Fidel llena campos fijos (título, texto, fotos, video…)</div>
+    <div class="arrow">→</div>
+    <div class="box"><b>📊 Google Sheet</b>Cada respuesta = una fila</div>
+    <div class="arrow">→</div>
+    <div class="box"><b>🌐 Página (Lovable)</b>Lee la hoja y dibuja las tarjetas</div>
+  </div>
+
+  <h4>Cómo se monta (una sola vez)</h4>
+  <ol>
+    <li><b>Crear 2 formularios:</b> "Nueva Carrera" y "Nueva Historia", con los campos fijos:
+      <ul>
+        <li><b>Carrera:</b> Municipio · Número · Título · Texto corto · Fotos (subir archivo) · Video (subir archivo) · Etiquetas.</li>
+        <li><b>Historia:</b> Categoría (lista) · Formato (blog/fotopostal/video) · Título · Texto · Fotos · Video.</li>
+      </ul>
+    </li>
+    <li>Cada formulario <b>crea su hoja de respuestas</b> automáticamente (botón "Vincular a Sheets").</li>
+    <li><b>Publicar la hoja</b> para que la página la pueda leer (ver abajo el método).</li>
+    <li>En Lovable, el <b>prompt maestro</b> le dice a la app que lea esa URL.</li>
+  </ol>
+
+  <h4>Cómo se "lee" la información de la hoja (esto es lo que preguntaste)</h4>
+  <table>
+    <tr><th>Método</th><th>Cómo</th><th>Para quién</th></tr>
+    <tr><td><b>Publicar como CSV</b> <span class="pill libre">el más simple</span></td><td>En la hoja: <b>Archivo → Compartir → Publicar en la web → CSV</b>. Te da un enlace. La página descarga ese CSV y lo convierte en tarjetas.</td><td>El más fácil de explicar y gratis.</td></tr>
+    <tr><td><b>Enlace JSON (gviz)</b> <span class="pill">recomendado para la web</span></td><td>Se usa el enlace <code>.../gviz/tq?tqx=out:json</code> de la hoja. Devuelve los datos en formato que la web entiende directo.</td><td>Cuando quieras que cargue rapidito y ordenado.</td></tr>
+    <tr><td><b>Google Apps Script</b></td><td>Un mini-script en Google que devuelve un JSON <b>limpio</b> y a la medida (ya con las columnas que quiere la página).</td><td>Si más adelante quieren más control.</td></tr>
+  </table>
+  <div class="callout tip"><span class="t">💡 En cristiano</span>Publicas la hoja con un enlace, se lo pasas a Lovable en el <b>prompt maestro</b>, y la página queda "enchufada" a esa hoja: cada vez que Fidel llena el formulario, aparece una tarjeta nueva sola.</div>
+
+  <h4>El contador "N/221"</h4>
+  <p><b>221</b> = total de municipios del recorrido (fijo). <b>N</b> = municipios ya recorridos, y <b>sube solo</b>. Se puede calcular de dos formas:</p>
+  <ul>
+    <li><b>Desde la hoja de Carreras:</b> N = número de municipios distintos ya cargados. Simple y siempre sincronizado con lo publicado.</li>
+    <li><b>Desde el visor:</b> N = municipios que el visor marca como visitados. Útil cuando el visor sea la fuente oficial de la ruta.</li>
+  </ul>
+
+  <div class="callout warn"><span class="t">⚠️ Sobre los videos en Drive (lo que elegiste)</span>Subir videos por el formulario los guarda en el Drive de Fidel. Ojo con los <b>15 GB</b>: usa videos <b>cortos</b> (testimoniales de 30-60 s) y, si se llena, la salida es pasarlos a <b>YouTube no listado</b>. Además, la carpeta/enlace debe quedar como <b>"cualquiera con el enlace puede ver"</b> para que se muestren en la web.</div>
+
+  <div class="edlabel">✏️ Enlaces reales (pégalos cuando existan)</div>
+  <div class="editable" data-key="nota-forms">URL de la hoja de Carreras · URL de la hoja de Historias · carpeta de Drive de medios…</div>
+
+  <hr>
+
+  <!-- ===== 2.7 PROMPTS POR PANTALLA ===== -->
+  <h3 id="prompts">2.7 · Prompts pantalla por pantalla (mundo por mundo) 🧩</h3>
+  <p>Aquí están los prompts, uno por pantalla. Empezamos por el <b>prompt maestro</b> (arquitectura + conexión a Google Sheets) y luego uno por cada mundo. <b>Todos son editables y se guardan</b>: ajústalos con los textos reales de Fidel antes de pegarlos en Lovable.</p>
+
+  <div class="promptlabel"><span class="n">Extra 1</span> Prompt MAESTRO — arquitectura + conexión a Google Sheets</div>
+  <p class="copyhint">Úsalo primero, después de generar la pantalla de inicio (§2.3). Deja la app "enchufada" a las hojas.</p>
+  <textarea class="promptarea" data-key="prompt-maestro">Vamos a construir la app "Fidel Ecuador" en Lovable, conectada a Google
+Sheets como fuente de contenido (Fidel carga todo desde Google Forms).
+
+ARQUITECTURA
+- Pantalla de inicio con 4 mundos: CARRERAS, HISTORIAS, BITACORA, QUIEN SOY.
+- El contenido de CARRERAS e HISTORIAS se lee EN VIVO desde Google Sheets
+  publicadas (una hoja para carreras, otra para historias).
+- Respeta el diseno y los textos ya definidos (design.md + ZIP de Stitch).
+
+DATOS QUE LLEGAN DE GOOGLE SHEETS (columnas)
+- Carreras: numero, municipio, titulo, texto_corto, fotos (URLs separadas
+  por coma), video_url, etiquetas, fecha.
+- Historias: formato (blog/fotopostal/video/entrevista), titulo, texto,
+  fotos, video_url, fecha. (SIN categorias: Historias es general.)
+
+REGLAS
+1. Lee las hojas por su URL publicada (te la dare). Si aun no la tengo, usa
+   datos de ejemplo con la MISMA estructura de columnas.
+2. Muestra un contador "N/221" donde N = numero de municipios distintos ya
+   publicados en la hoja de Carreras (221 = total de municipios del recorrido).
+3. Diseno responsive, carga rapida y navegacion clara entre los 4 mundos.
+4. Por ahora arma solo la estructura y la pantalla de inicio; cada mundo lo
+   desarrollaremos por separado en los siguientes prompts. No te adelantes.</textarea>
+
+  <div class="promptlabel"><span class="n">Mundo 1</span> Prompt CARRERAS (navegación por provincias + espacio para el visor)</div>
+  <div class="callout tip"><span class="t">🗺️ Estructura: Provincia → Municipios → carrera</span>Las carreras se ordenan por las <b>24 provincias de Ecuador</b> (alfabéticas). Cada provincia despliega sus <b>municipios/cantones</b>; el que ya tiene carrera muestra su información. Ecuador tiene <b>221 cantones</b> en total — por eso el contador es <b>N/221</b>. Necesitarás una lista de provincias y sus cantones (se consigue oficial del INEC/CONALI); mientras tanto el prompt genera un ejemplo.</div>
+  <textarea class="promptarea" data-key="prompt-carreras">Desarrolla la pantalla CARRERAS. Respeta el diseno y los textos definidos.
+
+OBJETIVO: entrada principal y directa, organizada GEOGRAFICAMENTE por
+provincias y municipios de Ecuador.
+
+NAVEGACION:
+1. Muestra las PROVINCIAS de Ecuador en orden ALFABETICO (lista o acordeon).
+2. Al abrir una provincia, muestra sus MUNICIPIOS (cantones), tambien en orden
+   alfabetico.
+3. Los municipios que YA tienen carrera se ven ACTIVOS/destacados; al tocarlos
+   se DESPLIEGA la informacion que ya existe en la pagina.
+4. Los municipios SIN carrera aun se ven en gris con la etiqueta
+   "Sin carrera aun" (no desplegables).
+
+INFORMACION QUE SE DESPLIEGA en un municipio con carrera (TARJETA):
+- Numeracion: "Municipio N/221" (ej. "Guayaquil 1/221"). N = municipios ya
+  recorridos; 221 = total de cantones del recorrido.
+- Titulo memorable (ej. "Guayaquil: el lujo de recorrer Las Penas y el Malecon").
+- Texto corto (2 a 4 lineas).
+- Las mejores fotos (galeria pequena).
+- Un video testimonial corto.
+- Etiquetas que enlacen a HISTORIAS o BITACORA para profundizar.
+
+FUENTE DE DATOS:
+- La lista de provincias y sus municipios de Ecuador como ESTRUCTURA fija. Si
+  no la tengo aun, genera un ejemplo con 3-4 provincias y sus municipios.
+- Las carreras se leen desde la hoja de Google Sheets "Carreras" y se EMPAREJAN
+  con su municipio por el nombre de municipio + provincia.
+- Muestra un contador global "N/221" en la cabecera.
+
+ESPACIO PARA EL VISOR (IMPORTANTE):
+- Dentro de la informacion de una carrera, deja un AREA RESERVADA y claramente
+  marcada con el texto "Aqui se integrara el visor del recorrido" (recuadro
+  placeholder). NO integres el visor todavia; solo deja el espacio para un
+  iframe mas adelante.
+
+Responsive. Por ahora desarrolla solo esta pantalla.</textarea>
+
+  <div class="promptlabel"><span class="n">Mundo 1·b</span> Prompt de ARREGLO — agregar el espacio del visor (si no salió)</div>
+  <p class="copyhint">Úsalo si Lovable no dejó el recuadro reservado del visor. Es un prompt de corrección.</p>
+  <textarea class="promptarea" data-key="prompt-visor-espacio">En la pantalla CARRERAS falto el espacio reservado para el visor. Agregalo:
+
+- Dentro de la informacion de cada carrera (al abrir un municipio con carrera),
+  agrega un RECUADRO RESERVADO para el visor del recorrido.
+- El recuadro: ancho completo de la tarjeta, buena altura (formato 16:9 o unos
+  300-400 px), con BORDE PUNTEADO y un fondo suave.
+- Centrado dentro del recuadro, el texto: "Aqui se integrara el visor del
+  recorrido".
+- Ubicalo ARRIBA de las fotos y el video, justo debajo del titulo y el texto
+  corto.
+- NO integres ningun mapa ni iframe todavia: es SOLO el espacio marcado para
+  insertar mas adelante un iframe.
+- Responsive (que se vea bien en celular).
+
+No cambies el resto del diseno ni los textos ya definidos.</textarea>
+
+  <div class="promptlabel"><span class="n">Mundo 2</span> Prompt HISTORIAS</div>
+  <textarea class="promptarea" data-key="prompt-historias">Desarrolla la pantalla HISTORIAS. Respeta el diseno y los textos definidos.
+
+CONCEPTO: es una seccion GENERAL, SIN categorias ni barra de filtros. NO esta
+ligada directamente a las carreras. Reune contenido util y humano del recorrido
+y lo que se comparte en redes sociales.
+
+Responde preguntas y temas como:
+- Donde te puedes quedar (hospedaje).
+- Que comidas son las mas ricas.
+- Lugares, personas, entrevistas y anecdotas.
+
+FORMATOS diversos (cada historia lleva una etiqueta de formato):
+- Blog (texto largo con fotos).
+- Fotopostal (una foto grande + texto breve).
+- Video.
+- Entrevista.
+
+PRESENTACION:
+- Un feed/mosaico UNICO de tarjetas, del mas reciente al mas antiguo.
+- SIN categorias. Como maximo, un buscador simple por texto (opcional).
+- Cada tarjeta muestra su formato, titulo, imagen/preview y un extracto.
+
+ACCIONES en cada historia:
+- Boton "Conocer mas": abre el contenido COMPLETO (blog completo, video o
+  entrevista) para profundizar.
+- Boton "Compartir en redes sociales" (Facebook, Instagram, WhatsApp) para
+  llevar la historia a redes.
+
+FUENTE: lee desde la hoja de Google Sheets "Historias". Responsive. Por ahora
+solo esta pantalla. Junto con CARRERAS es la columna vertebral del sitio.</textarea>
+
+  <div class="promptlabel"><span class="n">Mundo 2·b</span> Prompt de ARREGLO — quitar las categorías de HISTORIAS</div>
+  <p class="copyhint">Úsalo si Lovable ya generó Historias con la barra de categorías (Todas, Íconos geográficos, Comida…).</p>
+  <textarea class="promptarea" data-key="prompt-historias-fix">En la pantalla HISTORIAS, QUITA la barra de categorias/filtros (Todas, Iconos
+geograficos, Personas, Comida, Musica, Parte fisica). HISTORIAS debe ser
+GENERAL, sin categorias.
+
+- Deja un feed/mosaico UNICO de tarjetas, del mas reciente al mas antiguo.
+- Conserva solo la etiqueta de FORMATO en cada tarjeta (Blog, Fotopostal,
+  Video, Entrevista).
+- Como maximo, un buscador simple por texto (opcional).
+- El contenido responde temas como donde quedarse, mejores comidas, lugares,
+  personas y entrevistas, y lo que va a redes sociales.
+- En cada historia agrega dos botones: "Conocer mas" (abre el contenido
+  completo) y "Compartir en redes sociales" (Facebook, Instagram, WhatsApp).
+
+No cambies el resto del diseno ni los textos ya definidos.</textarea>
+
+  <div class="promptlabel"><span class="n">Mundo 3</span> Prompt BITÁCORA</div>
+  <textarea class="promptarea" data-key="prompt-bitacora">Desarrolla la pantalla BITACORA. Respeta el diseno y los textos definidos.
+
+Es el REPOSITORIO/memoria completo: todas las fotos, videos y anotaciones
+usadas en CARRERAS e HISTORIAS. Es la "bibliografia" del proyecto.
+
+- Galeria filtrable por tipo (foto/video/nota) y por municipio o fecha.
+- Cada elemento enlaza a la carrera o historia donde se uso.
+- Buscador simple.
+
+FUENTE: los mismos medios de las hojas de Carreras e Historias (mas una hoja
+"Bitacora" si hace falta para insumos sueltos). Responsive. Solo esta pantalla.</textarea>
+
+  <div class="promptlabel"><span class="n">Mundo 4</span> Prompt QUIÉN SOY</div>
+  <textarea class="promptarea" data-key="prompt-quiensoy">Desarrolla la pantalla QUIEN SOY. Respeta el diseno y los textos definidos.
+
+Contenido mas fijo (cambia poco). Secciones:
+- Trayectoria personal, profesional y deportiva.
+- El "por que": es mas que correr — el territorio, las personas.
+- Galeria de carreras pasadas, medallas (destacar las Six Majors), camisetas
+  y articulos.
+
+Puede leer de una hoja "QuienSoy" o tener el contenido fijo que te dare.
+Diseno tipo perfil/landing, emotivo y sobrio. Responsive. Solo esta pantalla.</textarea>
+
+  <hr>
+
+  <!-- ===== 2.8 PROMPT DIARIO ===== -->
+  <h3 id="diario">2.8 · Prompt de actualización diaria 🔄</h3>
+  <p>Este es el que Fidel usa <b>cada día con la IA</b> (Claude): le pasa el material del municipio y la IA le devuelve la entrada <b>lista para pegar en el Google Form</b>. Así el llenado es rápido y estándar.</p>
+  <div class="promptlabel"><span class="n">Diario</span> Prompt de actualización diaria</div>
+  <textarea class="promptarea" data-key="prompt-diario">Eres el asistente diario de Fidel. Con el material del dia de UN municipio,
+preparame una entrada LISTA PARA PEGAR en el Google Form.
+
+Te doy: municipio, metricas del Garmin (km, VO2 max, calorias, fatiga),
+fotos (descritas) y las notas de animo de Fidel.
+
+Devuelveme, en campos separados y listos para copiar:
+- MUNICIPIO:
+- NUMERO (el siguiente en la cuenta):
+- TITULO memorable (estilo "Guayaquil: el lujo de recorrer Las Penas..."):
+- TEXTO CORTO (2 a 4 lineas):
+- ETIQUETAS sugeridas (para enlazar a Historias/Bitacora):
+- ES CARRERA O HISTORIA:
+- Si detectas material para una HISTORIA aparte (donde quedarse, comida,
+  persona, lugar, entrevista), propon tambien su formato y un borrador.
+
+Reglas: no inventes datos; si falta algo escribe [FALTA: ...]. Respeta el
+estado de animo de Fidel. Espanol de Ecuador, cercano y honesto.</textarea>
+
+  <hr>
+
+  <!-- ===== 2.9 PROMPT VISOR ===== -->
+  <h3 id="visor-prompt">2.9 · Prompt para conectar el visor (más adelante) 🗺️</h3>
+  <p>Cuando el visor esté listo, este prompt lo integra en el espacio que dejamos reservado en Carreras. <b>No lo uses todavía</b>, guárdalo para esa fase.</p>
+  <div class="promptlabel extra"><span class="n extra">Extra 2</span> Prompt para integrar el visor en CARRERAS</div>
+  <textarea class="promptarea" data-key="prompt-visor">Ahora vamos a integrar el visor en la pantalla CARRERAS, en el area que
+dejamos reservada ("Aqui se integrara el visor del recorrido").
+
+- Inserta el visor mediante un iframe con la URL que te dare.
+- Que ocupe el area reservada y sea responsive (que se vea bien en celular).
+- Debajo del mapa, manten la tarjeta de la carrera (titulo, texto, fotos,
+  video, etiquetas).
+- Si una carrera tiene su propio recorrido, el iframe debe apuntar a esa ruta
+  especifica (te indicare como se pasa el municipio/etapa en la URL).
+
+No cambies el resto del diseno ni los textos ya definidos.</textarea>
+
+  <div class="callout tip"><span class="t">🧩 ¿Hacían falta prompts adicionales? Sí, dos</span>Además de uno por mundo y el diario, agregué el <b>Prompt maestro</b> (Extra 1 — enchufa la app a Google Sheets y define el contador) y el <b>Prompt del visor</b> (Extra 2 — para la fase en que se integre el mapa). Con esos <b>7 prompts</b> queda cubierto todo el ciclo.</div>
+</section>
+
+<!-- ============================================================= -->
+<!-- ============ CAPÍTULO 3 — GUÍA DE CLASE (APP) ============== -->
+<!-- ============================================================= -->
+<section id="cap3app">
+  <h2>Capítulo 3 · Guía de clase — que Fidel repita la app + el visor 👩‍🏫</h2>
+  <p>Los profesores <b>Martín y Carolina</b> acompañan a Fidel para repetir el ejercicio que ya hicimos. Esta es la <b>guía didáctica</b>, pensada para alguien que <b>nunca ha programado</b>. Vamos de lo más básico a construir la app y el visor.</p>
+
+  <h3>2.1 · Qué vamos a construir y por qué (objetivos de la clase)</h3>
+  <ul>
+    <li><b>Meta 1:</b> que Fidel entienda las piezas (no que memorice código).</li>
+    <li><b>Meta 2:</b> reproducir <b>FidelApp</b> (app Android de captura offline) usando Android Studio + IA como copiloto.</li>
+    <li><b>Meta 3:</b> reproducir el <b>visor web</b> que muestra la carrera en un mapa.</li>
+    <li><b>Filosofía:</b> Fidel hace, Martín y Carolina acompañan. En cada paso él aporta ideas; la IA es un ayudante, no el jefe.</li>
+  </ul>
+
+  <h3>2.2 · Instalaciones antes de empezar (paso a paso)</h3>
+  <div class="callout warn"><span class="t">⚠️ Recuerda la regla del proyecto</span>En FidelApp se compila <b>desde Android Studio</b>, no desde la línea de comandos (falta <code>gradle-wrapper.jar</code>). Enséñale a Fidel a usar el botón, no la terminal.</div>
+  <ol>
+    <li><b>Java (JDK):</b> Android Studio ya trae uno incluido. No hace falta instalar nada aparte en la mayoría de casos.</li>
+    <li><b>Android Studio:</b> descargar de <span class="small">developer.android.com/studio</span> → instalar con las opciones por defecto → en el primer arranque deja que baje el "Android SDK".</li>
+    <li><b>Un emulador o el teléfono real:</b> para Fidel lo mejor es su <b>teléfono Android real</b> (activar "Opciones de desarrollador" → "Depuración USB").</li>
+    <li><b>Cuenta de Google + Drive para escritorio:</b> para transferir el APK y sincronizar la carpeta del proyecto.</li>
+    <li><b>Claude Code / Claude:</b> como copiloto de programación (el mismo que usas tú).</li>
+  </ol>
+  <div class="edlabel">✏️ Estado de instalaciones en el PC de Fidel</div>
+  <div class="editable" data-key="nota-instal">Marca qué ya está instalado y qué falta, versión de Windows, modelo del teléfono…</div>
+
+  <h3>2.3 · Glosario: qué es cada cosa (para explicárselo a Fidel)</h3>
+  <table>
+    <tr><th>Palabra</th><th>Explicación sencilla</th></tr>
+    <tr><td><b>Android Studio</b></td><td>El "taller" donde se arma la app. Trae editor, emulador y el botón para construir.</td></tr>
+    <tr><td><b>SDK</b></td><td>Caja de herramientas de Android. Android Studio la descarga sola.</td></tr>
+    <tr><td><b>APK</b></td><td>El archivo instalable de la app (como un .exe pero de Android). Es lo que se le pasa a Fidel por Drive.</td></tr>
+    <tr><td><b>Gradle</b></td><td>El "constructor": junta el código y las piezas y produce el APK. En este proyecto se usa desde el botón, no la terminal.</td></tr>
+    <tr><td><b>Kotlin</b></td><td>El idioma en que está escrita la app.</td></tr>
+    <tr><td><b>Jetpack Compose</b></td><td>La forma moderna de dibujar las pantallas (los botones grandes de captura).</td></tr>
+    <tr><td><b>Room</b></td><td>La base de datos dentro del teléfono donde se guardan GPS, notas y estadísticas.</td></tr>
+    <tr><td><b>ForegroundService</b></td><td>El "motor" que sigue grabando el GPS aunque la pantalla esté apagada.</td></tr>
+    <tr><td><b>FileProvider</b></td><td>El permiso ordenado para compartir fotos/archivos con otras apps (Drive, galería).</td></tr>
+    <tr><td><b>minSdk / targetSdk</b></td><td>Versiones de Android soportadas. Aquí <code>minSdk=21</code> para que funcione en muchos teléfonos.</td></tr>
+    <tr><td><b>GPX</b></td><td>Formato estándar de rutas (para mapas). Es lo que exporta la app.</td></tr>
+  </table>
+
+  <h3>2.4 · El prompt inicial (el mismo enfoque que usamos, listo para copiar)</h3>
+  <p>Así como nosotras partimos de apps gratuitas existentes, Fidel arranca dándole a la IA un prompt claro. Cópialo tal cual:</p>
+  <details open>
+    <summary>📋 Prompt inicial para construir FidelApp con IA</summary>
+    <pre><code>Quiero construir una app Android NATIVA de captura de datos en campo
+para un corredor que recorre municipios de Ecuador, mayormente SIN
+internet. Ayúdame paso a paso, explicando como a alguien que nunca
+ha programado.
+
+Requisitos (v1):
+- Android nativo en Kotlin + Jetpack Compose, minSdk 21, targetSdk 35.
+- Botones GRANDES: iniciar/detener captura, tomar foto, grabar audio,
+  escribir nota de ánimo.
+- Grabar GPS en segundo plano con LocationManager NATIVO
+  (NO Google Play Services, NO FusedLocation).
+- Guardar todo offline en base de datos Room + archivos en
+  almacenamiento externo visible por USB.
+- Exportar la ruta a GPX 1.1 y un ZIP con metadata.json + fotos + audio.
+- Botón para subir el ZIP a Google Drive.
+- SIN Firebase, SIN Supabase, SIN servicios de pago.
+- No copiar código GPL; se puede adaptar Apache 2.0 (OpenTracks).
+
+Empieza explicándome la estructura del proyecto y qué haremos en cada
+sesión. Al final de cada paso, dime cómo probarlo en un teléfono real.</code></pre>
+  </details>
+  <div class="callout tip"><span class="t">💡 Apps gratuitas de referencia (base honesta)</span>Se puede <b>adaptar OpenTracks</b> (licencia Apache 2.0, sí permitido). <b>NO</b> copiar de GPSLogger ni OSMTracker (licencia GPL, no permitido en este proyecto).</div>
+
+  <h3>2.5 · Ruta de la clase, sesión por sesión</h3>
+  <table>
+    <tr><th>Sesión</th><th>Tema</th><th>Resultado esperado</th></tr>
+    <tr><td><span class="num">1</span></td><td>Instalar Android Studio + abrir un proyecto vacío + entender el "taller".</td><td>Ver la app de ejemplo corriendo en el teléfono de Fidel.</td></tr>
+    <tr><td><span class="num">2</span></td><td>Permisos y pantalla principal (ubicación, cámara, micrófono).</td><td>App que pide permisos y muestra los botones grandes.</td></tr>
+    <tr><td><span class="num">3</span></td><td>GPS en segundo plano (ForegroundService).</td><td>Grabar un recorrido caminando por la cuadra.</td></tr>
+    <tr><td><span class="num">4</span></td><td>Fotos y audios + guardarlos en carpetas visibles.</td><td>Ver fotos/audios por cable USB.</td></tr>
+    <tr><td><span class="num">5</span></td><td>Base de datos Room + notas de ánimo.</td><td>Historial de capturas que sobrevive al cerrar la app.</td></tr>
+    <tr><td><span class="num">6</span></td><td>Exportar GPX + ZIP.</td><td>Un ZIP con todo listo para la web.</td></tr>
+    <tr><td><span class="num">7</span></td><td>Subir a Google Drive + generar el APK.</td><td>APK instalado en el teléfono de Fidel vía Drive.</td></tr>
+    <tr><td><span class="num">8</span></td><td>El visor web (Lovable): mostrar la carrera en un mapa.</td><td>Página que lee el ZIP/JSON y dibuja la ruta.</td></tr>
+  </table>
+  <div class="edlabel">✏️ Calendario real de las clases con Fidel</div>
+  <div class="editable" data-key="nota-calendario">Fechas, duración de cada sesión, quién se conecta, dónde…</div>
+
+  <h3>2.6 · Cosas para tener en cuenta en el camino (errores comunes)</h3>
+  <ul>
+    <li><b>Transferir el APK solo por Google Drive.</b> WhatsApp comprime y <b>corrompe</b> el APK.</li>
+    <li><b>Compilar desde el botón de Android Studio</b>, no desde la terminal (falta <code>gradle-wrapper.jar</code>).</li>
+    <li><b>Memoria (OOM):</b> si Android Studio se queda sin memoria, el proyecto ya trae <code>-Xmx2048m</code> en <code>gradle.properties</code>.</li>
+    <li><b>Permisos en Android 15:</b> el teléfono de Fidel es Android 15; probar que pida bien ubicación en segundo plano.</li>
+    <li><b>La primera compilación es lenta</b> (baja dependencias). Es normal, no es un error.</li>
+    <li><b>Guardar avances en Drive/Git</b> para no perder trabajo entre sesiones.</li>
+    <li>Consultar <code>docs/historial-errores.md</code> del proyecto: ahí están los errores ya resueltos.</li>
+  </ul>
+
+  <h3>2.7 · Cómo entregar el APK a Fidel</h3>
+  <ol>
+    <li>En Android Studio: <b>Build → Generate App Bundles or APKs → Build APK(s)</b>.</li>
+    <li>El APK queda en <code>app\build\outputs\apk\debug\app-debug.apk</code>.</li>
+    <li>Subirlo a <b>Google Drive</b> → compartir el enlace con Fidel.</li>
+    <li>En el teléfono: descargar, permitir "instalar de orígenes desconocidos", instalar.</li>
+  </ol>
+</section>
+
+<!-- ============================================================= -->
+<!-- ============ CAPÍTULO 3 — DECISIONES ======================== -->
+<!-- ============================================================= -->
+<section id="cap4">
+  <h2>Capítulo 4 · Decisiones por definir con Fidel ✅</h2>
+  <p>Estas son las bifurcaciones del camino. No hay que resolverlas todas hoy: escribe la decisión y la fecha en cada casilla amarilla a medida que las vayan hablando.</p>
+
+  <div class="decision-card">
+    <div class="q">1. Motor de IA para los textos</div>
+    <div class="opts">Claude (recomendado por español y multimodal) · ChatGPT · comparar en el camino</div>
+    <textarea class="decision" data-key="dec-ia" placeholder="Decisión + fecha…"></textarea>
+  </div>
+
+  <div class="decision-card">
+    <div class="q">2. Cómo corre el agente diario</div>
+    <div class="opts">A) semiautomático con Claude · B) Claude Code programado en el PC · C) 100% en la nube</div>
+    <textarea class="decision" data-key="dec-agente-modo" placeholder="Decisión + fecha…"></textarea>
+  </div>
+
+  <div class="decision-card">
+    <div class="q">3. Qué mostrar como "fatiga" desde Garmin</div>
+    <div class="opts">Body Battery · Training Load · Estado de entrenamiento</div>
+    <textarea class="decision" data-key="dec-fatiga" placeholder="Decisión + fecha…"></textarea>
+  </div>
+
+  <div class="decision-card">
+    <div class="q">4. Cómo salen las métricas del Garmin</div>
+    <div class="opts">Export manual · vía Strava · Connect IQ auto-export · API oficial (v2)</div>
+    <textarea class="decision" data-key="dec-garmin" placeholder="Decisión + fecha…"></textarea>
+  </div>
+
+  <div class="decision-card">
+    <div class="q">5. Almacenamiento cuando se llene Drive (15 GB)</div>
+    <div class="opts">Google One 100 GB (~USD 2/mes) · limpiar y archivar · videos en YouTube no listado</div>
+    <textarea class="decision" data-key="dec-almacen" placeholder="Decisión + fecha…"></textarea>
+  </div>
+
+  <div class="decision-card">
+    <div class="q">6. Cuándo migrar de Lovable a Claude Code</div>
+    <div class="opts">Al llegar a límite de créditos · cuando falte control · cuando funcione lo básico</div>
+    <textarea class="decision" data-key="dec-migracion" placeholder="Decisión + fecha…"></textarea>
+  </div>
+
+  <div class="decision-card">
+    <div class="q">7. Publicación en redes</div>
+    <div class="opts">Meta Business Suite (manual-asistido) · Metricool/Buffer · API oficial de Meta</div>
+    <textarea class="decision" data-key="dec-redes2" placeholder="Decisión + fecha…"></textarea>
+  </div>
+
+  <div class="decision-card">
+    <div class="q">8. Backend de la web para los datos estructurados</div>
+    <div class="opts">JSON generado desde Drive (gratis, simple) · Supabase plan free (si crece)</div>
+    <textarea class="decision" data-key="dec-backend" placeholder="Decisión + fecha…"></textarea>
+  </div>
+
+  <div class="decision-card">
+    <div class="q">9. Voz y estilo de los textos (para el prompt de la IA)</div>
+    <div class="opts">¿Tono más íntimo o más informativo? ¿Menciona nombres de personas? ¿Emojis sí/no?</div>
+    <textarea class="decision" data-key="dec-voz" placeholder="Decisión + fecha…"></textarea>
+  </div>
+
+  <div class="decision-card">
+    <div class="q">10. Qué va en "Quién soy" (contenido fijo)</div>
+    <div class="opts">Biografía · medallas Six Majors · camisetas · artículos · fotos de carreras pasadas</div>
+    <textarea class="decision" data-key="dec-quiensoy" placeholder="Decisión + fecha…"></textarea>
+  </div>
+
+  <div class="decision-card">
+    <div class="q">11. Rutina que conecta Drive con el visor (§1.3)</div>
+    <div class="opts">A) el agente IA también publica · B) GitHub Actions · C) Google Apps Script — y a qué hora corre</div>
+    <textarea class="decision" data-key="dec-sync" placeholder="Decisión + fecha…"></textarea>
+  </div>
+</section>
+
+<!-- ============ BLOC LIBRE ============ -->
+<section id="bloc">
+  <h2>📝 Bloc libre de Fidel, Martín y Carolina</h2>
+  <p>Espacio abierto para ideas, dudas, pendientes o lo que surja en clase.</p>
+  <div class="editable" data-key="bloc-libre" style="min-height:160px">Escribe aquí…</div>
+</section>
+
+<p class="small" style="text-align:center;margin-top:30px">Hecho para el proceso de Fidel con Martín y Carolina · Ecuador · Todo lo editable se guarda solo en este navegador. Recuerda <b>Exportar</b> para respaldar.</p>
+
+</main>
+
+<!-- ============ BARRA DE HERRAMIENTAS ============ -->
+<div class="toolbar">
+  <button onclick="guardarTodo()">💾 Guardar</button>
+  <button class="sec" onclick="exportar()">📤 Exportar</button>
+  <button class="ghost" onclick="document.getElementById('imp').click()">📥 Importar</button>
+  <button class="alt" onclick="window.print()">🖨️ PDF</button>
+  <input id="imp" type="file" accept="application/json" style="display:none" onchange="importar(event)">
+</div>
+<div id="toast"></div>
+
+<script>
+  const STORE = 'fidel_guia_v1';
+  const $campos = () => document.querySelectorAll('[data-key]');
+
+  function toast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 1800);
+  }
+
+  function leerStore(){
+    try { return JSON.parse(localStorage.getItem(STORE) || '{}'); }
+    catch(e){ return {}; }
+  }
+
+  function guardarTodo(silencioso){
+    const data = {};
+    $campos().forEach(el=>{
+      const k = el.getAttribute('data-key');
+      data[k] = ('value' in el && el.tagName==='TEXTAREA') ? el.value : el.innerHTML;
+    });
+    localStorage.setItem(STORE, JSON.stringify(data));
+    if(!silencioso) toast('💾 Guardado');
+  }
+
+  function restaurar(){
+    const data = leerStore();
+    $campos().forEach(el=>{
+      const k = el.getAttribute('data-key');
+      if(data[k] !== undefined && data[k] !== ''){
+        if(el.tagName==='TEXTAREA') el.value = data[k];
+        else el.innerHTML = data[k];
+      }
+    });
+  }
+
+  function exportar(){
+    guardarTodo(true);
+    const blob = new Blob([JSON.stringify(leerStore(), null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    const fecha = new Date().toISOString().slice(0,10);
+    a.href = URL.createObjectURL(blob);
+    a.download = 'guia-fidel_'+fecha+'.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('📤 Exportado — súbelo a Drive');
+  }
+
+  function importar(ev){
+    const file = ev.target.files[0];
+    if(!file) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try{
+        const data = JSON.parse(r.result);
+        localStorage.setItem(STORE, JSON.stringify(data));
+        restaurar();
+        toast('📥 Importado correctamente');
+      }catch(e){ toast('⚠️ Archivo no válido'); }
+    };
+    r.readAsText(file);
+    ev.target.value = '';
+  }
+
+  // autosave con pequeño retraso
+  let _t;
+  function autosave(){ clearTimeout(_t); _t = setTimeout(()=>guardarTodo(true), 700); }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    restaurar();
+    $campos().forEach(el=>{
+      if(el.tagName!=='TEXTAREA') el.setAttribute('contenteditable','true');
+      el.addEventListener('input', autosave);
+      el.addEventListener('blur', ()=>guardarTodo(true));
+    });
+    // Ctrl+S guarda
+    document.addEventListener('keydown', e=>{
+      if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); guardarTodo(); }
+    });
+  });
+</script>
+</body>
+</html>
