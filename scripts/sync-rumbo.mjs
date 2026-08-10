@@ -21,7 +21,7 @@ import crypto from "node:crypto";
 // sobreescribir con la variable de entorno RUMBO_ONEDRIVE_ROOT.
 const RUMBO_ROOT =
   process.env.RUMBO_ONEDRIVE_ROOT ||
-  "C:\\Users\\carol\\OneDrive\\Contratos\\2. FLAR\\1. Fiel a Fidel\\RUMBO";
+  "C:\\RUMBO"; // <ruta_operativa_RUMBO> — definir con la variable de entorno RUMBO_ONEDRIVE_ROOT
 
 const PAQUETE_DIR = path.join(RUMBO_ROOT, "04_PUBLICACION_WEB");
 const CODEBASE_PUBLIC_DIR = path.join(
@@ -476,8 +476,34 @@ async function generatePackage() {
     }
   }
 
-  // --- medios.json / bitacora.json (solo status=published) ---
-  const mediosAutorizados = mediosRows.filter((m) => m.status === "published");
+  // --- medios.json / bitacora.json ---
+  // Condicion EXPLICITA de publicacion: un medio solo puede copiarse a public/
+  // si esta publicado (status=published), con derechos confirmados y una
+  // licencia valida (no vacia ni "pendiente"/"null"). Nunca se asume que por
+  // haberlo cargado Fidel un archivo puede hacerse publico.
+  const licenciaValida = (v) => {
+    const s = String(v ?? "").trim().toLowerCase();
+    return s !== "" && s !== "pendiente" && s !== "null";
+  };
+  const derechosConfirmados = (v) => {
+    const s = String(v ?? "").trim().toLowerCase();
+    return s === "sí" || s === "si";
+  };
+  const aprobadoParaPublicar = (m) =>
+    m.status === "published" &&
+    derechosConfirmados(m.derechos_confirmados) &&
+    licenciaValida(m.licencia);
+  const mediosAutorizados = mediosRows.filter(aprobadoParaPublicar);
+  for (const m of mediosRows) {
+    if (m.status === "published" && !aprobadoParaPublicar(m)) {
+      warn(
+        `Medio ${m.media_id} publicado pero SIN aprobacion para public/ (falta derechos_confirmados=Si o licencia valida); no se copia.`
+      );
+    }
+  }
+  // Mapa bitacora_id -> ruta web del medio APROBADO derivado de ese original,
+  // para que la Bitacora enlace solo medios aprobados (nunca el original).
+  const aprobadoPorBitacoraId = new Map();
   const medios = [];
   await fsp.mkdir(path.join(PAQUETE_DIR, "archivos", "imagenes"), { recursive: true });
   await fsp.mkdir(path.join(PAQUETE_DIR, "archivos", "audios"), { recursive: true });
@@ -503,6 +529,8 @@ async function generatePackage() {
     } else {
       warn(`Medio ${m.media_id} sin bitacora_id/ubicacion resuelta, no se copia`);
     }
+
+    if (webPath && m.bitacora_id) aprobadoPorBitacoraId.set(m.bitacora_id, webPath);
 
     medios.push({
       mediaId: m.media_id,
@@ -543,7 +571,7 @@ async function generatePackage() {
     });
   }
 
-  await fsp.mkdir(path.join(PAQUETE_DIR, "archivos", "originales"), { recursive: true });
+  // NO se crea "archivos/originales": los originales nunca se publican.
 
   const bitacoraIds = new Set();
   const bitacoraItems = [];
@@ -570,19 +598,11 @@ async function generatePackage() {
       }
     }
 
-    let webPath = null;
-    if (b.ubicacion_bitacora) {
-      const srcReal = resolveRumboAsset(b.ubicacion_bitacora);
-      if (fs.existsSync(srcReal)) {
-        const destName = safeMediaName(b.bitacora_id, b.nombre_original);
-        await fsp.copyFile(srcReal, path.join(PAQUETE_DIR, "archivos", "originales", destName));
-        webPath = `archivos/originales/${destName}`;
-      } else {
-        warn(`Original de Bitacora no encontrado en disco, no se copia: ${b.bitacora_id} (${srcReal})`);
-      }
-    } else {
-      warn(`Bitacora ${b.bitacora_id} sin ubicacion_bitacora resuelta, no se copia`);
-    }
+    // Regla de privacidad: los ORIGINALES nunca se publican en public/. La
+    // Bitacora enlaza unicamente el medio ya APROBADO para publicacion derivado
+    // de este original (published + derechos_confirmados + licencia valida). Si
+    // no hay medio aprobado, la Bitacora no expone ningun archivo (rutaWeb null).
+    const webPath = aprobadoPorBitacoraId.get(b.bitacora_id) || null;
 
     bitacoraItems.push({
       id: b.bitacora_id,

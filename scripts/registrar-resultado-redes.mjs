@@ -25,7 +25,7 @@ import path from "node:path";
 
 const RUMBO_ROOT =
   process.env.RUMBO_ONEDRIVE_ROOT ||
-  "C:\\Users\\carol\\OneDrive\\Contratos\\2. FLAR\\1. Fiel a Fidel\\RUMBO";
+  "C:\\RUMBO"; // <ruta_operativa_RUMBO> — definir con la variable de entorno RUMBO_ONEDRIVE_ROOT
 const LISTOS_DIR = path.join(RUMBO_ROOT, "05_LISTOS_PUBLICAR");
 const DIR_PUBLICADOS = path.join(RUMBO_ROOT, "06_PUBLICADOS");
 const DIR_PARCIAL = path.join(RUMBO_ROOT, "07_PUBLICADOS_PARCIAL");
