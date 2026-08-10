@@ -15,6 +15,11 @@ import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
+import {
+  necesitaDerivadoInstagram,
+  generarDerivadoInstagram,
+  ratioDe,
+} from "./lib/instagram-image.mjs";
 
 // --- Configuración de rutas ---
 // El root operativo de RUMBO vive en OneDrive, fuera del codebase. Se puede
@@ -532,12 +537,66 @@ async function generatePackage() {
 
     if (webPath && m.bitacora_id) aprobadoPorBitacoraId.set(m.bitacora_id, webPath);
 
+    // Derivado compatible con Instagram Foto (solo fotografias). Nunca toca el
+    // original: crea "<base>__instagram.jpg" en la misma carpeta imagenes/.
+    // Idempotente. Si no puede generarse, se marca error y no se enlaza (para
+    // que preparar-publicacion-redes.mjs bloquee esa foto en Instagram).
+    let instagram = null;
+    if (webPath && m.tipo_medio === "fotografia") {
+      const w = toNumberOrNull(bitacoraOrigen?.ancho_pixeles);
+      const h = toNumberOrNull(bitacoraOrigen?.alto_pixeles);
+      const srcRealImg = rutaOrigenRel ? resolveRumboAsset(rutaOrigenRel) : null;
+      const destNameIg = safeMediaName(m.media_id, nombreOriginal);
+      if (w && h && necesitaDerivadoInstagram(w, h) && srcRealImg && fs.existsSync(srcRealImg)) {
+        const res = await generarDerivadoInstagram({
+          srcPath: srcRealImg,
+          w,
+          h,
+          destDir: path.join(PAQUETE_DIR, "archivos", carpeta),
+          nombreArchivo: destNameIg,
+        });
+        if (res.ok) {
+          instagram = {
+            requiereDerivado: true,
+            rutaWebInstagram: `archivos/${carpeta}/${res.nombre}`,
+            anchoOriginal: w,
+            altoOriginal: h,
+            ratioOriginal: res.ratioOriginal,
+            anchoDerivado: res.outW,
+            altoDerivado: res.outH,
+            ratioFinal: res.ratioFinal,
+          };
+        } else {
+          instagram = {
+            requiereDerivado: true,
+            error: res.error,
+            rutaWebInstagram: null,
+            anchoOriginal: w,
+            altoOriginal: h,
+            ratioOriginal: ratioDe(w, h),
+          };
+          warn(
+            `No se pudo generar el derivado Instagram de ${m.media_id}: ${res.error}. No debe publicarse en Instagram.`
+          );
+        }
+      } else if (w && h) {
+        instagram = {
+          requiereDerivado: false,
+          rutaWebInstagram: webPath,
+          anchoOriginal: w,
+          altoOriginal: h,
+          ratioOriginal: ratioDe(w, h),
+        };
+      }
+    }
+
     medios.push({
       mediaId: m.media_id,
       tipo: m.tipo_medio,
       titulo: m.titulo,
       descripcion: m.descripcion,
       rutaWeb: webPath,
+      instagram,
       credito: bitacoraOrigen?.autor || null,
       fuente: m.location_source,
       licencia: null,
