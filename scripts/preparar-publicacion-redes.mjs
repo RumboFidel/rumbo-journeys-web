@@ -23,6 +23,10 @@ import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
+import {
+  necesitaDerivadoInstagram,
+  nombreDerivadoInstagram,
+} from "./lib/instagram-image.mjs";
 
 const RUMBO_ROOT =
   process.env.RUMBO_ONEDRIVE_ROOT ||
@@ -304,7 +308,25 @@ function validarPublicacion(pubRow, ctx) {
     let urlPublica = null;
     if (ctx.publicSiteBaseUrl && medio.status === "published" && srcReal && fs.existsSync(srcReal)) {
       const destName = safeMediaName(medio.media_id, bitacora.nombre_original);
-      urlPublica = `${ctx.publicSiteBaseUrl}/data/rumbo/archivos/${tipoWeb}/${destName}`;
+      let webName = destName;
+      // Instagram Foto exige relacion de aspecto 0.8..1.91. Si la imagen esta
+      // fuera de rango, la url_publica debe apuntar al DERIVADO que genero
+      // sync-rumbo ("<base>__instagram.jpg"); si el derivado no existe, se
+      // bloquea con error_preparacion_imagen_instagram.
+      if (publicarInstagram && tipoRedes === "imagen") {
+        const w = Number(bitacora.ancho_pixeles) || null;
+        const h = Number(bitacora.alto_pixeles) || null;
+        if (w && h && necesitaDerivadoInstagram(w, h)) {
+          const deriv = nombreDerivadoInstagram(destName);
+          const derivDisk = path.join(process.cwd(), "public", "data", "rumbo", "archivos", tipoWeb, deriv);
+          if (fs.existsSync(derivDisk)) {
+            webName = deriv;
+          } else {
+            motivos.push(`error_preparacion_imagen_instagram:${medio.media_id}`);
+          }
+        }
+      }
+      urlPublica = `${ctx.publicSiteBaseUrl}/data/rumbo/archivos/${tipoWeb}/${webName}`;
     }
 
     // ruta_onedrive debe ser la ruta completa desde la raiz de My Drive hacia
