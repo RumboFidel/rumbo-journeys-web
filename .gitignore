@@ -51,3 +51,8 @@ RESPALDOS_CODEBASE/
 
 # Explícitamente SÍ se incluye (no excluir el paquete web generado):
 !public/data/rumbo/
+
+# Originales privados de la Bitacora: NUNCA se publican (regla de privacidad RUMBO)
+public/data/rumbo/archivos/originales/
+# Guia interna del proyecto: vive en la operacion privada RUMBO, no en el repo publico
+guia-proyecto-fidel.html

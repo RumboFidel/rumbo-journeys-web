@@ -26,7 +26,7 @@ import crypto from "node:crypto";
 
 const RUMBO_ROOT =
   process.env.RUMBO_ONEDRIVE_ROOT ||
-  "C:\\Users\\carol\\OneDrive\\Contratos\\2. FLAR\\1. Fiel a Fidel\\RUMBO";
+  "C:\\RUMBO"; // <ruta_operativa_RUMBO> — definir con la variable de entorno RUMBO_ONEDRIVE_ROOT
 const LISTOS_DIR = path.join(RUMBO_ROOT, "05_LISTOS_PUBLICAR");
 const MARKER_PREFIX = "LISTO_PARA_PUBLICAR";
 const SCHEMA_VERSION = "1.0";
@@ -162,12 +162,54 @@ function cargarContexto(workbook) {
 
 // --- Validacion pura: nunca copia archivos ni escribe nada ---
 
+// Marca de idempotencia estable por publicacion: Make la adjunta al post (o la
+// usa para buscarlo despues) y permite verificar si una red ya publico sin
+// depender solo de su memoria interna.
+function marcaIdempotenciaDe(publicacionId) {
+  return `RUMBO::${publicacionId}`;
+}
+
+// Redes ya publicadas segun la hoja 21 (post_id presente). En un reintento se
+// arrastran para que Make NO las vuelva a publicar (omitir_redes) y para
+// conservar su post_id/url en el manifiesto (redes_completadas).
+function redesCompletadasDe(pubRow) {
+  const out = [];
+  if (pubRow.facebook_post_id) {
+    out.push({
+      red: "facebook",
+      post_id: pubRow.facebook_post_id,
+      url: pubRow.facebook_url || null,
+      fecha: pubRow.facebook_fecha_publicacion || null,
+    });
+  }
+  if (pubRow.instagram_post_id) {
+    out.push({
+      red: "instagram",
+      post_id: pubRow.instagram_post_id,
+      url: pubRow.instagram_url || null,
+      fecha: pubRow.instagram_fecha_publicacion || null,
+    });
+  }
+  return out;
+}
+
+const ESTADOS_REINTENTO = ["en_proceso", "error", "publicada_parcial", "pendiente_seguro"];
+
 function validarPublicacion(pubRow, ctx) {
   const motivos = [];
   const publicacionId = pubRow.publicacion_id;
 
   const publicarInstagram = esSi(pubRow.publicar_instagram);
   const publicarFacebook = esSi(pubRow.publicar_facebook);
+
+  // Reintento: hay al menos un post_id previo o la fila esta en un estado
+  // recuperable. En ese caso NO se trata la presencia de archivos como
+  // duplicado, y se arrastran las redes ya publicadas.
+  const redesCompletadas = redesCompletadasDe(pubRow);
+  const omitirRedes = redesCompletadas.map((r) => r.red);
+  const esReintento =
+    redesCompletadas.length > 0 ||
+    ESTADOS_REINTENTO.includes(String(pubRow.estado ?? "").trim());
   if (!publicarInstagram && !publicarFacebook) {
     motivos.push("ninguna_red_autorizada");
   }
@@ -203,7 +245,10 @@ function validarPublicacion(pubRow, ctx) {
     (r) => r.publicacion_id === publicacionId && r.__row !== pubRow.__row && ["lista_para_publicar", "publicada"].includes(r.estado)
   );
   if (otraFilaMisma) motivos.push("publicacion_duplicada");
-  if (fs.existsSync(LISTOS_DIR)) {
+  // En un reintento legitimo los medios planos ya estan en 05_LISTOS_PUBLICAR;
+  // no debe contarse como duplicado. Solo se bloquea por archivos preexistentes
+  // cuando NO es reintento.
+  if (!esReintento && fs.existsSync(LISTOS_DIR)) {
     const yaExiste = fs
       .readdirSync(LISTOS_DIR)
       .some((f) => f.includes(`pub-${sufijoId(publicacionId)}`) || f === `${MARKER_PREFIX}__${publicacionId}.json`);
@@ -319,6 +364,15 @@ function validarPublicacion(pubRow, ctx) {
     formato_facebook: pubRow.formato_facebook || null,
     texto_instagram: pubRow.texto_instagram || "",
     texto_facebook: pubRow.texto_facebook || "",
+    // Idempotencia y control por red (v1.1)
+    marca_idempotencia: marcaIdempotenciaDe(publicacionId),
+    redes_autorizadas: [
+      publicarFacebook ? "facebook" : null,
+      publicarInstagram ? "instagram" : null,
+    ].filter(Boolean),
+    redes_completadas: redesCompletadas, // ya publicadas (con post_id): Make NO las repite
+    omitir_redes: omitirRedes,
+    es_reintento: esReintento,
     medios: medios.map(({ __srcReal, ...m }) => m),
     cantidad_medios: medios.length,
     permitir_publicacion: permitirPublicacion,
@@ -395,11 +449,29 @@ async function prepararPublicacion(pubRow, ctx, ws21, colIndex) {
   const hashes = mediosConRuta.map((m) => m.sha256);
   const fechaPreparacion = new Date().toISOString();
   const fila = ws21.getRow(pubRow.__row);
-  fila.getCell(colIndex.estado).value = "lista_para_publicar";
-  fila.getCell(colIndex.fecha_preparacion).value = fechaPreparacion;
-  fila.getCell(colIndex.archivos).value = archivosCopiados.join(", ");
-  fila.getCell(colIndex.hashes_sha256).value = hashes.join(", ");
-  fila.getCell(colIndex.motivos_bloqueo_ultima_validacion).value = "";
+  const setIf = (name, val) => {
+    if (colIndex[name]) fila.getCell(colIndex[name]).value = val;
+  };
+  setIf("estado", "lista_para_publicar");
+  setIf("fecha_preparacion", fechaPreparacion);
+  setIf("archivos", archivosCopiados.join(", "));
+  setIf("hashes_sha256", hashes.join(", "));
+  setIf("motivos_bloqueo_ultima_validacion", "");
+
+  // Inicializacion de estado/intentos por red (v1.1). En un reintento se
+  // conservan los intentos y los estados ya publicados.
+  const estadoRed = (red) =>
+    manifest[`publicar_${red}`]
+      ? manifest.omitir_redes.includes(red)
+        ? "publicada"
+        : "pendiente"
+      : "no_aplica";
+  setIf("facebook_estado", estadoRed("facebook"));
+  setIf("instagram_estado", estadoRed("instagram"));
+  if (!manifest.es_reintento) {
+    setIf("facebook_intentos", 0);
+    setIf("instagram_intentos", 0);
+  }
 
   console.log(`\nLISTA PARA PUBLICAR: ${pubRow.publicacion_id}`);
   console.log(`  Archivos copiados a ${LISTOS_DIR}:`);
