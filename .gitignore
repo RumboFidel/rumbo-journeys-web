@@ -46,6 +46,10 @@ RUMBO/
 # La plantilla versionada es rumbo.config.example.json.
 rumbo.config.json
 
+# Excel operativo y archivos temporales de Office
+*.xlsx
+~$*.xlsx
+
 # Respaldos y temporales
 *.bak
 RESPALDOS_CODEBASE/
