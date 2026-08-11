@@ -13,8 +13,12 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { execFileSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
-const SCRIPT = path.resolve(new URL(".", import.meta.url).pathname, "../registrar-resultado-redes.mjs");
+// En Windows, new URL(".", import.meta.url).pathname devuelve "/C:/..." con los
+// espacios percent-encoded, y path.resolve lo convertia en "C:\C:\...%20...".
+// fileURLToPath es la unica forma correcta de pasar de URL a ruta del sistema.
+const SCRIPT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../registrar-resultado-redes.mjs");
 const HEADERS = [
   "publicacion_id","historia_id","carrera_id","publicar_instagram","publicar_facebook",
   "formato_instagram","formato_facebook","texto_instagram","texto_facebook","media_ids",

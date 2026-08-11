@@ -240,6 +240,84 @@ caso("my drive: la configuracion y la variable mandan sobre el calculo", () => {
   );
 });
 
+// ------------------------------------------- REGLAS PROPIAS DEL REGISTRADOR
+
+// registrar-resultado-redes.mjs no resuelve rutas contra la carpeta padre, asi
+// que no le aplica el nombre de la raiz; en cambio necesita las cuatro carpetas
+// del ciclo de cierre, no 04_PUBLICACION_WEB.
+const REGLAS_REGISTRADOR = {
+  exigirNombreRaiz: false,
+  carpetasRequeridas: ["05_LISTOS_PUBLICAR", "06_PUBLICADOS", "07_PUBLICADOS_PARCIAL", "08_ERRORES"],
+};
+
+function raizDeCierre(base, nombre = "rumbo-fixture") {
+  const root = path.join(base, nombre);
+  fs.mkdirSync(root, { recursive: true });
+  for (const c of REGLAS_REGISTRADOR.carpetasRequeridas) fs.mkdirSync(path.join(root, c), { recursive: true });
+  fs.writeFileSync(path.join(root, "MASTER_TEST.xlsx"), "fixture");
+  return root;
+}
+
+caso("registrador: acepta una raiz de fixture que no se llama RUMBO", () => {
+  const root = raizDeCierre(tmp("reg-ok"));
+  assert(validarRaiz(root, REGLAS_REGISTRADOR).length === 0, "el fixture del harness deberia ser valido");
+  assert(
+    validarRaiz(root).some((p) => p.includes("debe llamarse exactamente")),
+    "con las reglas estrictas si deberia quejarse del nombre"
+  );
+  const r = resolverRumboRoot({ env: { [ENV_ROOT]: root }, desde: tmp("reg-c"), ...REGLAS_REGISTRADOR });
+  assert(r.root === path.resolve(root), "deberia resolver la raiz del fixture");
+});
+
+caso("registrador: rechaza una raiz sin las carpetas del ciclo de cierre", () => {
+  const base = tmp("reg-falta");
+  const root = path.join(base, "RUMBO");
+  fs.mkdirSync(path.join(root, "05_LISTOS_PUBLICAR"), { recursive: true });
+  fs.writeFileSync(path.join(root, "MASTER_TEST.xlsx"), "fixture");
+  const problemas = validarRaiz(root, REGLAS_REGISTRADOR);
+  assert(problemas.some((p) => p.includes("06_PUBLICADOS")), `problemas: ${problemas.join(" | ")}`);
+  assert(problemas.some((p) => p.includes("08_ERRORES")), "deberia listar todas las que faltan");
+});
+
+caso("registrador: 04_PUBLICACION_WEB no es requisito suyo", () => {
+  const root = raizDeCierre(tmp("reg-04"));
+  assert(!fs.existsSync(path.join(root, "04_PUBLICACION_WEB")), "el fixture no tiene esa carpeta");
+  assert(validarRaiz(root, REGLAS_REGISTRADOR).length === 0, "y aun asi debe ser valida para el registrador");
+});
+
+function correrRegistrador(root) {
+  try {
+    execFileSync(
+      process.execPath,
+      [path.join(raizCodebase(), "scripts", "registrar-resultado-redes.mjs"), "--reconciliar"],
+      { env: { ...process.env, [ENV_ROOT]: root }, encoding: "utf-8", stdio: "pipe" }
+    );
+    return { code: 0, stderr: "" };
+  } catch (e) {
+    return { code: e.status, stderr: String(e.stderr ?? "") };
+  }
+}
+
+caso("registrador cli: carpeta inexistente falla antes de tocar nada", () => {
+  const { code, stderr } = correrRegistrador(path.join(tmp("reg-cli"), "NO_EXISTE"));
+  assert(code === 1, `esperaba codigo 1, obtuve ${code}`);
+  assert(stderr.includes("configurar:rumbo"), "el error debe decir como configurarlo");
+  assert(stderr.includes("no existe"), "debe decir que la carpeta no existe");
+  assert(!stderr.includes("C:\\RUMBO"), "no debe mencionar el antiguo fallback");
+  assert(!stderr.includes("ENOENT"), "no debe filtrarse un ENOENT crudo");
+});
+
+caso("registrador cli: carpeta sin las terminales lista lo que falta", () => {
+  const base = tmp("reg-cli2");
+  const root = path.join(base, "RUMBO");
+  fs.mkdirSync(path.join(root, "05_LISTOS_PUBLICAR"), { recursive: true });
+  fs.writeFileSync(path.join(root, "MASTER_TEST.xlsx"), "fixture");
+  const { code, stderr } = correrRegistrador(root);
+  assert(code === 1, `esperaba codigo 1, obtuve ${code}`);
+  assert(stderr.includes("06_PUBLICADOS"), "debe nombrar la carpeta terminal que falta");
+  assert(stderr.includes("08_ERRORES"), "debe nombrarlas todas");
+});
+
 // ------------------------------------------------------------ CLI DE VERDAD
 
 caso("cli: --verificar informa correctamente con una ruta valida", () => {

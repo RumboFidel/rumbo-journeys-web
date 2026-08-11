@@ -81,8 +81,23 @@ export function leerConfig(desde = raizCodebase()) {
 /**
  * Comprueba una carpeta candidata. Devuelve la lista de problemas encontrados
  * (vacia = valida). No lanza: quien llama decide como reportarlos.
+ *
+ * Cada script valida lo que realmente necesita:
+ *   - sync-rumbo y preparar-publicacion-redes resuelven rutas del Excel con
+ *     path.join(RUMBO_ROOT, "..", "RUMBO/..."), asi que para ellos el nombre de
+ *     la carpeta es obligatorio;
+ *   - registrar-resultado-redes solo trabaja dentro de la raiz (05 a 08 y el
+ *     Excel), nunca contra la carpeta padre, y ademas necesita las carpetas
+ *     terminales, no 04_PUBLICACION_WEB.
  */
-export function validarRaiz(dir, { exigirExcel = true } = {}) {
+export function validarRaiz(
+  dir,
+  {
+    exigirExcel = true,
+    exigirNombreRaiz = true,
+    carpetasRequeridas = CARPETAS_REQUERIDAS,
+  } = {}
+) {
   const problemas = [];
   if (!dir || !String(dir).trim()) {
     return ["la ruta esta vacia"];
@@ -100,7 +115,7 @@ export function validarRaiz(dir, { exigirExcel = true } = {}) {
   }
 
   const base = path.basename(abs);
-  if (base.toUpperCase() !== NOMBRE_RAIZ) {
+  if (exigirNombreRaiz && base.toUpperCase() !== NOMBRE_RAIZ) {
     problemas.push(
       `la carpeta se llama "${base}" y debe llamarse exactamente "${NOMBRE_RAIZ}" ` +
         `(las rutas del Excel empiezan por "RUMBO/" y se resuelven contra la carpeta padre)`
@@ -127,7 +142,7 @@ export function validarRaiz(dir, { exigirExcel = true } = {}) {
     }
   }
 
-  for (const carpeta of CARPETAS_REQUERIDAS) {
+  for (const carpeta of carpetasRequeridas) {
     if (!fs.existsSync(path.join(abs, carpeta))) {
       problemas.push(`falta la subcarpeta ${carpeta}`);
     }
@@ -153,7 +168,7 @@ export function excelDeLaRaiz(dir) {
  * en cada nivel una subcarpeta llamada RUMBO que valide. Devuelve todas las
  * candidatas encontradas (sin repetir).
  */
-export function detectarRaices(desde = raizCodebase(), { exigirExcel = true } = {}) {
+export function detectarRaices(desde = raizCodebase(), opciones = {}) {
   const encontradas = [];
   let actual = path.resolve(desde);
 
@@ -168,7 +183,7 @@ export function detectarRaices(desde = raizCodebase(), { exigirExcel = true } = 
       // Carpeta ilegible: se ignora y se sigue subiendo.
     }
     for (const c of candidatas) {
-      if (validarRaiz(c, { exigirExcel }).length === 0 && !encontradas.includes(c)) {
+      if (validarRaiz(c, opciones).length === 0 && !encontradas.includes(c)) {
         encontradas.push(c);
       }
     }
@@ -180,7 +195,7 @@ export function detectarRaices(desde = raizCodebase(), { exigirExcel = true } = 
   return encontradas;
 }
 
-function bloqueDeAyuda(intentos, problemasPorRuta) {
+function bloqueDeAyuda(intentos, problemasPorRuta, carpetasRequeridas = CARPETAS_REQUERIDAS) {
   const lineas = [];
   lineas.push("No encuentro la carpeta operativa de RUMBO.");
   lineas.push("");
@@ -201,7 +216,7 @@ function bloqueDeAyuda(intentos, problemasPorRuta) {
   lineas.push("  Requisitos de esa carpeta:");
   lineas.push(`    · llamarse exactamente ${NOMBRE_RAIZ}`);
   lineas.push("    · contener un unico archivo .xlsx (el Excel maestro)");
-  lineas.push(`    · contener las subcarpetas ${CARPETAS_REQUERIDAS.join(" y ")}`);
+  lineas.push(`    · contener las subcarpetas ${carpetasRequeridas.join(", ")}`);
   return lineas.join("\n");
 }
 
@@ -215,14 +230,17 @@ export function resolverRumboRoot({
   env = process.env,
   desde = raizCodebase(),
   exigirExcel = true,
+  exigirNombreRaiz = true,
+  carpetasRequeridas = CARPETAS_REQUERIDAS,
 } = {}) {
+  const reglas = { exigirExcel, exigirNombreRaiz, carpetasRequeridas };
   const intentos = [];
   const problemasPorRuta = [];
 
   // 1. Variable de entorno
   const desdeEnv = String(env[ENV_ROOT] ?? "").trim();
   if (desdeEnv) {
-    const problemas = validarRaiz(desdeEnv, { exigirExcel });
+    const problemas = validarRaiz(desdeEnv, reglas);
     if (problemas.length === 0) {
       return {
         root: path.resolve(desdeEnv),
@@ -247,7 +265,7 @@ export function resolverRumboRoot({
   const cfg = leerConfig(desde);
   const desdeCfg = cfg ? String(cfg.rumboRoot ?? "").trim() : "";
   if (desdeCfg) {
-    const problemas = validarRaiz(desdeCfg, { exigirExcel });
+    const problemas = validarRaiz(desdeCfg, reglas);
     if (problemas.length === 0) {
       return {
         root: path.resolve(desdeCfg),
@@ -265,7 +283,7 @@ export function resolverRumboRoot({
   }
 
   // 3. Deteccion segura
-  const detectadas = detectarRaices(desde, { exigirExcel });
+  const detectadas = detectarRaices(desde, reglas);
   if (detectadas.length === 1) {
     return {
       root: detectadas[0],
@@ -285,7 +303,7 @@ export function resolverRumboRoot({
   intentos.push(`deteccion automatica desde ${desde} (sin resultados)`);
 
   // 4. Error accionable
-  throw new RumboRootError(bloqueDeAyuda(intentos, problemasPorRuta));
+  throw new RumboRootError(bloqueDeAyuda(intentos, problemasPorRuta, carpetasRequeridas));
 }
 
 /**

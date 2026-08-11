@@ -22,10 +22,26 @@ import ExcelJS from "exceljs";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
+import { resolverRumboRootCLI } from "./lib/rumbo-root.mjs";
 
-const RUMBO_ROOT =
-  process.env.RUMBO_ONEDRIVE_ROOT ||
-  "C:\\RUMBO"; // <ruta_operativa_RUMBO> — definir con la variable de entorno RUMBO_ONEDRIVE_ROOT
+// La ubicacion de la carpeta operativa se resuelve en scripts/lib/rumbo-root.mjs
+// con esta precedencia: RUMBO_ONEDRIVE_ROOT -> rumbo.config.json -> deteccion
+// -> error accionable. Nunca hay un fallback silencioso a una ruta inexistente.
+//
+// Este script solo trabaja DENTRO de la raiz (carpetas 05 a 08, LOGS y el
+// Excel); nunca resuelve rutas contra la carpeta padre, asi que no le aplica la
+// exigencia de que la carpeta se llame exactamente RUMBO —esa la imponen
+// sync-rumbo y preparar-publicacion-redes, que corren antes en la rutina
+// nocturna—. Lo que si necesita son las cuatro carpetas del ciclo de cierre.
+const { root: RUMBO_ROOT } = resolverRumboRootCLI({
+  exigirNombreRaiz: false,
+  carpetasRequeridas: [
+    "05_LISTOS_PUBLICAR",
+    "06_PUBLICADOS",
+    "07_PUBLICADOS_PARCIAL",
+    "08_ERRORES",
+  ],
+});
 const LISTOS_DIR = path.join(RUMBO_ROOT, "05_LISTOS_PUBLICAR");
 const DIR_PUBLICADOS = path.join(RUMBO_ROOT, "06_PUBLICADOS");
 const DIR_PARCIAL = path.join(RUMBO_ROOT, "07_PUBLICADOS_PARCIAL");
