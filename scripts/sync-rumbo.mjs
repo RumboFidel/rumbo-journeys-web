@@ -20,13 +20,14 @@ import {
   generarDerivadoInstagram,
   ratioDe,
 } from "./lib/instagram-image.mjs";
+import { resolverRumboRootCLI } from "./lib/rumbo-root.mjs";
 
 // --- Configuración de rutas ---
-// El root operativo de RUMBO vive en OneDrive, fuera del codebase. Se puede
-// sobreescribir con la variable de entorno RUMBO_ONEDRIVE_ROOT.
-const RUMBO_ROOT =
-  process.env.RUMBO_ONEDRIVE_ROOT ||
-  "C:\\RUMBO"; // <ruta_operativa_RUMBO> — definir con la variable de entorno RUMBO_ONEDRIVE_ROOT
+// El root operativo de RUMBO vive fuera del codebase (hoy en OneDrive). Su
+// ubicación se resuelve en scripts/lib/rumbo-root.mjs con esta precedencia:
+// RUMBO_ONEDRIVE_ROOT -> rumbo.config.json -> detección -> error accionable.
+// Nunca hay un fallback silencioso a una ruta que no existe.
+const { root: RUMBO_ROOT, origen: ORIGEN_RUMBO_ROOT } = resolverRumboRootCLI();
 
 const PAQUETE_DIR = path.join(RUMBO_ROOT, "04_PUBLICACION_WEB");
 const CODEBASE_PUBLIC_DIR = path.join(
@@ -168,7 +169,7 @@ function sha256OfFile(p) {
 // --- Fase 1: GENERAR paquete en RUMBO/04_PUBLICACION_WEB ---
 
 async function generatePackage() {
-  console.log(`Leyendo Excel maestro desde: ${RUMBO_ROOT}`);
+  console.log(`Leyendo Excel maestro desde: ${RUMBO_ROOT}  (${ORIGEN_RUMBO_ROOT})`);
 
   // 1. Confirmar el Excel activo declarado en 09_CONFIGURACION
   const xlsxFiles = fs

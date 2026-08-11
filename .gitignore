@@ -42,6 +42,9 @@ dist-ssr
 *.tcx
 RUMBO/
 **/RUMBO/
+# Configuracion local de la ruta operativa: contiene una ruta personal.
+# La plantilla versionada es rumbo.config.example.json.
+rumbo.config.json
 
 # Respaldos y temporales
 *.bak

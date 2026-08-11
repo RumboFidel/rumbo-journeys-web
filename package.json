@@ -10,6 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "configurar:rumbo": "node scripts/configurar-rumbo.mjs",
+    "test:rutas": "node scripts/tests/test-rumbo-root.mjs",
     "generar:paquete-web": "node scripts/sync-rumbo.mjs --generate",
     "sync:web": "node scripts/sync-rumbo.mjs --sync",
     "sync:rumbo": "node scripts/sync-rumbo.mjs",

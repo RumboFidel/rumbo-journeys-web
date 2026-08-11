@@ -27,10 +27,12 @@ import {
   necesitaDerivadoInstagram,
   nombreDerivadoInstagram,
 } from "./lib/instagram-image.mjs";
+import { resolverRumboRootCLI, resolverMyDriveRoot } from "./lib/rumbo-root.mjs";
 
-const RUMBO_ROOT =
-  process.env.RUMBO_ONEDRIVE_ROOT ||
-  "C:\\RUMBO"; // <ruta_operativa_RUMBO> — definir con la variable de entorno RUMBO_ONEDRIVE_ROOT
+// La ubicacion de la carpeta operativa se resuelve en scripts/lib/rumbo-root.mjs
+// con esta precedencia: RUMBO_ONEDRIVE_ROOT -> rumbo.config.json -> deteccion
+// -> error accionable. Nunca hay un fallback silencioso a una ruta inexistente.
+const { root: RUMBO_ROOT, config: RUMBO_CONFIG } = resolverRumboRootCLI();
 const LISTOS_DIR = path.join(RUMBO_ROOT, "05_LISTOS_PUBLICAR");
 const MARKER_PREFIX = "LISTO_PARA_PUBLICAR";
 const SCHEMA_VERSION = "1.0";
@@ -42,16 +44,11 @@ const SCHEMA_VERSION = "1.0";
 // apuntando siempre a la copia plana ya generada en 05_LISTOS_PUBLICAR (la
 // unica que Make puede descargar), nunca a la ubicacion original dispersa del
 // archivo en 02_BITACORA_ORIGINAL.
-function calcularRaizMyDrive(rutaAbsolutaRumboRoot) {
-  const marcador = "OneDrive";
-  const idx = rutaAbsolutaRumboRoot.indexOf(marcador);
-  if (idx === -1) return null;
-  const relativa = rutaAbsolutaRumboRoot.slice(idx + marcador.length).replace(/\\/g, "/");
-  return relativa.startsWith("/") ? relativa : `/${relativa}`;
-}
-
-const MYDRIVE_RUMBO_ROOT =
-  process.env.RUMBO_MYDRIVE_RELATIVE_ROOT || calcularRaizMyDrive(RUMBO_ROOT);
+//
+// Si la carpeta operativa deja de estar en OneDrive (Dropbox, Google Drive), el
+// calculo automatico no aplica y el valor debe declararse en rumbo.config.json
+// (myDriveRelativeRoot) o en RUMBO_MYDRIVE_RELATIVE_ROOT.
+const MYDRIVE_RUMBO_ROOT = resolverMyDriveRoot(RUMBO_ROOT, { config: RUMBO_CONFIG });
 
 // --- Utilidades compartidas con scripts/sync-rumbo.mjs (mismo criterio) ---
 

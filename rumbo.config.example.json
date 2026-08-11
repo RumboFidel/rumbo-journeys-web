@@ -1,0 +1,7 @@
+{
+  "_ayuda": "Copia este archivo como rumbo.config.json (que NO se versiona) o generalo con: npm run configurar:rumbo -- \"<ruta de tu carpeta RUMBO>\"",
+  "_rumboRoot": "Ruta absoluta a la carpeta operativa. Debe llamarse exactamente RUMBO, contener un unico .xlsx y las subcarpetas 04_PUBLICACION_WEB y 05_LISTOS_PUBLICAR.",
+  "rumboRoot": "<ruta absoluta a tu carpeta RUMBO>",
+  "_myDriveRelativeRoot": "Ruta de esa misma carpeta vista desde la raiz de la nube, tal como la pide Make en 'Download a File'. Si la carpeta cuelga de OneDrive se calcula sola y puedes omitir esta clave. Con Dropbox o Google Drive es obligatoria.",
+  "myDriveRelativeRoot": "/<carpetas intermedias>/RUMBO"
+}
