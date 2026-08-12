@@ -69,6 +69,12 @@ function CarrerasPage() {
             </div>
           </div>
 
+          {carrerasById.size === 0 ? (
+            <p className="border border-outline-variant bg-surface-container-lowest py-16 text-center text-sm text-on-surface/50">
+              Todavía no hay carreras publicadas. Aparecerán aquí cuando Fidel
+              apruebe la primera jornada.
+            </p>
+          ) : (
           <ul className="divide-y divide-outline-variant border border-outline-variant bg-surface-container-lowest">
             {provincias.map((prov) => {
               const cantonesProv = cantones
@@ -163,6 +169,7 @@ function CarrerasPage() {
               );
             })}
           </ul>
+          )}
         </section>
       </main>
     </div>
