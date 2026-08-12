@@ -21,6 +21,17 @@ import {
   ratioDe,
 } from "./lib/instagram-image.mjs";
 import { resolverRumboRootCLI } from "./lib/rumbo-root.mjs";
+import {
+  esCarreraPublicable,
+  esHistoriaPublicable,
+  jornadasPublicables,
+} from "./lib/publicables.mjs";
+import {
+  crearTemporal,
+  descartarTemporal,
+  sustituir,
+  validarDirectorio,
+} from "./lib/reemplazo-atomico.mjs";
 
 // --- Configuración de rutas ---
 // El root operativo de RUMBO vive fuera del codebase (hoy en OneDrive). Su
@@ -255,9 +266,36 @@ async function generatePackage() {
     return false;
   }
 
+  // Criterio unico de publicabilidad (scripts/lib/publicables.mjs). Todo lo que
+  // se derive de Carreras usa ESTA lista, no una condicion propia: antes cada
+  // seccion aplicaba una distinta —o ninguna— y el estado editorial del Excel
+  // no gobernaba realmente lo que se publicaba.
+  const carrerasPublicables = carrerasRows.filter(esCarreraPublicable);
+  for (const c of carrerasRows) {
+    if (!esCarreraPublicable(c)) {
+      warn(`Carrera ${c.race_id} excluida del paquete (status="${c.status ?? ""}").`);
+    }
+  }
+
+  // Jornadas que pueden aparecer en el sitio. Se calcula una sola vez porque lo
+  // usan los medios y la Bitacora; si cada seccion lo dedujera por su cuenta
+  // volveriamos a tener criterios paralelos.
+  const { jornadas: jornadasVisibles } = jornadasPublicables({
+    carrerasRows,
+    historiasRows,
+    jornadasRows: jornadas,
+    rutasRows,
+    bitacoraRows: bitacoraArchivosRows,
+    relacionesRows,
+  });
+  const jornadaDeMedio = new Map();
+  for (const b of bitacoraArchivosRows) {
+    if (b.media_id && b.jornada_id) jornadaDeMedio.set(b.media_id, b.jornada_id);
+  }
+
   // --- resumen.json ---
   const cantonesValidosVisitados = new Set(
-    carrerasRows.filter((c) => c.status && c.status !== "rechazada").map((c) => {
+    carrerasPublicables.map((c) => {
       const ruta = rutasRows.find((r) => r.route_id === c.route_id);
       return ruta ? ruta.canton_id : null;
     }).filter(Boolean)
@@ -265,7 +303,7 @@ async function generatePackage() {
 
   let kmTotales = 0;
   const rutaVistaParaKm = new Set();
-  for (const c of carrerasRows) {
+  for (const c of carrerasPublicables) {
     const ruta = rutasRows.find((r) => r.route_id === c.route_id);
     if (ruta && !rutaVistaParaKm.has(ruta.route_id)) {
       const km = toNumberOrNull(ruta.distancia_km);
@@ -274,6 +312,11 @@ async function generatePackage() {
     }
   }
 
+  // Decision deliberada: VO2max, recuperacion, pasos y calorias NO se filtran
+  // por publicabilidad de la Carrera. Son metricas generales del atleta, no
+  // atributos de una jornada publicada; que no haya jornadas publicables no
+  // significa que Fidel no tenga VO2max. Si alguna vez deben ocultarse, sera
+  // por una decision editorial propia, no como efecto colateral de esta regla.
   const metricasValidas = metricasRows.filter((m) => m.status && m.status !== "rechazado");
   function ultimoValor(tipo) {
     const candidatos = metricasValidas
@@ -324,10 +367,14 @@ async function generatePackage() {
   };
 
   // --- carreras.json + rutas/<route_id>.geojson ---
-  await fsp.mkdir(path.join(PAQUETE_DIR, "rutas"), { recursive: true });
+  // El paquete se construye entero en un temporal hermano y solo sustituye al
+  // anterior cuando esta completo y validado. Nunca se borra el destino "para
+  // luego copiar": si algo falla a mitad, el paquete anterior sigue intacto.
+  const SALIDA = crearTemporal(PAQUETE_DIR, "nuevo");
+  await fsp.mkdir(path.join(SALIDA, "rutas"), { recursive: true });
 
   const carreras = [];
-  for (const c of carrerasRows) {
+  for (const c of carrerasPublicables) {
     const ruta = rutasRows.find((r) => r.route_id === c.route_id) || null;
     const territorio = ruta ? territorioByCantonId.get(ruta.canton_id) : null;
 
@@ -338,7 +385,7 @@ async function generatePackage() {
       const srcGeojsonReal = resolveRumboAsset(ruta.geojson_onedrive_path);
       if (fs.existsSync(srcGeojsonReal)) {
         const destName = `${ruta.route_id}.geojson`;
-        await fsp.copyFile(srcGeojsonReal, path.join(PAQUETE_DIR, "rutas", destName));
+        await fsp.copyFile(srcGeojsonReal, path.join(SALIDA, "rutas", destName));
         rutaGeojsonRelPath = `rutas/${destName}`;
       } else {
         warn(`GeoJSON de ruta no encontrado en disco: ${srcGeojsonReal} (route_id ${ruta.route_id})`);
@@ -456,7 +503,7 @@ async function generatePackage() {
 
   // --- historias.json (solo aprobada_fidel / publicada) ---
   const historias = historiasRows
-    .filter((h) => h.status === "aprobada_fidel" || h.status === "publicada")
+    .filter(esHistoriaPublicable)
     .map((h) => {
       const media = relacionesRows
         .filter((rel) => rel.destination_type === "story" && rel.destination_id === h.story_id)
@@ -499,21 +546,43 @@ async function generatePackage() {
     m.status === "published" &&
     derechosConfirmados(m.derechos_confirmados) &&
     licenciaValida(m.licencia);
-  const mediosAutorizados = mediosRows.filter(aprobadoParaPublicar);
+
+  // Segunda condicion, del mismo criterio compartido: un medio aprobado cuya
+  // jornada no es publicable tampoco se publica. Sin esto, retirar una jornada
+  // del sitio dejaba sus fotografias y videos accesibles por URL, enlazados o
+  // no. Un medio sin jornada queda fuera por omision y con aviso nominal: los
+  // medios generales, si algun dia existen, necesitaran una decision explicita.
+  const jornadaPublicableDelMedio = (m) => {
+    const j = jornadaDeMedio.get(m.media_id);
+    if (!j) return { ok: false, motivo: "no tiene jornada_id en 17_BITACORA_ARCHIVOS" };
+    if (!jornadasVisibles.has(j)) return { ok: false, motivo: `su jornada ${j} no es publicable` };
+    return { ok: true, motivo: null };
+  };
+
+  const mediosAutorizados = [];
   for (const m of mediosRows) {
-    if (m.status === "published" && !aprobadoParaPublicar(m)) {
-      warn(
-        `Medio ${m.media_id} publicado pero SIN aprobacion para public/ (falta derechos_confirmados=Si o licencia valida); no se copia.`
-      );
+    if (!aprobadoParaPublicar(m)) {
+      if (m.status === "published") {
+        warn(
+          `Medio ${m.media_id} publicado pero SIN aprobacion para public/ (falta derechos_confirmados=Si o licencia valida); no se copia.`
+        );
+      }
+      continue;
     }
+    const jornada = jornadaPublicableDelMedio(m);
+    if (!jornada.ok) {
+      warn(`Medio ${m.media_id} excluido: ${jornada.motivo}; no se copia.`);
+      continue;
+    }
+    mediosAutorizados.push(m);
   }
   // Mapa bitacora_id -> ruta web del medio APROBADO derivado de ese original,
   // para que la Bitacora enlace solo medios aprobados (nunca el original).
   const aprobadoPorBitacoraId = new Map();
   const medios = [];
-  await fsp.mkdir(path.join(PAQUETE_DIR, "archivos", "imagenes"), { recursive: true });
-  await fsp.mkdir(path.join(PAQUETE_DIR, "archivos", "audios"), { recursive: true });
-  await fsp.mkdir(path.join(PAQUETE_DIR, "archivos", "videos"), { recursive: true });
+  await fsp.mkdir(path.join(SALIDA, "archivos", "imagenes"), { recursive: true });
+  await fsp.mkdir(path.join(SALIDA, "archivos", "audios"), { recursive: true });
+  await fsp.mkdir(path.join(SALIDA, "archivos", "videos"), { recursive: true });
 
   const tipoToCarpeta = { fotografia: "imagenes", audio: "audios", video: "videos" };
 
@@ -527,7 +596,7 @@ async function generatePackage() {
       const srcReal = resolveRumboAsset(rutaOrigenRel);
       if (fs.existsSync(srcReal)) {
         const destName = safeMediaName(m.media_id, nombreOriginal);
-        await fsp.copyFile(srcReal, path.join(PAQUETE_DIR, "archivos", carpeta, destName));
+        await fsp.copyFile(srcReal, path.join(SALIDA, "archivos", carpeta, destName));
         webPath = `archivos/${carpeta}/${destName}`;
       } else {
         warn(`Medio autorizado pero archivo no encontrado en disco, no se copia: ${m.media_id} (${srcReal})`);
@@ -553,7 +622,7 @@ async function generatePackage() {
           srcPath: srcRealImg,
           w,
           h,
-          destDir: path.join(PAQUETE_DIR, "archivos", carpeta),
+          destDir: path.join(SALIDA, "archivos", carpeta),
           nombreArchivo: destNameIg,
         });
         if (res.ok) {
@@ -633,11 +702,24 @@ async function generatePackage() {
 
   // NO se crea "archivos/originales": los originales nunca se publican.
 
+  // Criterio relacional: la Bitacora publica solo muestra originales de
+  // jornadas con Carrera o Historia publicable (mismo conjunto jornadasVisibles
+  // que filtra los medios). Sin esto, retirar una jornada del sitio dejaba sus
+  // originales listados.
   const bitacoraIds = new Set();
   const bitacoraItems = [];
   for (const b of bitacoraArchivosRows) {
     if (bitacoraIds.has(b.bitacora_id)) err(`bitacora_id duplicado: ${b.bitacora_id}`);
     bitacoraIds.add(b.bitacora_id);
+
+    if (!b.jornada_id) {
+      warn(`Bitacora ${b.bitacora_id} excluida: no tiene jornada_id.`);
+      continue;
+    }
+    if (!jornadasVisibles.has(b.jornada_id)) {
+      warn(`Bitacora ${b.bitacora_id} excluida: su jornada ${b.jornada_id} no es publicable.`);
+      continue;
+    }
 
     const territorio = b.canton_id ? territorioByCantonId.get(b.canton_id) : null;
     const categoria = categoriaDe(b.tipo_archivo);
@@ -652,7 +734,7 @@ async function generatePackage() {
         const srcGeojsonReal = resolveRumboAsset(rutaAsociada.geojson_onedrive_path);
         if (fs.existsSync(srcGeojsonReal)) {
           const destName = `${rutaAsociada.route_id}.geojson`;
-          await fsp.copyFile(srcGeojsonReal, path.join(PAQUETE_DIR, "rutas", destName));
+          await fsp.copyFile(srcGeojsonReal, path.join(SALIDA, "rutas", destName));
           rutaGeojsonRelPath = `rutas/${destName}`;
         }
       }
@@ -718,10 +800,10 @@ async function generatePackage() {
     errores: errors,
   };
 
-  // --- Escribir todo ---
-  await fsp.mkdir(PAQUETE_DIR, { recursive: true });
+  // --- Escribir todo (en el temporal) ---
+  await fsp.mkdir(SALIDA, { recursive: true });
   const writeJson = (name, data) =>
-    fsp.writeFile(path.join(PAQUETE_DIR, name), JSON.stringify(data, null, 2), "utf-8");
+    fsp.writeFile(path.join(SALIDA, name), JSON.stringify(data, null, 2), "utf-8");
 
   await writeJson("resumen.json", resumen);
   await writeJson("cantones.json", { cantones });
@@ -731,6 +813,74 @@ async function generatePackage() {
   await writeJson("bitacora.json", bitacora);
   await writeJson("medios.json", { medios });
   await writeJson("manifest.json", manifest);
+
+  // --- Validar el temporal ANTES de que sustituya al paquete anterior ---
+  const problemas = validarDirectorio(SALIDA, {
+    obligatorios: JSON_FILES,
+    extensiones: [
+      ".json", ".geojson",
+      ".jpg", ".jpeg", ".png", ".webp",
+      ".wav", ".mp3", ".m4a",
+      ".mp4", ".mov",
+    ],
+    comprobaciones: (porRuta) => {
+      const malos = [];
+      // El manifiesto debe ser JSON valido y con los conteos que corresponden.
+      let man;
+      try {
+        man = JSON.parse(fs.readFileSync(path.join(SALIDA, "manifest.json"), "utf-8"));
+      } catch (e) {
+        return [`manifest.json no es JSON valido: ${e.message}`];
+      }
+      if (man.conteos?.carreras !== carreras.length) malos.push("manifest.conteos.carreras no coincide");
+      if (man.conteos?.historias !== historias.length) malos.push("manifest.conteos.historias no coincide");
+      if (man.conteos?.medios !== medios.length) malos.push("manifest.conteos.medios no coincide");
+      // Los ocho JSON deben parsear.
+      for (const f of JSON_FILES) {
+        try {
+          JSON.parse(fs.readFileSync(path.join(SALIDA, f), "utf-8"));
+        } catch (e) {
+          malos.push(`JSON invalido: ${f} (${e.message})`);
+        }
+      }
+      // Toda referencia a un archivo debe existir dentro del temporal.
+      const refs = [
+        ...medios.map((m) => m.rutaWeb),
+        ...medios.map((m) => m.instagram?.rutaWebInstagram),
+        ...carreras.map((c) => c.rutaGeojson),
+        ...bitacoraItems.map((b) => b.rutaWeb),
+        ...bitacoraItems.map((b) => b.rutaGeojson),
+      ].filter(Boolean);
+      for (const ref of refs) {
+        if (!porRuta.has(ref)) malos.push(`referencia a un archivo inexistente: ${ref}`);
+      }
+      return malos;
+    },
+  });
+
+  if (problemas.length > 0) {
+    for (const p of problemas) err(`Paquete no valido: ${p}`);
+    await descartarTemporal(SALIDA);
+    err("El paquete anterior se conserva intacto: no se sustituyo nada.");
+    return;
+  }
+
+  // Un error de integridad detectado antes (identificadores duplicados,
+  // referencias inexistentes, hoja ausente) tampoco debe llegar al paquete.
+  if (errors.length > 0) {
+    await descartarTemporal(SALIDA);
+    err("Se encontraron errores: el paquete anterior se conserva intacto.");
+    return;
+  }
+
+  // --- Sustituir el paquete anterior, ya validado ---
+  try {
+    await sustituir(PAQUETE_DIR, SALIDA, { onAviso: warn });
+  } catch (e) {
+    await descartarTemporal(SALIDA);
+    err(`No se pudo sustituir el paquete: ${e.message}. El anterior sigue en su sitio.`);
+    return;
+  }
 
   console.log(`\nPaquete generado en: ${PAQUETE_DIR}`);
   console.log(`Carreras: ${carreras.length} | Historias: ${historias.length} | Medios: ${medios.length} | Cantones visitados: ${resumen.cantonesVisitados}`);
@@ -757,13 +907,61 @@ async function syncToPublic() {
     }
   }
 
-  await fsp.rm(CODEBASE_PUBLIC_DIR, { recursive: true, force: true });
-  await fsp.mkdir(CODEBASE_PUBLIC_DIR, { recursive: true });
-  await fsp.cp(PAQUETE_DIR, CODEBASE_PUBLIC_DIR, { recursive: true });
+  if (errors.length > 0) return;
 
-  await fsp.mkdir(CODEBASE_SRC_MIRROR_DIR, { recursive: true });
-  for (const f of JSON_FILES) {
-    await fsp.copyFile(path.join(PAQUETE_DIR, f), path.join(CODEBASE_SRC_MIRROR_DIR, f));
+  // Los dos destinos se construyen completos en un temporal hermano y solo
+  // sustituyen al anterior cuando estan validados. Si algo falla, el sitio se
+  // queda con los datos que ya tenia, nunca a medias ni vacio. Al sustituir el
+  // directorio entero desaparece cualquier residuo de una version anterior.
+  const extensionesPaquete = [
+    ".json", ".geojson",
+    ".jpg", ".jpeg", ".png", ".webp",
+    ".wav", ".mp3", ".m4a",
+    ".mp4", ".mov",
+  ];
+
+  // 1) public/data/rumbo
+  const tmpPublic = crearTemporal(CODEBASE_PUBLIC_DIR, "nuevo");
+  try {
+    await fsp.cp(PAQUETE_DIR, tmpPublic, { recursive: true });
+    const p = validarDirectorio(tmpPublic, {
+      obligatorios: JSON_FILES,
+      extensiones: extensionesPaquete,
+    });
+    if (p.length > 0) {
+      for (const m of p) err(`Copia a public/ no valida: ${m}`);
+      await descartarTemporal(tmpPublic);
+      err("public/data/rumbo se conserva como estaba.");
+      return;
+    }
+    await sustituir(CODEBASE_PUBLIC_DIR, tmpPublic, { onAviso: warn });
+  } catch (e) {
+    await descartarTemporal(tmpPublic);
+    err(`No se pudo sincronizar public/data/rumbo: ${e.message}. Se conserva el contenido anterior.`);
+    return;
+  }
+
+  // 2) espejo en src/, solo los ocho JSON
+  const tmpEspejo = crearTemporal(CODEBASE_SRC_MIRROR_DIR, "nuevo");
+  try {
+    for (const f of JSON_FILES) {
+      await fsp.copyFile(path.join(PAQUETE_DIR, f), path.join(tmpEspejo, f));
+    }
+    const p = validarDirectorio(tmpEspejo, {
+      obligatorios: JSON_FILES,
+      extensiones: [".json", ".geojson"],
+    });
+    if (p.length > 0) {
+      for (const m of p) err(`Espejo no valido: ${m}`);
+      await descartarTemporal(tmpEspejo);
+      err("src/data/generated/rumbo-web se conserva como estaba.");
+      return;
+    }
+    await sustituir(CODEBASE_SRC_MIRROR_DIR, tmpEspejo, { onAviso: warn });
+  } catch (e) {
+    await descartarTemporal(tmpEspejo);
+    err(`No se pudo sincronizar el espejo: ${e.message}. Se conserva el contenido anterior.`);
+    return;
   }
 
   console.log(`\nPaquete sincronizado hacia: ${CODEBASE_PUBLIC_DIR}`);
