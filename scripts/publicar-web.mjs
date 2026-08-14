@@ -155,14 +155,26 @@ function gitSilencioso(...a) {
   }
 }
 // En Windows npm es un .cmd y Node ya no permite ejecutarlo con execFile sin
-// shell, asi que se invoca a traves del shell en esa plataforma.
+// shell; pero pasar `shell: true` con argumentos concatena sin escapar y Node
+// lo avisa como riesgo (DEP0190). Se invoca el interprete de forma explicita,
+// con argumentos fijos, y el nombre del script se valida contra un patron
+// estricto: en operacion sale de la constante SCRIPTS_VERIFICACION, nunca de
+// una entrada libre.
+const NOMBRE_SCRIPT_VALIDO = /^[a-z][a-z0-9:._-]*$/;
+
 function npmRun(script) {
-  return execFileSync("npm", ["run", script], {
-    cwd: REPO,
-    encoding: "utf-8",
-    stdio: "pipe",
-    shell: process.platform === "win32",
-  });
+  if (!NOMBRE_SCRIPT_VALIDO.test(script)) {
+    fallar(`Nombre de script no permitido: "${script}".`, PARA_FIDEL.revision);
+  }
+  const opciones = { cwd: REPO, encoding: "utf-8", stdio: "pipe" };
+  if (process.platform === "win32") {
+    const cmd = process.env.ComSpec || "cmd.exe";
+    // /d sin autorun, /s tratamiento estandar de comillas, /c ejecutar y salir.
+    // El cwd va por opciones, no en la linea de comandos: una ruta con espacios
+    // no necesita comillas ni las puede romper.
+    return execFileSync(cmd, ["/d", "/s", "/c", "npm", "run", script], opciones);
+  }
+  return execFileSync("npm", ["run", script], opciones);
 }
 
 function leerJson(p) {
@@ -179,28 +191,63 @@ function excelActivo() {
   return path.join(RUMBO_ROOT, xlsx[0]);
 }
 
-/** Archivos bajo las dos rutas publicables, con su estado en git. */
+/**
+ * Archivos bajo las dos rutas publicables, con su estado en git.
+ *
+ * Antes de mirar nada se refresca el indice: al reescribir un archivo con el
+ * mismo contenido —el build regenera src/routeTree.gen.ts asi— cambia su mtime
+ * y "git status" lo marca como modificado aunque no lo este. Refrescar el
+ * indice resuelve la mayoria de esos casos; los que sobrevivan se comprueban
+ * uno a uno con "git diff", que es la unica autoridad sobre el contenido.
+ *
+ * La regla de descarte es estrecha a proposito:
+ *   - solo se aplica a archivos RASTREADOS;
+ *   - un archivo sin seguimiento nunca se descarta;
+ *   - se necesita que "git diff" Y "git diff --cached" confirmen que no hay
+ *     diferencia; basta que uno detecte cambio para que cuente;
+ *   - cualquier cambio real fuera de las dos rutas generadas sigue bloqueando.
+ */
 function cambiosEnRutasGeneradas() {
+  // Equivalente seguro de "git update-index --refresh": actualiza la
+  // informacion de estado sin tocar contenido. Devuelve codigo distinto de 0
+  // cuando habia entradas desactualizadas, que es precisamente lo normal aqui.
+  gitSilencioso("update-index", "-q", "--refresh");
+
   const porcelain = gitCrudo("status", "--porcelain", "--untracked-files=all");
   const anadidos = [];
   const modificados = [];
   const eliminados = [];
   const fuera = [];
+  const ruidoDescartado = [];
+
   for (const linea of porcelain.split("\n").map((l) => l.replace(/\r$/, "")).filter(Boolean)) {
     const m = linea.match(/^(..) (.*)$/);
     if (!m) continue;
     const estado = m[1];
     const ruta = m[2].replace(/^"|"$/g, "");
     const esPublicable = RUTAS_PUBLICABLES.some((r) => ruta.startsWith(r));
+
     if (!esPublicable) {
+      const sinSeguimiento = estado.includes("?");
+      if (sinSeguimiento) {
+        fuera.push(`${estado} ${ruta}`);
+        continue;
+      }
+      const igualEnArbol = gitSilencioso("diff", "--quiet", "--", ruta).ok;
+      const igualEnIndice = gitSilencioso("diff", "--cached", "--quiet", "--", ruta).ok;
+      if (igualEnArbol && igualEnIndice) {
+        ruidoDescartado.push(ruta);
+        continue;
+      }
       fuera.push(`${estado} ${ruta}`);
       continue;
     }
+
     if (estado.includes("?")) anadidos.push(ruta);
     else if (estado.includes("D")) eliminados.push(ruta);
     else modificados.push(ruta);
   }
-  return { anadidos, modificados, eliminados, fuera };
+  return { anadidos, modificados, eliminados, fuera, ruidoDescartado };
 }
 
 /**
@@ -373,10 +420,13 @@ async function construirPlan({ conFetch = true } = {}) {
     conteos: manPublic.conteos,
     retira: cambios.eliminados.length > 0,
     urlBase,
-    // No entra en el hash: informativo.
+    // No entran en el hash: informativos, para el resumen que ve Fidel.
     _historiasEnPaquete: historias.map((h) => h.id),
     _excelPath: excelPath,
     _conteosPrevios: conteosPublicadosEnHead(),
+    _metaCantones: leerJson(path.join(PUBLIC_DIR, "resumen.json")).metaCantones,
+    _kmAhora: leerJson(path.join(PUBLIC_DIR, "resumen.json")).kilometros,
+    _kmAntes: jsonEnHead("resumen.json")?.kilometros,
   };
   plan.planHash = calcularPlanHash(plan);
   return plan;
@@ -391,6 +441,77 @@ function conteosPublicadosEnHead() {
   } catch {
     return null;
   }
+}
+
+/** Lee un JSON del paquete tal como esta commiteado en HEAD. */
+function jsonEnHead(rel) {
+  const r = gitSilencioso("show", `HEAD:public/data/rumbo/${rel}`);
+  if (!r.ok) return null;
+  try {
+    return JSON.parse(r.salida);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Resumen de la retirada en lenguaje de Fidel, derivado del plan real: compara
+ * lo que hay commiteado con lo que entra, y cuenta los archivos que salen por
+ * su tipo. No hay nada escrito para una jornada concreta.
+ */
+function resumenRetirada(plan) {
+  const piezas = [];
+
+  const carrerasAntes = (jsonEnHead("carreras.json")?.carreras) || [];
+  const carrerasAhora = leerJson(path.join(PUBLIC_DIR, "carreras.json")).carreras || [];
+  const idsAhora = new Set(carrerasAhora.map((c) => c.id));
+  const carrerasFuera = carrerasAntes.filter((c) => !idsAhora.has(c.id));
+  for (const c of carrerasFuera) piezas.push(`la carrera «${c.titulo ?? c.id}»`);
+
+  const historiasAntes = (jsonEnHead("historias.json")?.historias) || [];
+  const historiasAhora = leerJson(path.join(PUBLIC_DIR, "historias.json")).historias || [];
+  const idsHistoria = new Set(historiasAhora.map((h) => h.id));
+  const historiasFuera = historiasAntes.filter((h) => !idsHistoria.has(h.id));
+  for (const h of historiasFuera) piezas.push(`la historia «${h.titulo ?? h.id}»`);
+
+  // Los archivos que salen, contados por tipo.
+  const cuenta = { fotografias: 0, audios: 0, videos: 0, recorridos: 0 };
+  for (const rel of plan.eliminados) {
+    // Los derivados para Instagram (<base>__instagram.jpg) son copias
+    // recortadas de una fotografia que ya se cuenta: no son una foto mas.
+    if (/__instagram\.[a-z]+$/i.test(rel)) continue;
+    if (/\/archivos\/imagenes\//.test(rel)) cuenta.fotografias++;
+    else if (/\/archivos\/audios\//.test(rel)) cuenta.audios++;
+    else if (/\/archivos\/videos\//.test(rel)) cuenta.videos++;
+    else if (/\/rutas\/.*\.geojson$/.test(rel)) cuenta.recorridos++;
+  }
+  const plural = (n, s, p) => `${n} ${n === 1 ? s : p}`;
+  if (cuenta.fotografias) piezas.push(plural(cuenta.fotografias, "fotografía", "fotografías"));
+  if (cuenta.audios) piezas.push(plural(cuenta.audios, "audio", "audios"));
+  if (cuenta.videos) piezas.push(plural(cuenta.videos, "vídeo", "vídeos"));
+  if (cuenta.recorridos) {
+    piezas.push(cuenta.recorridos === 1 ? "el recorrido del mapa" : `${cuenta.recorridos} recorridos del mapa`);
+  }
+
+  const antes = plan._conteosPrevios || {};
+  const ahora = plan.conteos || {};
+  const contadores = [];
+  if (antes.cantonesVisitados !== ahora.cantonesVisitados) {
+    contadores.push(`${ahora.cantonesVisitados} de ${plan._metaCantones ?? "221"} municipios`);
+  }
+  if (plan._kmAntes !== plan._kmAhora) contadores.push(`${plan._kmAhora} km`);
+
+  if (piezas.length === 0 && contadores.length === 0) return null;
+
+  const lista =
+    piezas.length > 1
+      ? piezas.slice(0, -1).join(", ") + " y " + piezas[piezas.length - 1]
+      : piezas[0] ?? "";
+
+  let texto = `Esto retirará del sitio ${lista}.`;
+  if (contadores.length) texto += ` Los contadores pasarán a ${contadores.join(" y ")}.`;
+  texto += " Los originales se conservarán. ¿Confirmas que quieres retirarlo?";
+  return texto;
 }
 
 function mostrarPlan(plan) {
@@ -423,7 +544,12 @@ function mostrarPlan(plan) {
 
   if (plan.retira) {
     console.log("\n  ATENCION: esta publicacion RETIRA contenido que ya estaba en el sitio.");
-    console.log("  Para ejecutarla hace falta ademas el indicador --confirmar-retiro.");
+    const pregunta = resumenRetirada(plan);
+    if (pregunta) {
+      console.log("\n  Pregunta para Fidel:");
+      console.log(`    "${pregunta}"`);
+    }
+    console.log("\n  Para ejecutarla hace falta ademas el indicador --confirmar-retiro.");
   }
   console.log("\n  planHash: " + plan.planHash);
   console.log("=".repeat(64));
@@ -459,11 +585,17 @@ async function modoVerificar() {
   // Los artefactos del build no pueden ensuciar el arbol.
   const tras = cambiosEnRutasGeneradas();
   if (tras.fuera.length > 0) {
-    console.error("\nEl build dejo cambios fuera de las rutas generadas:");
+    console.error("\nEl build dejo cambios REALES fuera de las rutas generadas:");
     for (const f of tras.fuera) console.error(`  ${f}`);
     fallar("Revisa que .output, .tanstack y .wrangler esten ignorados.", PARA_FIDEL.revision);
   }
   console.log("  ok  los artefactos del build estan ignorados");
+  if (tras.ruidoDescartado.length > 0) {
+    console.log(
+      `  (${tras.ruidoDescartado.length} archivo(s) reescritos por el build sin cambio de contenido: ` +
+        `${tras.ruidoDescartado.join(", ")})`
+    );
+  }
 
   if (!plan.anadidos.length && !plan.modificados.length && !plan.eliminados.length) {
     mostrarPlan(plan);
@@ -580,9 +712,14 @@ async function cerrarConexiones() {
   }
 }
 
-async function pedir(url) {
+async function pedir(url, { sinCache = false } = {}) {
   try {
-    const r = await fetch(url, { redirect: "follow", signal: AbortSignal.timeout(TIMEOUT_PETICION_MS) });
+    const cabeceras = sinCache ? { "cache-control": "no-cache", pragma: "no-cache" } : undefined;
+    const r = await fetch(url, {
+      redirect: "follow",
+      headers: cabeceras,
+      signal: AbortSignal.timeout(TIMEOUT_PETICION_MS),
+    });
     const texto = r.headers.get("content-type")?.includes("json") ? await r.text() : null;
     // Se consume el cuerpo siempre, para que la conexion pueda liberarse.
     if (texto === null) await r.arrayBuffer().catch(() => {});
@@ -692,18 +829,41 @@ async function modoConfirmar() {
   }
 
   // 5. Lo retirado debe dejar de responder.
+  //
+  // Una respuesta 200 guardada en la cache del CDN antes del despliegue haria
+  // parecer vigente un archivo ya retirado. Para no dejarse enganar, cada URL
+  // se consulta con una cadena de consulta unica derivada del publicacionWebId
+  // —que ninguna cache pudo ver antes de esta publicacion— y con cabeceras
+  // no-cache. Un 200 en esas condiciones es un 200 de verdad: no se acepta
+  // "puede que sea cache".
   const retirados = git("show", "--diff-filter=D", "--name-only", "--format=", "HEAD")
     .split("\n")
     .filter((l) => l.startsWith("public/data/rumbo/"));
+  let retirosSinConfirmar = 0;
   for (const rel of retirados) {
     const publico = rel.replace("public/data/rumbo/", "");
-    const r = await pedir(`${urlBase}/data/rumbo/${publico}`);
-    if (r.estado === 200) problemas.push(`el archivo retirado ${publico} sigue respondiendo 200`);
-    else console.log(`  ok  retirado: ${publico} responde ${r.estado}`);
+    const url = `${urlBase}/data/rumbo/${publico}?verificacion=${encodeURIComponent(publicacionWebId)}`;
+    const r = await pedir(url, { sinCache: true });
+    if (r.estado === 404) {
+      console.log(`  ok  retirado: ${publico} responde 404`);
+    } else if (r.estado === 200) {
+      retirosSinConfirmar++;
+      problemas.push(
+        `el archivo retirado ${publico} sigue respondiendo 200 con verificacion=${publicacionWebId} y no-cache`
+      );
+    } else {
+      console.log(`  ok  retirado: ${publico} responde ${r.estado} (no accesible)`);
+    }
   }
 
   if (problemas.length) {
     for (const p of problemas) console.error(`  ${p}`);
+    if (retirosSinConfirmar > 0) {
+      console.error(
+        `\nEstado: DESPLEGADO PERO RETIRO NO CONFIRMADO. ${retirosSinConfirmar} archivo(s) que debian ` +
+          `desaparecer siguen accesibles. No se registra como cierre exitoso y no se toca el Excel.`
+      );
+    }
     fallar("El despliegue no coincide con lo publicado.", PARA_FIDEL.revision);
   }
 
@@ -758,7 +918,7 @@ async function registrarEnExcel(registro, excelPath, manifestLocal) {
   // el registro ya esta hecho.
   const yaRegistrado = buscarRegistroPrevio(wb, registro);
   if (yaRegistrado.estado === "identico") {
-    return { ok: true, yaEstaba: true, promovidas: [], fila: yaRegistrado.fila };
+    return { ok: true, yaEstaba: true, promovidas: [], carrerasPromovidas: [], fila: yaRegistrado.fila };
   }
   if (yaRegistrado.estado === "incompatible") {
     return {
@@ -814,6 +974,30 @@ async function registrarEnExcel(registro, excelPath, manifestLocal) {
     }
   }
 
+  // 1b. Lo mismo para las Carreras, con el catalogo carrera_status:
+  //     confirmada incluida -> publicada; publicada se queda; draft, rechazada
+  //     o ausente del paquete no se tocan. Una retirada deja carreras.json
+  //     vacio, asi que no promueve nada.
+  const idsCarrerasEnPaquete = new Set(
+    (JSON.parse(fs.readFileSync(path.join(PUBLIC_DIR, "carreras.json"), "utf-8")).carreras || []).map(
+      (c) => c.id
+    )
+  );
+  const ws3 = wb.getWorksheet("03_CARRERAS");
+  const carrerasPromovidas = [];
+  if (ws3) {
+    const col = {};
+    ws3.getRow(4).eachCell({ includeEmpty: false }, (c, n) => (col[String(c.value ?? "").trim()] = n));
+    for (let r = 5; r <= ws3.rowCount; r++) {
+      const id = String(ws3.getRow(r).getCell(col.race_id ?? 1).value ?? "").trim();
+      if (!id || !idsCarrerasEnPaquete.has(id)) continue;
+      const estado = String(ws3.getRow(r).getCell(col.status).value ?? "").trim();
+      if (estado !== "confirmada") continue; // publicada, draft o rechazada: intactas
+      ws3.getRow(r).getCell(col.status).value = "publicada";
+      carrerasPromovidas.push(id);
+    }
+  }
+
   // 2. Registro del evento en 01_HISTORIAL_COWORK.
   const ws1 = wb.getWorksheet("01_HISTORIAL_COWORK");
   if (ws1) {
@@ -838,7 +1022,8 @@ async function registrarEnExcel(registro, excelPath, manifestLocal) {
     set("decision_registrada", "Publicado");
     set(
       "resultado",
-      `despliegue confirmado; historias promovidas: ${promovidas.length ? promovidas.join(",") : "ninguna"}`
+      `despliegue confirmado; historias promovidas: ${promovidas.length ? promovidas.join(",") : "ninguna"}` +
+        `; carreras promovidas: ${carrerasPromovidas.length ? carrerasPromovidas.join(",") : "ninguna"}`
     );
     set("fecha_decision", registro.fecha);
     set("referencia_conversacion", "rutina_09");
@@ -873,8 +1058,9 @@ async function registrarEnExcel(registro, excelPath, manifestLocal) {
 
   console.log(`\nExcel actualizado. Respaldo previo en: ${respaldo}`);
   console.log(`  historias promovidas a "publicada": ${promovidas.length ? promovidas.join(", ") : "ninguna"}`);
+  console.log(`  carreras promovidas a "publicada" : ${carrerasPromovidas.length ? carrerasPromovidas.join(", ") : "ninguna"}`);
   console.log(`  evento registrado en 01_HISTORIAL_COWORK`);
-  return { ok: true, promovidas };
+  return { ok: true, promovidas, carrerasPromovidas };
 }
 
 /**

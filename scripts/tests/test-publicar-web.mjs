@@ -57,10 +57,17 @@ const sha256 = (p) => crypto.createHash("sha256").update(fs.readFileSync(p)).dig
 
 /** Servidor que sirve un directorio. `estado.dir` puede cambiarse en caliente. */
 function servir(dir) {
-  const estado = { dir, forzar404: new Set(), caidas: 0 };
+  const estado = { dir, forzar404: new Set(), soloSinQuery: null, caidas: 0 };
   const srv = http.createServer((req, res) => {
-    const rel = decodeURIComponent(req.url.split("?")[0]).replace(/^\/+/, "");
+    const [ruta, query] = req.url.split("?");
+    const rel = decodeURIComponent(ruta).replace(/^\/+/, "");
     if (estado.forzar404.has(rel)) { res.writeHead(404); res.end("no"); return; }
+    // Imita un CDN con una respuesta antigua guardada: la URL desnuda devuelve
+    // 200 (contenido cacheado), pero con cadena de consulta —que la cache no
+    // vio nunca— responde 404, que es la verdad del origen.
+    if (estado.soloSinQuery && estado.soloSinQuery.has(rel) && query) {
+      res.writeHead(404); res.end("no"); return;
+    }
     const abs = path.join(estado.dir, rel.replace(/^data\/rumbo\//, ""));
     if (!fs.existsSync(abs) || fs.statSync(abs).isDirectory()) { res.writeHead(404); res.end("no"); return; }
     const tipo = abs.endsWith(".json") ? "application/json" : "application/octet-stream";
@@ -80,6 +87,7 @@ function servir(dir) {
 const HOJAS = {
   "09_CONFIGURACION": ["config_key", "valor", "obligatorio", "quien_lo_completa", "explicacion", "ejemplo"],
   "04_HISTORIAS": ["story_id", "slug", "titulo", "status", "decision_message"],
+  "03_CARRERAS": ["race_id", "slug", "titulo", "fecha", "location_id", "descripcion_corta", "route_id", "cover_photo_id", "status"],
   "01_HISTORIAL_COWORK": [
     "tipo_contenido", "destino", "titulo", "resumen", "evidencia_onedrive", "alertas", "riesgo",
     "recomendacion_agente", "decision_registrada", "mensaje_fidel", "resultado", "fecha_decision",
@@ -87,7 +95,7 @@ const HOJAS = {
   ],
 };
 
-async function escribirExcel(ruta, historias, urlBase) {
+async function escribirExcel(ruta, historias, urlBase, carreras = []) {
   const wb = new ExcelJS.Workbook();
   for (const [hoja, headers] of Object.entries(HOJAS)) {
     const ws = wb.addWorksheet(hoja);
@@ -98,6 +106,15 @@ async function escribirExcel(ruta, historias, urlBase) {
       ws.getRow(5).getCell(2).value = EXCEL_NOMBRE;
       ws.getRow(6).getCell(1).value = "site_public_base_url";
       ws.getRow(6).getCell(2).value = urlBase;
+    }
+    if (hoja === "03_CARRERAS") {
+      carreras.forEach((c, i) => {
+        const r = ws.getRow(5 + i);
+        r.getCell(1).value = c.race_id;
+        r.getCell(2).value = c.slug ?? c.race_id;
+        r.getCell(3).value = c.titulo ?? `Carrera ${c.race_id}`;
+        r.getCell(9).value = c.status;
+      });
     }
     if (hoja === "04_HISTORIAS") {
       historias.forEach((h, i) => {
@@ -113,9 +130,9 @@ async function escribirExcel(ruta, historias, urlBase) {
 }
 
 /** Paquete web minimo pero coherente. */
-function paquete({ publicacionWebId, hashExcel, historias = [], conMedio = true, conteos = {} }) {
+function paquete({ publicacionWebId, hashExcel, historias = [], conMedio = true, conteos = {}, carreras = [{ race_id: "r1", status: "confirmada" }] }) {
   const c = {
-    jornadas: 1, carreras: 1, historias: historias.length, medios: conMedio ? 1 : 0,
+    jornadas: 1, carreras: carreras.length, historias: historias.length, medios: conMedio ? 1 : 0,
     cantonesVisitados: 1, bitacoraOriginales: 1, bitacoraPorCategoria: { fotografias: 1 }, ...conteos,
   };
   return {
@@ -123,7 +140,7 @@ function paquete({ publicacionWebId, hashExcel, historias = [], conMedio = true,
     "resumen.json": { cantonesVisitados: 1, metaCantones: 221, kilometros: 5.39 },
     "cantones.json": { cantones: [] },
     "cantones_visitados.geojson": { type: "FeatureCollection", features: [] },
-    "carreras.json": { carreras: [{ id: "r1", slug: "uno", titulo: "Uno", rutaGeojson: "rutas/rt1.geojson" }] },
+    "carreras.json": { carreras: carreras.map((c) => ({ id: c.race_id, slug: c.slug ?? c.race_id, titulo: c.titulo ?? `Carrera ${c.race_id}`, rutaGeojson: "rutas/rt1.geojson" })) },
     "historias.json": { historias: historias.map((h) => ({ id: h.story_id, titulo: h.titulo ?? h.story_id, estadoEditorial: h.status })) },
     "bitacora.json": { items: [] },
     "medios.json": { medios: conMedio ? [{ mediaId: "m1", tipo: "fotografia", rutaWeb: "archivos/imagenes/m1.jpg" }] : [] },
@@ -159,8 +176,13 @@ function g(repo, ...a) {
  * Monta: repo git con remoto bare, carpeta operativa RUMBO con Excel, y el
  * paquete ya sincronizado en las tres ubicaciones (como dejarian 07 y 08).
  */
-async function montar({ historias = [{ story_id: "h1", status: "aprobada_fidel" }], conMedio = true } = {}) {
-  const base = tmpdir("mundo");
+async function montar({
+  historias = [{ story_id: "h1", status: "aprobada_fidel" }],
+  conMedio = true,
+  carreras = [{ race_id: "r1", status: "confirmada" }],
+  repoDentroDe = null,
+} = {}) {
+  const base = repoDentroDe ?? tmpdir("mundo");
   const repo = path.join(base, "repo");
   const remoto = path.join(base, "remoto.git");
   const root = path.join(base, "RUMBO");
@@ -170,11 +192,11 @@ async function montar({ historias = [{ story_id: "h1", status: "aprobada_fidel" 
   fs.mkdirSync(path.join(root, "05_LISTOS_PUBLICAR"), { recursive: true });
 
   const publico = await servir(path.join(repo, "public", "data", "rumbo"));
-  await escribirExcel(path.join(root, EXCEL_NOMBRE), historias, publico.url);
+  await escribirExcel(path.join(root, EXCEL_NOMBRE), historias, publico.url, carreras);
   const hashExcel = sha256(path.join(root, EXCEL_NOMBRE));
 
   const id = "pubweb-" + crypto.randomBytes(8).toString("hex");
-  const p = paquete({ publicacionWebId: id, hashExcel, historias, conMedio });
+  const p = paquete({ publicacionWebId: id, hashExcel, historias, conMedio, carreras });
 
   fs.writeFileSync(path.join(repo, "package.json"), JSON.stringify(PKG_FIXTURE, null, 2));
   fs.writeFileSync(path.join(repo, ".gitignore"), "node_modules\n.output\n.tanstack/**\n.wrangler/\n");
@@ -183,7 +205,7 @@ async function montar({ historias = [{ story_id: "h1", status: "aprobada_fidel" 
   fs.mkdirSync(dirEspejo, { recursive: true });
 
   // Estado "ya publicado": una version anterior del paquete, commiteada.
-  const anterior = paquete({ publicacionWebId: "pubweb-anterior", hashExcel, historias, conMedio });
+  const anterior = paquete({ publicacionWebId: "pubweb-anterior", hashExcel, historias, conMedio, carreras });
   escribirPaquete(dirPublic, anterior, { conMedio });
   for (const n of Object.keys(anterior)) {
     fs.copyFileSync(path.join(dirPublic, n), path.join(dirEspejo, n));
@@ -207,7 +229,7 @@ async function montar({ historias = [{ story_id: "h1", status: "aprobada_fidel" 
   escribirPaquete(dirPublic, p, { conMedio });
   for (const n of Object.keys(p)) fs.copyFileSync(path.join(dirPublic, n), path.join(dirEspejo, n));
 
-  return { base, repo, remoto, root, publico, id, hashExcel, p, dirPublic, dirEspejo };
+  return { base, repo, remoto, root, publico, id, hashExcel, p, dirPublic, dirEspejo, carreras };
 }
 
 // Asincrono a proposito: el servidor HTTP ficticio vive en ESTE proceso, asi
@@ -318,6 +340,88 @@ await caso("env: un tiempo invalido o extremo produce error, no espera infinita"
   });
   assert(incoherente.code !== 0, "un intervalo mayor que la espera debe fallar");
   assert(/menor que la espera maxima/.test(incoherente.salida), "deberia explicar la incoherencia");
+});
+
+// ================================ ARBOL: RUIDO vs CAMBIO REAL
+
+await caso("arbol: un archivo rastreado reescrito sin cambio de contenido no bloquea", async () => {
+  const m = await montar();
+  // Se reescribe con el MISMO contenido: cambia la mtime, no el contenido.
+  const f = path.join(m.repo, "package.json");
+  const contenido = fs.readFileSync(f);
+  fs.writeFileSync(f, contenido);
+  const marcado = g(m.repo, "status", "--porcelain", "--untracked-files=all");
+  const { code, salida } = await correr(m, ["--verificar"]);
+  assert(code === 0, `no deberia bloquear, salio ${code}: ${salida.slice(-300)}`);
+  assert(
+    /reescritos por el build sin cambio de contenido/.test(salida) || !/package\.json/.test(salida),
+    "si lo descarta, deberia decirlo"
+  );
+  assert(marcado.length >= 0, "(el estado previo se consulta solo como contexto)");
+});
+
+await caso("arbol: un cambio REAL en un archivo rastreado bloquea", async () => {
+  const m = await montar();
+  const f = path.join(m.repo, "package.json");
+  const pkg = JSON.parse(fs.readFileSync(f, "utf-8"));
+  pkg.version = "9.9.9";
+  fs.writeFileSync(f, JSON.stringify(pkg, null, 2));
+  const { code, salida } = await correr(m, ["--verificar"]);
+  assert(code !== 0, "un cambio real debe bloquear");
+  assert(/cambios fuera de las rutas generadas/i.test(salida), "deberia explicarlo");
+  assert(/package\.json/.test(salida), "deberia nombrar el archivo");
+});
+
+await caso("arbol: un cambio REAL en routeTree.gen.ts bloquea igual que cualquier otro", async () => {
+  const m = await montar();
+  const dir = path.join(m.repo, "src");
+  fs.mkdirSync(dir, { recursive: true });
+  const f = path.join(dir, "routeTree.gen.ts");
+  fs.writeFileSync(f, "// generado\nexport const routeTree = {};\n");
+  g(m.repo, "add", "--", "src/routeTree.gen.ts");
+  g(m.repo, "commit", "-q", "-m", "routeTree inicial");
+
+  // (a) reescritura identica: no bloquea
+  fs.writeFileSync(f, fs.readFileSync(f));
+  const igual = await correr(m, ["--verificar"]);
+  assert(igual.code === 0, `una reescritura identica no deberia bloquear (salio ${igual.code})`);
+
+  // (b) cambio real: bloquea
+  fs.appendFileSync(f, "// una ruta nueva\n");
+  const distinto = await correr(m, ["--verificar"]);
+  assert(distinto.code !== 0, "un cambio real en routeTree.gen.ts debe bloquear");
+  assert(/routeTree\.gen\.ts/.test(distinto.salida), "deberia nombrarlo");
+});
+
+await caso("arbol: un archivo SIN SEGUIMIENTO nunca se descarta como ruido", async () => {
+  const m = await montar();
+  fs.writeFileSync(path.join(m.repo, "notas-sueltas.txt"), "");
+  const { code, salida } = await correr(m, ["--verificar"]);
+  assert(code !== 0, "un archivo sin seguimiento debe bloquear aunque este vacio");
+  assert(/notas-sueltas\.txt/.test(salida), "deberia nombrarlo");
+});
+
+await caso("arbol: un archivo fuera de las rutas permitidas bloquea", async () => {
+  const m = await montar();
+  fs.mkdirSync(path.join(m.repo, "public", "otros"), { recursive: true });
+  fs.writeFileSync(path.join(m.repo, "public", "otros", "cosa.json"), "{}");
+  const { code, salida } = await correr(m, ["--verificar"]);
+  assert(code !== 0, "public/otros no es una ruta generada");
+  assert(/public\/otros\/cosa\.json/.test(salida), "deberia nombrarlo");
+});
+
+await caso("npm: se invoca sin aviso de obsolescencia y con rutas que contienen espacios", async () => {
+  const base = tmpdir("con espacios");
+  const m = await montar({ repoDentroDe: base });
+  assert(/ /.test(m.repo), `la ruta del repo deberia contener un espacio: ${m.repo}`);
+  const { code, salida } = await correr(m, ["--verificar"], {
+    RUMBO_SCRIPTS_VERIFICACION: "typecheck,build",
+  });
+  assert(code === 0, `deberia funcionar con espacios en la ruta, salio ${code}: ${salida.slice(-300)}`);
+  assert(/ok  npm run typecheck/.test(salida), "deberia ejecutar typecheck");
+  assert(/ok  npm run build/.test(salida), "deberia ejecutar build");
+  assert(!/DeprecationWarning/.test(salida), "no deberia emitir avisos de obsolescencia");
+  assert(!/DEP0190/.test(salida), "en concreto, no DEP0190");
 });
 
 // =========================================================== VERIFICACION
@@ -809,6 +913,135 @@ await caso("idempotencia: proceso interrumpido tras escribir el Excel", async ()
   assert(reintento.code === 0, "el reintento debe terminar correctamente");
   assert(/ya confirmada y registrada/.test(reintento.salida), "debe reconocer el trabajo ya hecho");
   assert(sha256(path.join(m.root, EXCEL_NOMBRE)) === trasPrimera, "el Excel no debe volver a cambiar");
+});
+
+// ================================ PROMOCION DE CARRERAS
+
+/** Lee los status de 03_CARRERAS del Excel de fixture. */
+async function statusCarreras(m) {
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.readFile(path.join(m.root, EXCEL_NOMBRE));
+  const ws = wb.getWorksheet("03_CARRERAS");
+  const out = {};
+  for (let r = 5; r <= ws.rowCount; r++) {
+    const id = String(ws.getRow(r).getCell(1).value ?? "").trim();
+    if (id) out[id] = String(ws.getRow(r).getCell(9).value ?? "").trim();
+  }
+  return out;
+}
+
+await caso("carreras: una confirmada incluida en el paquete se promueve a publicada", async () => {
+  const m = await montar({ carreras: [{ race_id: "r1", status: "confirmada" }] });
+  await publicarYServir(m);
+  const { code, salida } = await correr(m, ["--confirmar"]);
+  assert(code === 0, `deberia confirmar, salio ${code}`);
+  assert(/carreras promovidas a "publicada" : r1/.test(salida), "deberia informar de la promocion");
+  assert((await statusCarreras(m)).r1 === "publicada", "r1 deberia quedar publicada");
+});
+
+await caso("carreras: una ya publicada permanece publicada y no se vuelve a tocar", async () => {
+  const m = await montar({ carreras: [{ race_id: "r1", status: "publicada" }] });
+  await publicarYServir(m);
+  await correr(m, ["--confirmar"]);
+  assert((await statusCarreras(m)).r1 === "publicada", "sigue publicada");
+  const antes = sha256(path.join(m.root, EXCEL_NOMBRE));
+  await correr(m, ["--confirmar"]);
+  assert(sha256(path.join(m.root, EXCEL_NOMBRE)) === antes, "una segunda confirmacion no cambia nada");
+});
+
+await caso("carreras: draft y rechazada no se promueven aunque esten en el Excel", async () => {
+  // r1 va en el paquete y esta confirmada; r2 (draft) y r3 (rechazada) no.
+  const m = await montar({
+    carreras: [
+      { race_id: "r1", status: "confirmada" },
+      { race_id: "r2", status: "draft" },
+      { race_id: "r3", status: "rechazada" },
+    ],
+  });
+  // El paquete solo publica r1: se reescribe carreras.json en los tres destinos.
+  const soloR1 = { carreras: [{ id: "r1", slug: "r1", titulo: "Carrera r1", rutaGeojson: "rutas/rt1.geojson" }] };
+  for (const d of [m.dirPublic, m.dirEspejo, path.join(m.root, "04_PUBLICACION_WEB")]) {
+    fs.writeFileSync(path.join(d, "carreras.json"), JSON.stringify(soloR1, null, 2));
+  }
+  await publicarYServir(m);
+  await correr(m, ["--confirmar"]);
+  const st = await statusCarreras(m);
+  assert(st.r1 === "publicada", "la confirmada incluida se promueve");
+  assert(st.r2 === "draft", "la draft no se toca");
+  assert(st.r3 === "rechazada", "la rechazada no se toca");
+});
+
+await caso("carreras: una ausente del paquete no se modifica", async () => {
+  const m = await montar({ carreras: [{ race_id: "r1", status: "confirmada" }] });
+  // El paquete se publica sin ninguna carrera.
+  for (const d of [m.dirPublic, m.dirEspejo, path.join(m.root, "04_PUBLICACION_WEB")]) {
+    fs.writeFileSync(path.join(d, "carreras.json"), JSON.stringify({ carreras: [] }, null, 2));
+  }
+  await publicarYServir(m);
+  const { salida } = await correr(m, ["--confirmar"]);
+  assert(/carreras promovidas a "publicada" : ninguna/.test(salida), "no deberia promover nada");
+  assert((await statusCarreras(m)).r1 === "confirmada", "la carrera ausente sigue confirmada");
+});
+
+await caso("carreras: una retirada con carreras.json vacio no cambia ningun status", async () => {
+  const m = await montar({ historias: [], carreras: [{ race_id: "r1", status: "confirmada" }] });
+  for (const d of [m.dirPublic, m.dirEspejo, path.join(m.root, "04_PUBLICACION_WEB")]) {
+    fs.writeFileSync(path.join(d, "carreras.json"), JSON.stringify({ carreras: [] }, null, 2));
+  }
+  await publicarYServir(m);
+  const p1 = await correr(m, ["--confirmar"]);
+  assert(p1.code === 0, "la retirada deberia confirmarse");
+  assert((await statusCarreras(m)).r1 === "confirmada", "ningun status cambia en una retirada");
+  const antes = sha256(path.join(m.root, EXCEL_NOMBRE));
+  const p2 = await correr(m, ["--confirmar"]);
+  assert(p2.code === 0 && /ya confirmada y registrada/.test(p2.salida), "segunda confirmacion idempotente");
+  assert(sha256(path.join(m.root, EXCEL_NOMBRE)) === antes, "y sin cambios en el Excel");
+});
+
+// ================================ VERIFICACION ANTI-CACHE DE RETIROS
+
+await caso("retiros: se comprueban con el identificador de verificacion, no con la URL desnuda", async () => {
+  const m = await montar();
+  // Se retira el medio.
+  fs.unlinkSync(path.join(m.dirPublic, "archivos", "imagenes", "m1.jpg"));
+  const p = paquete({ publicacionWebId: m.id, hashExcel: m.hashExcel, historias: [{ story_id: "h1", status: "aprobada_fidel" }], conMedio: false, carreras: m.carreras });
+  for (const [n, d] of Object.entries(p)) {
+    for (const dir of [m.dirPublic, m.dirEspejo, path.join(m.root, "04_PUBLICACION_WEB")]) {
+      fs.writeFileSync(path.join(dir, n), JSON.stringify(d, null, 2));
+    }
+  }
+  // El servidor imita un CDN con respuesta antigua: 200 en la URL desnuda,
+  // 404 cuando llega el identificador de verificacion.
+  const dirCdn = tmpdir("cdn");
+  escribirPaquete(dirCdn, p, { conMedio: true });
+  fs.writeFileSync(path.join(dirCdn, "manifest.json"), JSON.stringify(p["manifest.json"], null, 2));
+  m.publico.estado.soloSinQuery = new Set(["data/rumbo/archivos/imagenes/m1.jpg"]);
+
+  await publicarYServir(m, { servirDir: dirCdn });
+  const { code, salida } = await correr(m, ["--confirmar"]);
+  assert(code === 0, `deberia confirmar usando el identificador, salio ${code}: ${salida.slice(-400)}`);
+  assert(/responde 404/.test(salida), "deberia ver el 404 con verificacion");
+});
+
+await caso("retiros: un 200 con identificador deja 'desplegado pero retiro no confirmado'", async () => {
+  const m = await montar();
+  fs.unlinkSync(path.join(m.dirPublic, "archivos", "imagenes", "m1.jpg"));
+  const p = paquete({ publicacionWebId: m.id, hashExcel: m.hashExcel, historias: [{ story_id: "h1", status: "aprobada_fidel" }], conMedio: false, carreras: m.carreras });
+  for (const [n, d] of Object.entries(p)) {
+    for (const dir of [m.dirPublic, m.dirEspejo, path.join(m.root, "04_PUBLICACION_WEB")]) {
+      fs.writeFileSync(path.join(dir, n), JSON.stringify(d, null, 2));
+    }
+  }
+  const dirCdn = tmpdir("cdn2");
+  escribirPaquete(dirCdn, p, { conMedio: true }); // el archivo retirado sigue servido SIEMPRE
+  fs.writeFileSync(path.join(dirCdn, "manifest.json"), JSON.stringify(p["manifest.json"], null, 2));
+
+  await publicarYServir(m, { servirDir: dirCdn });
+  const { code, salida } = await correr(m, ["--confirmar"]);
+  assert(code !== 0, "no deberia confirmar");
+  assert(/DESPLEGADO PERO RETIRO NO CONFIRMADO/.test(salida), "deberia declarar ese estado");
+  assert(/sigue respondiendo 200 con verificacion=/.test(salida), "no debe aceptarlo como cache");
+  assert((await filasHistorial(m)).length === 0, "no debe registrarse como cierre exitoso");
 });
 
 // ============================================ RESPALDO E INTEGRIDAD
