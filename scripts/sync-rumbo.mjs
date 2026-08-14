@@ -782,20 +782,38 @@ async function generatePackage() {
   const bitacora = { items: bitacoraItems };
 
   // --- manifest.json ---
+  const generadoEn = new Date().toISOString();
+  const conteos = {
+    jornadas: jornadas.length,
+    carreras: carreras.length,
+    historias: historias.length,
+    medios: medios.length,
+    cantonesVisitados: resumen.cantonesVisitados,
+    bitacoraOriginales: bitacoraItems.length,
+    bitacoraPorCategoria,
+  };
+
+  // Identificador de esta generacion concreta del paquete. Sirve para que
+  // 09_PUBLICAR_WEB pueda comprobar que lo que respondio el sitio publico es
+  // exactamente lo que se publico, sin depender del SHA del commit (que en el
+  // momento de generar todavia no existe). Se deriva del instante de
+  // generacion, del hash del Excel y de los conteos: no contiene rutas, ni
+  // nombres de usuario, ni ningun dato privado. La rutina 08 lo copia tal cual.
+  const publicacionWebId =
+    "pubweb-" +
+    crypto
+      .createHash("sha256")
+      .update(`${generadoEn}|${excelHash}|${JSON.stringify(conteos)}`)
+      .digest("hex")
+      .slice(0, 16);
+
   const manifest = {
-    generadoEn: new Date().toISOString(),
+    publicacionWebId,
+    generadoEn,
     fuenteExcel: xlsxFiles[0],
     hashExcel: excelHash,
-    scriptVersion: "1.0.0",
-    conteos: {
-      jornadas: jornadas.length,
-      carreras: carreras.length,
-      historias: historias.length,
-      medios: medios.length,
-      cantonesVisitados: resumen.cantonesVisitados,
-      bitacoraOriginales: bitacoraItems.length,
-      bitacoraPorCategoria,
-    },
+    scriptVersion: "1.1.0",
+    conteos,
     advertencias: warnings,
     errores: errors,
   };
@@ -883,6 +901,7 @@ async function generatePackage() {
   }
 
   console.log(`\nPaquete generado en: ${PAQUETE_DIR}`);
+  console.log(`Identificador de esta generacion: ${publicacionWebId}`);
   console.log(`Carreras: ${carreras.length} | Historias: ${historias.length} | Medios: ${medios.length} | Cantones visitados: ${resumen.cantonesVisitados}`);
   console.log(`Advertencias: ${warnings.length} | Errores: ${errors.length}`);
 }
@@ -962,6 +981,31 @@ async function syncToPublic() {
     await descartarTemporal(tmpEspejo);
     err(`No se pudo sincronizar el espejo: ${e.message}. Se conserva el contenido anterior.`);
     return;
+  }
+
+  // Los tres manifiestos deben declarar la misma generacion. Es lo que permite
+  // a 09_PUBLICAR_WEB dar por buena una corrida sin volver a generar nada.
+  const idsPorOrigen = {};
+  for (const [nombre, dir] of [
+    ["paquete", PAQUETE_DIR],
+    ["public", CODEBASE_PUBLIC_DIR],
+    ["espejo", CODEBASE_SRC_MIRROR_DIR],
+  ]) {
+    try {
+      idsPorOrigen[nombre] = JSON.parse(
+        fs.readFileSync(path.join(dir, "manifest.json"), "utf-8")
+      ).publicacionWebId;
+    } catch (e) {
+      err(`No se pudo leer el manifiesto de ${nombre}: ${e.message}`);
+    }
+  }
+  const distintos = new Set(Object.values(idsPorOrigen));
+  if (distintos.size !== 1) {
+    err(
+      `Los manifiestos no corresponden a la misma generacion: ${JSON.stringify(idsPorOrigen)}`
+    );
+  } else {
+    console.log(`Identificador de la generacion sincronizada: ${[...distintos][0]}`);
   }
 
   console.log(`\nPaquete sincronizado hacia: ${CODEBASE_PUBLIC_DIR}`);
