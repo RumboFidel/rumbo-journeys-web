@@ -1,12 +1,12 @@
 {
-  "cantonesVisitados": 1,
+  "cantonesVisitados": 0,
   "metaCantones": 221,
   "cantonesVigentesCatalogo": 222,
-  "kilometros": 5.39,
+  "kilometros": 0,
   "metaKilometros": 2210,
   "vo2max": null,
   "recuperacion": null,
   "pasos": 3085,
   "caloriasPromedio": 376,
-  "ultimaActualizacion": "2026-07-21T21:33:53.722Z"
+  "ultimaActualizacion": "2026-08-14T17:15:25.397Z"
 }

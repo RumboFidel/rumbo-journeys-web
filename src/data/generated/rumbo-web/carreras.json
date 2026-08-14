@@ -1,37 +1,3 @@
 {
-  "carreras": [
-    {
-      "id": "race-20260720-turi",
-      "slug": "caminata-mirador-de-turi",
-      "titulo": "Caminata al Mirador de Turi",
-      "descripcionCorta": "Caminata de 5,39 km por el Mirador de Turi, en Cuenca (Azuay), con 237 m de ascenso y 1 h 2 min de duración.",
-      "descripcionCompleta": "Actividad registrada en formato FIT en el Mirador de Turi, cantón Cuenca, provincia de Azuay. El recorrido a pie cubrió 5,39 km en 1 h 2 min, con 237 m de desnivel positivo y 258 m de desnivel negativo, entre altitudes de 2.569 y 2.698 m (376 kcal). Deporte detectado automáticamente a partir del FIT: caminata (código 11). Datos extraídos del archivo original; la Carrera queda en borrador a la espera de la confirmación de Fidel.",
-      "fecha": "2026-05-09",
-      "fechaJornada": "2026-07-20",
-      "fechaPublica": "2026-05-09",
-      "provincia": "Azuay",
-      "canton": "Cuenca",
-      "lugar": "Mirador de Turi",
-      "distanciaKm": 5.39,
-      "duracionSeg": 3711,
-      "desnivelM": 237,
-      "caloriasKcal": 376,
-      "pasos": 3085,
-      "pasosFuente": "FIT session.totalStrides",
-      "pasosConfianza": "media",
-      "deporte": "Caminata",
-      "deporteConfianza": "alta",
-      "subdeporte": "Genérico",
-      "ubicacionFuente": "declarado_por_fidel",
-      "ubicacionConfianza": "alta",
-      "imagenPrincipal": "med-20260720-turi-01",
-      "galeria": [
-        "med-20260720-turi-01",
-        "med-20260720-turi-02",
-        "med-20260720-turi-03"
-      ],
-      "rutaGeojson": "rutas/route-20260720-turi.geojson",
-      "estado": "confirmada"
-    }
-  ]
+  "carreras": []
 }

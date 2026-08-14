@@ -1,24 +1,3 @@
 {
-  "historias": [
-    {
-      "id": "sto-20260720-turi-01",
-      "slug": "cuenca-desde-la-altura-turi",
-      "tipo": "reflexion",
-      "titulo": "Cuenca desde la altura: subir a Turi",
-      "extracto": "El Mirador de Turi ofrece una de las vistas más amplias de Cuenca. Subir sus laderas a pie es también una forma de leer el cantón desde lo alto.",
-      "fraseDestacada": "Conocer un cantón también es subir a mirarlo desde arriba.",
-      "contenidoCompleto": "Desde el Mirador de Turi, al sur de Cuenca, la ciudad se despliega en el valle: los tejados del centro histórico, las cúpulas de la catedral y el trazado de los ríos que le dieron nombre. Llegar hasta este balcón natural, a más de 2.600 metros de altitud, supone un ascenso sostenido de algo más de 200 metros a lo largo de poco más de cinco kilómetros.\n\nRecorrer esa subida a pie convierte el desplazamiento en una manera de conocer el cantón: el esfuerzo del ascenso ordena el paisaje y, al llegar arriba, la panorámica recompensa cada tramo. La ruta —caminar para observar el territorio— resume una idea sencilla: un cantón también se entiende desde la altura.\n\n(Texto editorial de prueba elaborado a partir del material de la jornada. Las fotografías provienen de terceros con licencia abierta y el audio y el video son piezas de prueba; no representan una experiencia narrada por Fidel. Pendiente de revisión y aprobación.)",
-      "fecha": "2026-05-09",
-      "lugar": null,
-      "imagen": "med-20260720-turi-01",
-      "medios": [
-        "med-20260720-turi-01",
-        "med-20260720-turi-02",
-        "med-20260720-turi-03",
-        "med-20260720-turi-04",
-        "med-20260720-turi-05"
-      ],
-      "estadoEditorial": "aprobada_fidel"
-    }
-  ]
+  "historias": []
 }
