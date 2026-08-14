@@ -1044,6 +1044,91 @@ await caso("retiros: un 200 con identificador deja 'desplegado pero retiro no co
   assert((await filasHistorial(m)).length === 0, "no debe registrarse como cierre exitoso");
 });
 
+// ================================ MENSAJE SEGUN EL TIPO DE PLAN
+
+const MSG_PUBLICADO = "La jornada quedó publicada en el sitio.";
+const MSG_RETIRADO = "El contenido quedó retirado del sitio.";
+
+/** Reescribe el paquete en los tres destinos. */
+function reescribirPaquete(m, p) {
+  for (const [n, d] of Object.entries(p)) {
+    for (const dir of [m.dirPublic, m.dirEspejo, path.join(m.root, "04_PUBLICACION_WEB")]) {
+      fs.writeFileSync(path.join(dir, n), JSON.stringify(d, null, 2));
+    }
+  }
+}
+
+await caso("mensaje: una publicacion nueva dice que quedo publicada", async () => {
+  const m = await montar();
+  // Un medio nuevo que antes no existia: solo hay altas, ninguna baja.
+  fs.writeFileSync(path.join(m.dirPublic, "archivos", "imagenes", "m2.jpg"), "otra-foto");
+  const p = paquete({ publicacionWebId: m.id, hashExcel: m.hashExcel, historias: [{ story_id: "h1", status: "aprobada_fidel" }], carreras: m.carreras });
+  p["medios.json"] = { medios: [
+    { mediaId: "m1", tipo: "fotografia", rutaWeb: "archivos/imagenes/m1.jpg" },
+    { mediaId: "m2", tipo: "fotografia", rutaWeb: "archivos/imagenes/m2.jpg" },
+  ] };
+  reescribirPaquete(m, p);
+  await publicarYServir(m);
+  const { code, salida } = await correr(m, ["--confirmar"]);
+  assert(code === 0, `deberia confirmar, salio ${code}`);
+  assert(salida.includes(MSG_PUBLICADO), "deberia dar el mensaje de publicacion");
+  assert(!salida.includes(MSG_RETIRADO), "no deberia hablar de retirada");
+});
+
+await caso("mensaje: una actualizacion sin bajas dice que quedo publicada", async () => {
+  const m = await montar();
+  // Solo cambia el contenido de los JSON: ni altas ni bajas de archivos.
+  const p = paquete({ publicacionWebId: m.id, hashExcel: m.hashExcel, historias: [{ story_id: "h1", status: "aprobada_fidel", titulo: "Titulo corregido" }], carreras: m.carreras });
+  reescribirPaquete(m, p);
+  await publicarYServir(m);
+  const { code, salida } = await correr(m, ["--confirmar"]);
+  assert(code === 0, `deberia confirmar, salio ${code}`);
+  assert(salida.includes(MSG_PUBLICADO), "una actualizacion sigue siendo una publicacion");
+  assert(!salida.includes(MSG_RETIRADO), "no deberia hablar de retirada");
+});
+
+await caso("mensaje: una retirada dice que el contenido quedo retirado", async () => {
+  const m = await montar();
+  fs.unlinkSync(path.join(m.dirPublic, "archivos", "imagenes", "m1.jpg"));
+  reescribirPaquete(m, paquete({ publicacionWebId: m.id, hashExcel: m.hashExcel, historias: [], conMedio: false, carreras: [] }));
+  await publicarYServir(m);
+  const { code, salida } = await correr(m, ["--confirmar"]);
+  assert(code === 0, `deberia confirmar, salio ${code}`);
+  assert(salida.includes(MSG_RETIRADO), "deberia dar el mensaje de retirada");
+  assert(!salida.includes(MSG_PUBLICADO), "NO deberia decir que quedo publicada");
+});
+
+await caso("mensaje: una retirada reconfirmada mantiene el mensaje de retirada", async () => {
+  const m = await montar();
+  fs.unlinkSync(path.join(m.dirPublic, "archivos", "imagenes", "m1.jpg"));
+  reescribirPaquete(m, paquete({ publicacionWebId: m.id, hashExcel: m.hashExcel, historias: [], conMedio: false, carreras: [] }));
+  await publicarYServir(m);
+  await correr(m, ["--confirmar"]);
+  const { code, salida } = await correr(m, ["--confirmar"]);
+  assert(code === 0, "la segunda confirmacion deberia salir 0");
+  assert(/Retirada ya confirmada y registrada/.test(salida), "deberia decir 'Retirada ya confirmada'");
+  assert(salida.includes(MSG_RETIRADO), "y mantener el mensaje de retirada");
+  assert(!salida.includes(MSG_PUBLICADO), "sin colarse el de publicacion");
+});
+
+await caso("mensaje: una retirada no confirmada no da ninguno de los dos mensajes de exito", async () => {
+  const m = await montar();
+  fs.unlinkSync(path.join(m.dirPublic, "archivos", "imagenes", "m1.jpg"));
+  const p = paquete({ publicacionWebId: m.id, hashExcel: m.hashExcel, historias: [], conMedio: false, carreras: [] });
+  reescribirPaquete(m, p);
+  // El sitio conserva el archivo retirado: el retiro no puede confirmarse.
+  const dirCdn = tmpdir("cdn3");
+  escribirPaquete(dirCdn, p, { conMedio: true });
+  fs.writeFileSync(path.join(dirCdn, "manifest.json"), JSON.stringify(p["manifest.json"], null, 2));
+  await publicarYServir(m, { servirDir: dirCdn });
+  const { code, salida } = await correr(m, ["--confirmar"]);
+  assert(code !== 0, "no deberia confirmar");
+  assert(/DESPLEGADO PERO RETIRO NO CONFIRMADO/.test(salida), "deberia declarar ese estado");
+  assert(!salida.includes(MSG_RETIRADO), "no debe decir que quedo retirado");
+  assert(!salida.includes(MSG_PUBLICADO), "ni que quedo publicada");
+  assert(/Se requiere tu revisión/.test(salida), "deberia pedir revision");
+});
+
 // ============================================ RESPALDO E INTEGRIDAD
 
 await caso("respaldo: se crea antes de la primera escritura y conserva el estado previo", async () => {

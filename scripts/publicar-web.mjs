@@ -93,6 +93,7 @@ function numeroEnLimites(nombre) {
 // Mensajes que puede ver Fidel. Ninguno menciona rutas, JSON ni comandos.
 const PARA_FIDEL = {
   ok: "La jornada quedó publicada en el sitio.",
+  retirado: "El contenido quedó retirado del sitio.",
   nada: "No había nada nuevo que publicar.",
   lento: "La publicación está tardando más de lo normal; te confirmo cuando termine.",
   error: "No pude publicar. Nada cambió en el sitio y el error quedó registrado.",
@@ -880,15 +881,22 @@ async function modoConfirmar() {
     fecha: new Date().toISOString(),
     retirada: retirados.length > 0,
   };
+  // El mensaje sale del tipo real de esta publicacion: si el commit elimino
+  // archivos del sitio, lo ocurrido fue una retirada, y decirle a Fidel que
+  // "la jornada quedo publicada" seria enganoso. Se deduce del diff, no de un
+  // texto escrito para un caso concreto.
+  const mensajeFinal = registro.retirada ? PARA_FIDEL.retirado : PARA_FIDEL.ok;
+  const queFue = registro.retirada ? "Retirada" : "Publicacion";
+
   const resultado = await registrarEnExcel(registro, excelPath, local);
   if (resultado.ok && resultado.yaEstaba) {
-    console.log(`\nPublicacion ya confirmada y registrada (fila ${resultado.fila} de 01_HISTORIAL_COWORK).`);
-    console.log("No se modifico nada: esta ejecucion no anade una segunda fila ni vuelve a tocar las historias.");
-    console.log(`\nMensaje para Fidel: "${PARA_FIDEL.ok}"`);
+    console.log(`\n${queFue} ya confirmada y registrada (fila ${resultado.fila} de 01_HISTORIAL_COWORK).`);
+    console.log("No se modifico nada: esta ejecucion no anade una segunda fila ni vuelve a tocar los estados.");
+    console.log(`\nMensaje para Fidel: "${mensajeFinal}"`);
     return;
   }
   if (resultado.ok) {
-    console.log(`\nMensaje para Fidel: "${PARA_FIDEL.ok}"`);
+    console.log(`\nMensaje para Fidel: "${mensajeFinal}"`);
     return;
   }
   if (resultado.requiereRevision) {
