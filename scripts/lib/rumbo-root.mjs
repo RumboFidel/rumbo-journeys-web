@@ -306,36 +306,79 @@ export function resolverRumboRoot({
   throw new RumboRootError(bloqueDeAyuda(intentos, problemasPorRuta, carpetasRequeridas));
 }
 
-/**
- * Ruta relativa a la raiz de My Drive que Make usa en "OneDrive > Download a
- * File". Se calcula tomando todo lo que sigue a la carpeta OneDrive dentro de la
- * ruta local. Devuelve null si la raiz no cuelga de una carpeta OneDrive.
- */
-export function calcularRaizMyDrive(rutaAbsolutaRumboRoot) {
-  const marcador = "OneDrive";
-  const idx = String(rutaAbsolutaRumboRoot ?? "").indexOf(marcador);
-  if (idx === -1) return null;
-  const relativa = String(rutaAbsolutaRumboRoot)
-    .slice(idx + marcador.length)
-    .replace(/\\/g, "/");
-  return relativa.startsWith("/") ? relativa : `/${relativa}`;
-}
+// Nota historica: aqui vivian calcularRaizMyDrive() y resolverMyDriveRoot().
+// Buscaban el literal "OneDrive" dentro de la ruta local para componer el File
+// Path que necesitaba el modulo "OneDrive > Download a File" de Make.
+//
+// Desde el esquema 1.1 los medios viajan por HTTP desde el sitio publicado y
+// ningun modulo descarga de la nube, asi que nadie necesita una ruta absoluta
+// dentro de ella: el marcador expresa la ruta de la fuente en el mismo formato
+// relativo "RUMBO/..." que ya usa el Excel. La dependencia no se generalizo a
+// otras nubes; se elimino.
+//
+// ENV_MYDRIVE y la clave de configuracion myDriveRelativeRoot se conservan
+// declaradas solo para poder detectarlas y limpiarlas (ver configurar-rumbo.mjs
+// y CLAVES_OBSOLETAS). Ningun codigo las lee para decidir nada.
+export const CLAVES_OBSOLETAS = ["myDriveRelativeRoot"];
 
 /**
- * Resuelve la raiz de My Drive con la misma logica de precedencia:
- * variable de entorno -> rumbo.config.json -> calculo desde la ruta local.
+ * Quita de la configuracion las claves que ya no lee nadie, PERO solo cuando la
+ * raiz ha dejado de estar en OneDrive.
  *
- * Importante para el traspaso: si la carpeta operativa deja de estar en OneDrive
- * (Dropbox, Google Drive), el calculo automatico devuelve null y hay que
- * declarar el valor en la configuracion, o toda publicacion quedara bloqueada
- * con no_se_pudo_calcular_ruta_onedrive_my_drive.
+ * El matiz importa y no es cosmetico. Mientras el codigo siga sabiendo emitir
+ * el esquema 1.0, la vuelta atras al escenario personal depende de que el
+ * marcador lleve ruta_onedrive, y ese valor se compone con myDriveRelativeRoot.
+ * Borrarla mientras la operacion sigue en OneDrive dejaria el rollback roto sin
+ * que nada avisara: el marcador 1.0 saldria con la ruta a null y el escenario
+ * personal no encontraria los archivos.
+ *
+ * Por eso la limpieza se ata a la mudanza, no a la reconfiguracion: cuando la
+ * raiz ya no cuelga de OneDrive, ese rollback tampoco existe y la clave sobra.
+ *
+ * Vive aqui, y no dentro de configurar-rumbo.mjs, para poder probarse sin
+ * ejecutar ese script: el script escribe siempre en la raiz real del codebase,
+ * asi que un harness que lo invocara pisaria el rumbo.config.json real.
  */
-export function resolverMyDriveRoot(root, { env = process.env, config = null } = {}) {
-  const desdeEnv = String(env[ENV_MYDRIVE] ?? "").trim();
-  if (desdeEnv) return desdeEnv;
-  const desdeCfg = config ? String(config.myDriveRelativeRoot ?? "").trim() : "";
-  if (desdeCfg) return desdeCfg;
-  return calcularRaizMyDrive(root);
+/**
+ * Escribe la configuracion en el destino indicado, de forma atomica.
+ *
+ * El destino se INYECTA en lugar de calcularse aqui. El motivo es un incidente
+ * real: el harness invocaba configurar-rumbo.mjs, ese script resolvia su
+ * destino con raizCodebase() —que parte de la ubicacion del propio modulo, no
+ * de cwd— y termino sobrescribiendo el rumbo.config.json de quien ejecutaba las
+ * pruebas. Con el destino inyectado, una prueba no puede alcanzar el archivo
+ * real ni por descuido.
+ *
+ * Atomica a proposito: se escribe un temporal en la MISMA carpeta y solo
+ * despues se renombra. Si algo falla a mitad —disco lleno, permisos, un JSON
+ * que no serializa— el archivo anterior queda intacto en vez de truncado.
+ */
+export function escribirConfiguracion(destinoDir, config) {
+  const destino = path.join(destinoDir, CONFIG_FILENAME);
+  const temporal = path.join(destinoDir, `.${CONFIG_FILENAME}.nuevo-${process.pid}`);
+  const contenido = JSON.stringify(config, null, 2) + "\n";
+  fs.writeFileSync(temporal, contenido, "utf-8");
+  try {
+    JSON.parse(fs.readFileSync(temporal, "utf-8"));
+  } catch (e) {
+    fs.rmSync(temporal, { force: true });
+    throw new Error(`El archivo generado no era JSON valido: ${e.message}. No se toco la configuracion anterior.`);
+  }
+  fs.renameSync(temporal, destino);
+  return destino;
+}
+
+export function limpiarClavesObsoletas(config, { raiz = null } = {}) {
+  const sigueEnOneDrive = /(^|[\\/])OneDrive([\\/]|$)/i.test(String(raiz ?? ""));
+  if (sigueEnOneDrive) return [];
+  const limpiadas = [];
+  for (const clave of CLAVES_OBSOLETAS) {
+    if (config[clave] !== undefined) {
+      delete config[clave];
+      limpiadas.push(clave);
+    }
+  }
+  return limpiadas;
 }
 
 /**

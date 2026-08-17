@@ -23,7 +23,9 @@
     "sync:web": "node scripts/sync-rumbo.mjs --sync",
     "sync:rumbo": "node scripts/sync-rumbo.mjs",
     "preparar:redes": "node scripts/preparar-publicacion-redes.mjs",
-    "preparar:redes:validar": "node scripts/preparar-publicacion-redes.mjs --validar"
+    "preparar:redes:validar": "node scripts/preparar-publicacion-redes.mjs --validar",
+    "test:redes": "node scripts/tests/test-preparar-redes.mjs",
+    "verificar:aislamiento": "node scripts/verificar-aislamiento.mjs"
   },
   "dependencies": {
     "sharp": "^0.33.5",

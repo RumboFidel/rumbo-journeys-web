@@ -6,7 +6,6 @@
 //
 // Uso:
 //   npm run configurar:rumbo -- "<ruta de tu carpeta RUMBO>"
-//   npm run configurar:rumbo -- "<ruta>" --mydrive="/Contratos/.../RUMBO"
 //   npm run configurar:rumbo -- --verificar     (no escribe nada: solo informa)
 //
 // No toca el Excel, no publica, no despliega y no ejecuta ninguna rutina.
@@ -15,24 +14,56 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   CONFIG_FILENAME,
+  CLAVES_OBSOLETAS,
   ENV_ROOT,
-  ENV_MYDRIVE,
+  escribirConfiguracion,
+  limpiarClavesObsoletas,
   RumboRootError,
-  calcularRaizMyDrive,
   excelDeLaRaiz,
   leerConfig,
   raizCodebase,
-  resolverMyDriveRoot,
   resolverRumboRoot,
   validarRaiz,
 } from "./lib/rumbo-root.mjs";
 
 const args = process.argv.slice(2);
 const soloVerificar = args.includes("--verificar");
-const mydriveArg = args.find((a) => a.startsWith("--mydrive="));
+const MODO_PRUEBA = args.includes("--modo-prueba");
 const rutaArg = args.find((a) => !a.startsWith("--")) ?? null;
 
-const CODEBASE = raizCodebase();
+// --- Destino de la configuracion ---
+//
+// En operacion, siempre la raiz real del codebase y nada mas. --codebase= solo
+// existe bajo --modo-prueba, y fuera de el es motivo de aborto, no de aviso:
+// un destino sustituible en operacion permitiria escribir la configuracion de
+// otro sitio sin que nadie lo notara.
+//
+// Se prefiere esta opcion protegida a una variable de entorno precisamente
+// porque una variable persiste entre comandos y se olvida; un argumento hay que
+// escribirlo cada vez, junto a la bandera que lo habilita.
+const codebaseArg = args.find((a) => a.startsWith("--codebase="));
+if (codebaseArg && !MODO_PRUEBA) {
+  console.error(
+    [
+      "",
+      "--codebase= solo puede usarse junto con --modo-prueba.",
+      "",
+      "  En una ejecucion operativa, la configuracion se escribe siempre en la",
+      `  raiz del proyecto. Permitir otro destino dejaria ${CONFIG_FILENAME} en un`,
+      "  lugar que despues nadie encontraria.",
+      "",
+      "  No se escribio ningun archivo.",
+      "",
+    ].join("\n")
+  );
+  process.exit(1);
+}
+
+const CODEBASE = codebaseArg ? path.resolve(codebaseArg.slice("--codebase=".length)) : raizCodebase();
+if (codebaseArg && !fs.existsSync(CODEBASE)) {
+  console.error(`\nLa carpeta indicada en --codebase= no existe. No se escribio nada.\n`);
+  process.exit(1);
+}
 const DESTINO = path.join(CODEBASE, CONFIG_FILENAME);
 
 function verificar() {
@@ -46,17 +77,15 @@ function verificar() {
     }
     throw e;
   }
-  const myDrive = resolverMyDriveRoot(info.root, { config: info.config });
   console.log("Carpeta operativa de RUMBO resuelta correctamente.");
   console.log(`  Ruta   : ${info.root}`);
   console.log(`  Origen : ${info.origen}`);
   console.log(`  Excel  : ${info.excel ?? "(no encontrado)"}`);
-  console.log(`  My Drive (para Make): ${myDrive ?? "(no calculable: la ruta no cuelga de OneDrive)"}`);
-  if (!myDrive) {
+  const obsoletas = CLAVES_OBSOLETAS.filter((k) => info.config && info.config[k] !== undefined);
+  if (obsoletas.length > 0) {
     console.log("");
-    console.log("  Aviso: sin esa ruta, las publicaciones de redes quedaran bloqueadas con");
-    console.log("  no_se_pudo_calcular_ruta_onedrive_my_drive. Declarala con --mydrive=... o");
-    console.log(`  con la variable ${ENV_MYDRIVE}.`);
+    console.log(`  Aviso: ${CONFIG_FILENAME} conserva claves obsoletas: ${obsoletas.join(", ")}.`);
+    console.log("  Ya no las lee nadie. Vuelve a ejecutar configurar:rumbo con la ruta para limpiarlas.");
   }
   process.exit(0);
 }
@@ -97,25 +126,24 @@ if (problemas.length > 0) {
   process.exit(1);
 }
 
-const myDrive = mydriveArg
-  ? mydriveArg.slice("--mydrive=".length).trim()
-  : calcularRaizMyDrive(rutaAbs);
-
 const previa = leerConfig(CODEBASE);
 const config = {
   ...(previa ?? {}),
   rumboRoot: rutaAbs,
 };
 delete config.__ruta;
-if (myDrive) config.myDriveRelativeRoot = myDrive;
 
-fs.writeFileSync(DESTINO, JSON.stringify(config, null, 2) + "\n", "utf-8");
+const limpiadas = limpiarClavesObsoletas(config, { raiz: rutaAbs });
+
+escribirConfiguracion(CODEBASE, config);
 
 console.log(previa ? `Actualizado ${CONFIG_FILENAME}` : `Creado ${CONFIG_FILENAME}`);
 console.log(`  Archivo: ${DESTINO}`);
 console.log(`  Ruta    : ${rutaAbs}`);
 console.log(`  Excel   : ${excelDeLaRaiz(rutaAbs) ?? "(no encontrado)"}`);
-console.log(`  My Drive: ${myDrive ?? "(no calculable)"}`);
+if (limpiadas.length > 0) {
+  console.log(`  Limpiadas: ${limpiadas.join(", ")} (obsoletas desde el esquema 1.1)`);
+}
 console.log("");
 console.log(`Este archivo es local y no se versiona. La variable ${ENV_ROOT}, si esta`);
 console.log("definida, tiene prioridad sobre el.");

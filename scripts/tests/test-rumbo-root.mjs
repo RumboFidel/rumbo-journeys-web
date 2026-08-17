@@ -14,13 +14,11 @@ import { execFileSync } from "node:child_process";
 import {
   CONFIG_FILENAME,
   ENV_ROOT,
-  ENV_MYDRIVE,
   RumboRootError,
-  calcularRaizMyDrive,
+  limpiarClavesObsoletas,
   detectarRaices,
   leerConfig,
   raizCodebase,
-  resolverMyDriveRoot,
   resolverRumboRoot,
   validarRaiz,
 } from "../lib/rumbo-root.mjs";
@@ -65,6 +63,18 @@ function raizValida(base, { nombre = "RUMBO", excel = ["MAESTRO_TEST.xlsx"], car
   for (const c of carpetas) fs.mkdirSync(path.join(root, c), { recursive: true });
   for (const x of excel) fs.writeFileSync(path.join(root, x), "fixture");
   return root;
+}
+
+/**
+ * Crea una raiz valida bajo una ruta de nube concreta. El punto de estas
+ * pruebas es que el nombre de la nube — OneDrive, "Mi unidad", "My Drive" — no
+ * cambie nada: la resolucion mira la estructura, no como se llame la carpeta.
+ */
+function crearRaiz(rutaRelativaDeNube) {
+  const base = tmp("nube");
+  const contenedor = path.join(base, ...rutaRelativaDeNube.split("/").slice(0, -1));
+  fs.mkdirSync(contenedor, { recursive: true });
+  return raizValida(contenedor, { nombre: rutaRelativaDeNube.split("/").pop() });
 }
 
 function escribirConfig(dir, obj) {
@@ -215,30 +225,65 @@ caso("ambiguedad: dos carpetas RUMBO validas no se resuelven por adivinacion", (
   assert(error && error.message.includes("mas de una"), `mensaje: ${error && error.message.slice(0, 60)}`);
 });
 
-// ------------------------------------------------------------------- MY DRIVE
+// ------------------------------------------------- RUTAS DE NUBE (RETIRADAS)
+//
+// Aqui se probaban calcularRaizMyDrive y resolverMyDriveRoot. Ambas se
+// retiraron: desde el esquema 1.1 los medios viajan por HTTP y ningun modulo
+// descarga de la nube, asi que nadie necesita una ruta absoluta dentro de ella.
+// Lo que se prueba ahora es que la resolucion de la raiz NO dependa de como se
+// llame la nube, y que una configuracion heredada no ensucie la nueva.
 
-caso("my drive: se calcula desde una ruta bajo OneDrive", () => {
-  const calc = calcularRaizMyDrive("C:\\Users\\alguien\\OneDrive\\Contratos\\FLAR\\RUMBO");
-  assert(calc === "/Contratos/FLAR/RUMBO", `obtenido: ${calc}`);
+caso("la raiz se resuelve igual bajo OneDrive que bajo Google Drive", () => {
+  const a = crearRaiz("OneDrive/Contratos/RUMBO");
+  const b = crearRaiz("Mi unidad/Contratos/RUMBO");
+  const ra = resolverRumboRoot({ env: { [ENV_ROOT]: a } });
+  const rb = resolverRumboRoot({ env: { [ENV_ROOT]: b } });
+  assert(ra.root === a, `OneDrive: ${ra.root}`);
+  assert(rb.root === b, `Google Drive: ${rb.root}`);
 });
 
-caso("my drive: fuera de OneDrive no se inventa", () => {
-  assert(calcularRaizMyDrive("D:\\Dropbox\\RUMBO") === null, "sin OneDrive debe devolver null");
+caso("modo espejo: una ruta con 'Mi unidad' es una raiz valida", () => {
+  const r = crearRaiz("Mi unidad/Contratos/2. FLAR/RUMBO");
+  assert(validarRaiz(r).length === 0, `problemas: ${validarRaiz(r).join(", ")}`);
 });
 
-caso("my drive: la configuracion y la variable mandan sobre el calculo", () => {
-  const root = "C:\\Users\\alguien\\OneDrive\\X\\RUMBO";
-  assert(
-    resolverMyDriveRoot(root, { env: {}, config: { myDriveRelativeRoot: "/desde/config/RUMBO" } }) ===
-      "/desde/config/RUMBO",
-    "deberia ganar la configuracion sobre el calculo"
-  );
-  assert(
-    resolverMyDriveRoot(root, { env: { [ENV_MYDRIVE]: "/desde/env/RUMBO" }, config: { myDriveRelativeRoot: "/c" } }) ===
-      "/desde/env/RUMBO",
-    "deberia ganar la variable sobre la configuracion"
-  );
+caso("modo espejo: la variante inglesa 'My Drive' tambien", () => {
+  const r = crearRaiz("My Drive/Contracts/RUMBO");
+  assert(validarRaiz(r).length === 0, `problemas: ${validarRaiz(r).join(", ")}`);
 });
+
+caso("transicion: una config con myDriveRelativeRoot heredada no rompe nada", () => {
+  const r = crearRaiz("Mi unidad/RUMBO");
+  const info = resolverRumboRoot({ env: { [ENV_ROOT]: r }, config: { myDriveRelativeRoot: "/viejo/RUMBO" } });
+  assert(info.root === r, "la raiz debe resolverse igual con la clave obsoleta presente");
+});
+
+caso("limpiarClavesObsoletas quita la clave heredada y respeta el resto", () => {
+  const RUTA_DRIVE = "D:\\Mi unidad\\RUMBO";
+  const fuera = { rumboRoot: RUTA_DRIVE, myDriveRelativeRoot: "/viejo/RUMBO" };
+  const limpiadas = limpiarClavesObsoletas(fuera, { raiz: fuera.rumboRoot });
+  assert(fuera.myDriveRelativeRoot === undefined, "fuera de OneDrive debe desaparecer");
+  assert(fuera.rumboRoot === RUTA_DRIVE, "no debe tocar la raiz");
+  assert(limpiadas.length === 1, `deberia informar de 1, informo de ${limpiadas.length}`);
+
+  // Mientras la raiz siga en OneDrive la clave se conserva: el rollback al
+  // escenario personal necesita ruta_onedrive, que se compone con ella.
+  const dentro = { rumboRoot: "C:\\Users\\x\\OneDrive\\RUMBO", myDriveRelativeRoot: "/x/RUMBO" };
+  const nada = limpiarClavesObsoletas(dentro, { raiz: dentro.rumboRoot });
+  assert(dentro.myDriveRelativeRoot === "/x/RUMBO", "en OneDrive NO debe borrarse");
+  assert(nada.length === 0, "y no debe informar de limpieza");
+});
+
+caso("no queda ninguna referencia al literal OneDrive en la resolucion", () => {
+  const fuente = fs.readFileSync(new URL("../lib/rumbo-root.mjs", import.meta.url), "utf-8");
+  const codigo = fuente
+    .split(/\r?\n/)
+    .filter((l) => !l.trim().startsWith("//") && !l.trim().startsWith("*"))
+    .join("\n");
+  const literales = codigo.match(/"OneDrive"|'OneDrive'/g) || [];
+  assert(literales.length === 0, `quedan ${literales.length} literales "OneDrive" en codigo activo`);
+});
+
 
 // ------------------------------------------- REGLAS PROPIAS DEL REGISTRADOR
 
