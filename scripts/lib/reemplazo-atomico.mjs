@@ -125,8 +125,15 @@ export async function sustituir(destino, temporal, { onAviso = () => {} } = {}) 
     throw new ReemplazoError(`El destino es un enlace simbolico o junction, no se sustituye: ${abs}`);
   }
 
-  const respaldo = `${abs}.anterior-${process.pid}`;
-  await fsp.rm(respaldo, { recursive: true, force: true });
+  // Si quedo un respaldo de una ejecucion anterior y tampoco se puede borrar,
+  // no se insiste: se usa un nombre libre. Reutilizar el nombre ocupado haria
+  // fallar el renombrado siguiente, que es el paso que si importa.
+  let respaldo = `${abs}.anterior-${process.pid}`;
+  try {
+    await fsp.rm(respaldo, { recursive: true, force: true });
+  } catch {
+    respaldo = `${abs}.anterior-${process.pid}-${Date.now()}`;
+  }
 
   const habia = fs.existsSync(abs);
   if (habia) {
@@ -149,8 +156,35 @@ export async function sustituir(destino, temporal, { onAviso = () => {} } = {}) 
     throw new ReemplazoError(`El destino no quedo en su sitio tras la sustitucion: ${abs}`);
   }
 
-  // Solo ahora se retira el anterior.
-  if (habia) await fsp.rm(respaldo, { recursive: true, force: true });
+  // Solo ahora se retira el anterior. Llegados aqui la sustitucion YA ocurrio:
+  // el paquete nuevo esta en su sitio. Si el borrado falla -algunos montajes de
+  // nube conceden renombrado pero no borrado, y devuelven EPERM- no se puede
+  // tratar como un fallo de sustitucion, porque no lo es. Se aparta el resto
+  // con un nombre inequivoco, se avisa, y se sigue.
+  if (habia) {
+    try {
+      await fsp.rm(respaldo, { recursive: true, force: true });
+    } catch (e) {
+      const apartado = path.join(
+        path.dirname(abs),
+        `_BORRAR__${path.basename(abs)}.anterior-${process.pid}`,
+      );
+      try {
+        await fsp.rename(respaldo, apartado);
+        onAviso(
+          `La sustitucion de ${abs} termino bien, pero no se pudo borrar el contenido anterior (${e.code || e.message}). ` +
+            `Quedo apartado en ${apartado}; se puede borrar a mano.`,
+        );
+        return { sustituido: true, respaldo: apartado };
+      } catch {
+        onAviso(
+          `La sustitucion de ${abs} termino bien, pero no se pudo borrar ni apartar el contenido anterior (${e.code || e.message}). ` +
+            `Quedo en ${respaldo}; se puede borrar a mano.`,
+        );
+        return { sustituido: true, respaldo };
+      }
+    }
+  }
   return { sustituido: true, respaldo: null };
 }
 
