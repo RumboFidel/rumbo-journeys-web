@@ -1,3 +1,46 @@
 {
-  "medios": []
+  "medios": [
+    {
+      "mediaId": "med-20260818-turi-01",
+      "tipo": "fotografia",
+      "titulo": "Cuenca desde el Mirador de Turi al anochecer",
+      "descripcion": "Vista del valle de Cuenca al atardecer desde el Mirador de Turi: luces de la ciudad, las tres cúpulas azules de la catedral y la cordillera al fondo; baranda y cipreses en primer plano. Imagen generada por computador (prueba).",
+      "rutaWeb": "archivos/imagenes/med-20260818-turi-01.jpg",
+      "instagram": {
+        "requiereDerivado": false,
+        "rutaWebInstagram": "archivos/imagenes/med-20260818-turi-01.jpg",
+        "anchoOriginal": 1440,
+        "altoOriginal": 1080,
+        "ratioOriginal": 1.3333333333333333
+      },
+      "credito": "RUMBO, imagen generada por computador",
+      "fuente": "declarado_por_fidel",
+      "licencia": null,
+      "estado": "published"
+    },
+    {
+      "mediaId": "med-20260818-turi-02",
+      "tipo": "video",
+      "titulo": "Panorámica del anochecer sobre Cuenca desde Turi",
+      "descripcion": "Panorámica lenta (6 s) de la vista del valle de Cuenca al anochecer desde el Mirador de Turi. Video generado por computador (prueba), sin personas.",
+      "rutaWeb": "archivos/videos/med-20260818-turi-02.mp4",
+      "instagram": null,
+      "credito": "RUMBO, video generado por computador",
+      "fuente": "declarado_por_fidel",
+      "licencia": null,
+      "estado": "published"
+    },
+    {
+      "mediaId": "med-20260818-turi-03",
+      "tipo": "audio",
+      "titulo": "Audio ambiente de prueba (sin voz)",
+      "descripcion": "Pista de audio de prueba de 6 s, tonos suaves, mono, sin voz ni personas. Generado por computador.",
+      "rutaWeb": "archivos/audios/med-20260818-turi-03.wav",
+      "instagram": null,
+      "credito": "RUMBO, audio generado por computador",
+      "fuente": "declarado_por_fidel",
+      "licencia": null,
+      "estado": "published"
+    }
+  ]
 }

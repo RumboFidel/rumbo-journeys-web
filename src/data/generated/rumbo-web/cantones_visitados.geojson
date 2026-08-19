@@ -1,4 +1,21 @@
 {
   "type": "FeatureCollection",
-  "features": []
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.01211940075373,
+          -2.914952837939698
+        ]
+      },
+      "properties": {
+        "cantonId": "cant-azuay-cuenca",
+        "provincia": "Azuay",
+        "canton": "Cuenca",
+        "numCarreras": 1
+      }
+    }
+  ]
 }

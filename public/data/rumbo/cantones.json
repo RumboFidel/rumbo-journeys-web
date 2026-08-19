@@ -24,11 +24,13 @@
       "cantonId": "cant-azuay-cuenca",
       "provincia": "Azuay",
       "canton": "Cuenca",
-      "visitado": false,
-      "numCarreras": 0,
-      "kmAcumulados": 0,
-      "fechaUltimaCarrera": null,
-      "carrerasIds": []
+      "visitado": true,
+      "numCarreras": 1,
+      "kmAcumulados": 5.39,
+      "fechaUltimaCarrera": "2026-05-09",
+      "carrerasIds": [
+        "race-20260818-turi"
+      ]
     },
     {
       "cantonId": "cant-azuay-el-pan",

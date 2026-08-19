@@ -1,32 +1,24 @@
 {
-  "publicacionWebId": "pubweb-4a4241ddc30fe42a",
-  "generadoEn": "2026-08-14T17:15:25.408Z",
+  "publicacionWebId": "pubweb-7dac3c5f979bcf0c",
+  "generadoEn": "2026-08-19T11:35:01.983Z",
   "fuenteExcel": "RUMBO_ARCHIVO_MAESTRO_V6_INTEGRACION_WEB.xlsx",
-  "hashExcel": "41b9d792f35d3763c7b85fabd57e104c065b560c579d25462fe7c893a7d3d172",
+  "hashExcel": "48de916adb0ce29616cc2bd665f189a834be07670cf53906ddb1887795989e64",
   "scriptVersion": "1.1.0",
   "conteos": {
     "jornadas": 1,
-    "carreras": 0,
+    "carreras": 1,
     "historias": 0,
-    "medios": 0,
-    "cantonesVisitados": 0,
-    "bitacoraOriginales": 0,
-    "bitacoraPorCategoria": {}
+    "medios": 3,
+    "cantonesVisitados": 1,
+    "bitacoraOriginales": 5,
+    "bitacoraPorCategoria": {
+      "rutas": 1,
+      "fotografias": 1,
+      "videos": 1,
+      "audios": 1,
+      "documentos": 1
+    }
   },
-  "advertencias": [
-    "Carrera race-20260720-turi excluida del paquete (status=\"rechazada\").",
-    "Medio med-20260720-turi-01 publicado pero SIN aprobacion para public/ (falta derechos_confirmados=Si o licencia valida); no se copia.",
-    "Medio med-20260720-turi-02 publicado pero SIN aprobacion para public/ (falta derechos_confirmados=Si o licencia valida); no se copia.",
-    "Medio med-20260720-turi-03 publicado pero SIN aprobacion para public/ (falta derechos_confirmados=Si o licencia valida); no se copia.",
-    "Medio med-20260720-turi-04 publicado pero SIN aprobacion para public/ (falta derechos_confirmados=Si o licencia valida); no se copia.",
-    "Medio med-20260720-turi-05 publicado pero SIN aprobacion para public/ (falta derechos_confirmados=Si o licencia valida); no se copia.",
-    "Bitacora bit-20260720-turi-01 excluida: su jornada jor-20260720-turi no es publicable.",
-    "Bitacora bit-20260720-turi-02 excluida: su jornada jor-20260720-turi no es publicable.",
-    "Bitacora bit-20260720-turi-03 excluida: su jornada jor-20260720-turi no es publicable.",
-    "Bitacora bit-20260720-turi-04 excluida: su jornada jor-20260720-turi no es publicable.",
-    "Bitacora bit-20260720-turi-05 excluida: su jornada jor-20260720-turi no es publicable.",
-    "Bitacora bit-20260720-turi-06 excluida: su jornada jor-20260720-turi no es publicable.",
-    "Bitacora bit-20260720-turi-07 excluida: su jornada jor-20260720-turi no es publicable."
-  ],
+  "advertencias": [],
   "errores": []
 }
