@@ -326,7 +326,14 @@ function validarPublicacion(pubRow, ctx) {
   if (pubRow.carrera_id) {
     carrera = ctx.carrerasRows.find((c) => c.race_id === pubRow.carrera_id) || null;
     if (!carrera) motivos.push("carrera_no_encontrada");
-    else if (carrera.status !== "confirmada") motivos.push("carrera_no_confirmada");
+    // "publicada" cuenta igual que "confirmada": es el estado al que la propia
+    // rutina 09 promueve la Carrera al publicar el sitio, y publicar en la web
+    // no puede inhabilitar la publicacion en redes. Aceptar solo "confirmada"
+    // hacia que 09 y 10 se contradijeran y bloqueaba toda jornada ya publicada.
+    // La linea equivalente de Historia ya contemplaba ambos estados.
+    else if (!["confirmada", "publicada"].includes(carrera.status)) {
+      motivos.push("carrera_no_confirmada");
+    }
   }
 
   if (!pubRow.aprobado_por || !pubRow.fecha_aprobacion) {
